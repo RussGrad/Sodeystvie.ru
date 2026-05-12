@@ -55,6 +55,10 @@ EOF
 ZIP_NAME="an-sodeystvie-production-$STAMP.zip"
 (cd "$ROOT/build" && rm -f "$ZIP_NAME" && zip -rq "$ZIP_NAME" "$(basename "$OUT_DIR")")
 
+STABLE_ZIP="$ROOT/build/an-sodeystvie-public-hosting.zip"
+cp -f "$ROOT/build/$ZIP_NAME" "$STABLE_ZIP"
+
 echo "Готово:"
 echo "  Папка: $OUT_DIR"
 echo "  Архив: $ROOT/build/$ZIP_NAME"
+echo "  Удобная копия (всегда одно имя): $STABLE_ZIP"

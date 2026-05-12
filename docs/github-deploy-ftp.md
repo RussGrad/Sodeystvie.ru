@@ -60,6 +60,19 @@ git push -u origin main
 
 Ручной прогон: **Actions → Deploy public (FTP) → Run workflow**. Опция **dry_run** — только лог, без записи на FTP.
 
-## 5. Если доступ только по SSH (без FTP)
+## 5. Ручная заливка (ZIP, без GitHub Actions)
+
+В корне репозитория:
+
+```bash
+cd Sodeystvie.ru
+npm run build:production
+```
+
+Появится архив **`build/an-sodeystvie-public-hosting.zip`** (всегда одно и то же имя при каждой сборке) и копия с меткой времени в `build/an-sodeystvie-production-*.zip`.
+
+Распакуйте архив **в корень сайта** на хостинге (рядом должны оказаться `index.php`, `css/`, `includes/`). Файл **`env.example.txt`** переименуйте в **`.env`** и пропишите `CRM_API_BASE` / `CRM_PUBLIC_BASE` (см. текст `README-REG-RU.txt` внутри архива).
+
+## 6. Если доступ только по SSH (без FTP)
 
 Тогда этот workflow не подойдёт; используйте, например, [web-deploy](https://github.com/SamKirkland/web-deploy) (rsync по SSH) или свой runner с `rsync`/`scp` и ключом в Secrets.
