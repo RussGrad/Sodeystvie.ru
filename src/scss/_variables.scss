@@ -1,0 +1,143 @@
+// Переменные Sass (брейкпоинты, шрифты). Цвета темы — через CSS custom properties ниже.
+$breakpoint-nav: 1024px; // от этой ширины — полное горизонтальное меню в шапке
+$container-max: 1280px; // максимальная ширина контентной области
+$font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+// Интерактив: плавность без «пружины» (см. prefers-reduced-motion в _base.scss)
+$ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+$duration-fast: 0.18s;
+$duration-normal: 0.28s;
+
+// Токены светлой темы (фон страницы, шапка, подвал, кнопки). См. docs/05-non-functional.md
+:root[data-theme="light"] {
+  color-scheme: light;
+  --ease-smooth: #{$ease-smooth};
+  --duration-fast: #{$duration-fast};
+  --duration-normal: #{$duration-normal};
+  --btn-primary-shadow: 0 2px 8px rgba(184, 148, 72, 0.28), 0 1px 2px rgba(26, 31, 38, 0.06);
+  --btn-primary-shadow-hover: 0 8px 24px rgba(184, 148, 72, 0.38), 0 2px 6px rgba(26, 31, 38, 0.08);
+  --page-bg: #f4f6f9;
+  --page-text: #1a1f26;
+  --header-bg: #ffffff;
+  --header-border: rgba(26, 31, 38, 0.08);
+  --header-text: #1a1f26;
+  --header-muted: #5c6570;
+  --nav-hover: rgba(184, 148, 72, 0.12);
+  --cta-bg: #b89448;
+  --cta-bg-hover: #a3823d;
+  --cta-text: #1a1f26;
+  --focus-ring: #b89448;
+  --footer-bg: #eef1f6;
+  --footer-border: rgba(26, 31, 38, 0.1);
+  --footer-text: #1a1f26;
+  --footer-muted: #5c6570;
+  --footer-link: #3d4a5c;
+  --footer-link-hover: #b89448;
+  --hero-border: rgba(26, 31, 38, 0.08);
+  --hero-photo-overlay: linear-gradient(
+    180deg,
+    rgba(225, 235, 250, 0.9) 0%,
+    rgba(236, 242, 252, 0.88) 45%,
+    rgba(242, 246, 252, 0.92) 100%
+  );
+  --hero-title: #2c3138;
+  --hero-panel-bg: #ffffff;
+  --hero-panel-border: rgba(26, 31, 38, 0.08);
+  --hero-panel-shadow: 0 8px 32px rgba(26, 31, 38, 0.1);
+  --hero-filter-divider: rgba(26, 31, 38, 0.12);
+  --hero-filter-hint: #6b7280;
+  --hero-tab-glass: rgba(255, 255, 255, 0.48);
+  --hero-tab-text: rgba(35, 42, 54, 0.9);
+  --hero-btn-find-fg: #ffffff;
+  --hero-slider-bg: rgba(255, 255, 255, 0.92);
+  --hero-slider-text: #4a5568;
+  --services-card-bg: #ffffff;
+  --services-card-border: rgba(26, 31, 38, 0.08);
+  --services-card-shadow: 0 4px 24px rgba(26, 31, 38, 0.07);
+  --services-title: #1a1f26;
+  --services-text: #5c6570;
+  --services-icon-bg: rgba(184, 148, 72, 0.14);
+  --services-icon-color: #9a7b3c;
+  --featured-strip-bg: #eef1f6;
+  --featured-card-bg: #ffffff;
+  --featured-card-border: rgba(26, 31, 38, 0.08);
+  --featured-card-shadow: 0 4px 20px rgba(26, 31, 38, 0.08);
+  --featured-title: #1a1f26;
+  --featured-muted: #5c6570;
+  --featured-price: #9a7b3c;
+  --featured-badge-new: rgba(184, 148, 72, 0.18);
+  --featured-badge-resale: rgba(60, 100, 140, 0.12);
+  --featured-badge-sale: rgba(180, 60, 60, 0.1);
+  --resale-accent: #2563eb;
+  --resale-pill-bg: rgba(184, 148, 72, 0.16);
+  --resale-pill-text: #8a6a2f;
+  --resale-fav-bg: rgba(255, 255, 255, 0.9);
+  --resale-fav-border: rgba(26, 31, 38, 0.12);
+}
+
+// Токены тёмной темы
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ease-smooth: #{$ease-smooth};
+  --duration-fast: #{$duration-fast};
+  --duration-normal: #{$duration-normal};
+  --btn-primary-shadow: 0 2px 12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(201, 168, 90, 0.12);
+  --btn-primary-shadow-hover: 0 10px 28px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(201, 168, 90, 0.2);
+  --page-bg: #1e2630;
+  --page-text: #e8eaef;
+  --header-bg: #232b35;
+  --header-border: rgba(255, 255, 255, 0.08);
+  --header-text: #e8eaef;
+  --header-muted: #a8b0bc;
+  --nav-hover: rgba(184, 148, 72, 0.15);
+  --cta-bg: #c9a85a;
+  --cta-bg-hover: #d4b56e;
+  --cta-text: #1a1f26;
+  --focus-ring: #d4b56e;
+  --footer-bg: #1a2129;
+  --footer-border: rgba(255, 255, 255, 0.08);
+  --footer-text: #e8eaef;
+  --footer-muted: #9aa3ae;
+  --footer-link: #c9d0d9;
+  --footer-link-hover: #d4b56e;
+  --hero-border: rgba(255, 255, 255, 0.06);
+  --hero-photo-overlay: linear-gradient(
+    180deg,
+    rgba(22, 28, 36, 0.88) 0%,
+    rgba(26, 32, 42, 0.9) 50%,
+    rgba(20, 26, 34, 0.92) 100%
+  );
+  --hero-title: #f2f4f8;
+  --hero-panel-bg: #2a3340;
+  --hero-panel-border: rgba(255, 255, 255, 0.1);
+  --hero-panel-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --hero-filter-divider: rgba(255, 255, 255, 0.12);
+  --hero-filter-hint: #9aa3ae;
+  --hero-tab-glass: rgba(255, 255, 255, 0.12);
+  --hero-tab-text: rgba(232, 236, 242, 0.92);
+  --hero-btn-find-fg: #1a1f26;
+  --hero-slider-bg: rgba(42, 51, 64, 0.92);
+  --hero-slider-text: #c9d0d9;
+  --services-card-bg: #2a3340;
+  --services-card-border: rgba(255, 255, 255, 0.1);
+  --services-card-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+  --services-title: #f2f4f8;
+  --services-text: #9aa3ae;
+  --services-icon-bg: rgba(201, 168, 90, 0.18);
+  --services-icon-color: #d4b56e;
+  --featured-strip-bg: #1a2129;
+  --featured-card-bg: #2a3340;
+  --featured-card-border: rgba(255, 255, 255, 0.1);
+  --featured-card-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+  --featured-title: #f2f4f8;
+  --featured-muted: #9aa3ae;
+  --featured-price: #d4b56e;
+  --featured-badge-new: rgba(201, 168, 90, 0.22);
+  --featured-badge-resale: rgba(120, 160, 200, 0.2);
+  --featured-badge-sale: rgba(220, 100, 100, 0.18);
+  --resale-accent: #60a5fa;
+  --resale-pill-bg: rgba(201, 168, 90, 0.22);
+  --resale-pill-text: #e7d3a1;
+  --resale-fav-bg: rgba(42, 51, 64, 0.92);
+  --resale-fav-border: rgba(255, 255, 255, 0.12);
+}

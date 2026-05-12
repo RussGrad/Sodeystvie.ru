@@ -1,0 +1,57 @@
+# Деплой витрины: после пуша в main/master собирается CSS и заливается содержимое public/ по FTP.
+# Секреты: Settings → Secrets and variables → Actions → Secrets.
+# Переменные (не секрет): Settings → Secrets and variables → Actions → Variables.
+name: Deploy public (FTP)
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Только список изменений FTP (без записи)
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: deploy-public-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Установка зависимостей и сборка CSS
+        run: |
+          npm ci
+          npm run build:css
+
+      - name: Выгрузка public/ на хостинг (FTP)
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ${{ vars.FTP_PROTOCOL || 'ftp' }}
+          port: ${{ vars.FTP_PORT || '21' }}
+          local-dir: ./public/
+          server-dir: ${{ vars.FTP_SERVER_DIR || './' }}
+          dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+          security: loose
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.env
+            **/.env.*

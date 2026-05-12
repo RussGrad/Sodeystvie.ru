@@ -1,0 +1,46 @@
+services:
+  web:
+    build: .
+    container_name: sodeystvie-php83
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    volumes:
+      - ./public:/var/www/html
+    # Доступ к Nest CRM на машине-хосте (Mac/Win из коробки; Linux — через host-gateway)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_DATABASE: ${POSTGRES_DB:-sodeystvie}
+      DB_USERNAME: ${POSTGRES_USER:-sodeystvie}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-sodeystvie_dev}
+      # База Nest API (an-realty-crm apps/api). Внутри контейнера localhost ≠ хост — см. site_crm_api_base_resolved() в config.php
+      CRM_API_BASE: ${CRM_API_BASE:-http://localhost:3000}
+      # URL для браузера (картинки /uploads и т.п.) — с точки зрения вашего ПК, обычно тот же хост:порт что и API
+      CRM_PUBLIC_BASE: ${CRM_PUBLIC_BASE:-http://localhost:3000}
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    container_name: sodeystvie-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sodeystvie}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sodeystvie_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-sodeystvie}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sodeystvie} -d ${POSTGRES_DB:-sodeystvie}"]
+      interval: 3s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

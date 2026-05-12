@@ -1,0 +1,13 @@
+// Prisma используется для Prisma Studio и при необходимости db pull (сайт на PHP — отдельно).
+// После появления таблиц в БД: npm run prisma:pull — подтянуть схему из PostgreSQL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Модели добавятся после prisma db pull или вручную при появлении миграций.

@@ -1,0 +1,386 @@
+// Первый экран: фото-фон, оверлей, заголовок, вкладки 5+1 над белой панелью, «пилюли», декор слайдера, FAB чат.
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  min-height: clamp(32rem, 78vh, 52rem);
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--hero-border);
+  overflow: hidden;
+}
+
+// Слой фона: стоковое фото + затемнение/светлый туман (не скриншот референса)
+.hero__media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--hero-photo-overlay), url("/assets/hero/hero-bg.jpg") center / cover no-repeat;
+  transition: background 0.25s ease;
+}
+
+.hero__layout {
+  position: relative;
+  z-index: 1;
+  padding-top: clamp(3rem, 5.5vw + 1.5rem, 6rem);
+  padding-bottom: clamp(4.5rem, 11vw, 7.5rem);
+}
+
+.hero__title {
+  margin: 0 0 clamp(1.5rem, 3.5vw, 2.25rem);
+  max-width: 28rem;
+  font-size: clamp(1.5rem, 3.8vw, 2.125rem);
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: -0.02em;
+  color: var(--hero-title);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.35);
+}
+
+:root[data-theme="dark"] .hero__title {
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+// Блок поиска: вкладки над панелью; кнопки — на фоне героя, не на панели
+.hero__search-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.9rem, 2vw, 1.15rem);
+  max-width: 56rem;
+}
+
+.hero__tabbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.35rem;
+  margin-bottom: 0.2rem;
+}
+
+.hero__tab {
+  margin: 0;
+  padding: 0.55rem 0.9rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--hero-tab-text);
+  background: var(--hero-tab-glass);
+  border: none;
+  border-radius: 10px 10px 0 0;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.65);
+  }
+
+  &--active {
+    color: var(--page-text);
+    font-weight: 600;
+    background: var(--hero-panel-bg);
+    box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.06);
+  }
+
+  &--abroad {
+    margin-left: auto;
+  }
+
+  @media (max-width: 520px) {
+    &--abroad {
+      margin-left: 0;
+      flex: 1 1 auto;
+      text-align: center;
+    }
+  }
+}
+
+:root[data-theme="dark"] .hero__tab:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+:root[data-theme="dark"] .hero__tab--active {
+  color: var(--page-text);
+  background: var(--hero-panel-bg);
+}
+
+// Панель: только сетка фильтров (кнопки снаружи — без «второй плашки» под ними)
+.hero__search-card {
+  position: relative;
+  z-index: 2;
+  background: var(--hero-panel-bg);
+  border: 1px solid var(--hero-panel-border);
+  border-radius: 12px;
+  box-shadow: var(--hero-panel-shadow);
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hero__form {
+  margin: 0;
+}
+
+.hero__filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hero__filter {
+  padding: 1rem 1rem 1.1rem 1.15rem;
+  border-right: 1px solid var(--hero-filter-divider);
+
+  &:last-child {
+    border-right: none;
+  }
+
+  @media (max-width: 900px) and (min-width: 481px) {
+    border-bottom: 1px solid var(--hero-filter-divider);
+
+    &:nth-child(odd) {
+      border-right: 1px solid var(--hero-filter-divider);
+    }
+
+    &:nth-child(even) {
+      border-right: none;
+    }
+
+    &:nth-last-child(-n + 2) {
+      border-bottom: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    border-right: none;
+    border-bottom: 1px solid var(--hero-filter-divider);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}
+
+.hero__filter-name {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--page-text);
+}
+
+.hero__filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0;
+  cursor: pointer;
+}
+
+.hero__filter-hint {
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  color: var(--hero-filter-hint);
+}
+
+.hero__select {
+  width: 100%;
+  margin: 0;
+  padding: 0.15rem 1.05rem 0.15rem 0;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--page-text);
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.75 4.5 L6 8.25 L9.25 4.5' fill='none' stroke='%236b7280' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0 center;
+  border: none;
+  cursor: pointer;
+  appearance: none;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+:root[data-theme="dark"] .hero__select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.75 4.5 L6 8.25 L9.25 4.5' fill='none' stroke='%239aa3ae' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+// Ряд кнопок на фоне секции (без фона-«таблетки»)
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
+// Две отдельные кнопки: основная (как CTA в шапке) и вторичная без заливки
+.hero__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.65rem;
+  padding: 0.5rem 1.5rem;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-smooth),
+    color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) var(--ease-smooth),
+    transform var(--duration-fast) var(--ease-smooth),
+    filter 0.2s ease;
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  &--find {
+    border: none;
+    color: var(--hero-btn-find-fg);
+    background: linear-gradient(180deg, var(--cta-bg) 0%, var(--cta-bg-hover) 100%);
+    box-shadow: var(--btn-primary-shadow);
+
+    &:hover {
+      filter: brightness(1.05);
+      box-shadow: var(--btn-primary-shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: translateY(0) scale(0.98);
+    }
+  }
+
+  &--map {
+    border: 1px solid var(--hero-filter-divider);
+    color: var(--page-text);
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+
+    &:hover {
+      background: var(--nav-hover);
+      border-color: rgba(184, 148, 72, 0.35);
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: translateY(0) scale(0.98);
+    }
+  }
+}
+
+:root[data-theme="light"] .hero__btn--map {
+  background: rgba(255, 255, 255, 0.55);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.85);
+  }
+}
+
+// Декор «карусели» в углу секции
+.hero__slider-ui {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.4rem 0.65rem;
+  background: var(--hero-slider-bg);
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  font-size: 0.875rem;
+  color: var(--hero-slider-text);
+
+  @media (max-width: 600px) {
+    display: none;
+  }
+}
+
+.hero__slider-nav {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.hero__slider-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  opacity: 0.75;
+}
+
+.hero__slider-dots {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.hero__slider-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.35;
+
+  &--active {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+// Плавающая кнопка связи
+.hero__chat {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.35rem;
+  height: 3.35rem;
+  border-radius: 50%;
+  color: var(--cta-text);
+  background: linear-gradient(145deg, var(--cta-bg) 0%, var(--cta-bg-hover) 100%);
+  box-shadow: var(--btn-primary-shadow), 0 8px 24px rgba(0, 0, 0, 0.15);
+  transition:
+    transform var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) var(--ease-smooth),
+    filter 0.2s ease;
+
+  &:hover {
+    filter: brightness(1.08);
+    box-shadow: var(--btn-primary-shadow-hover), 0 12px 32px rgba(0, 0, 0, 0.2);
+    transform: translateY(-3px) scale(1.03);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.97);
+  }
+}
+
+.hero__chat-icon {
+  display: block;
+}

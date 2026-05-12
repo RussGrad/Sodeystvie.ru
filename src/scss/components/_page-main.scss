@@ -1,0 +1,51 @@
+// Область <main>: секции главной; отступ снизу перед подвалом задают секции.
+@use "../variables" as *;
+
+.page-main {
+  flex: 1 0 auto;
+  padding: 0;
+
+  &--inner {
+    padding: clamp(1.75rem, 4vw, 2.5rem) 0 clamp(2.5rem, 6vw, 4rem);
+  }
+
+  &__heading {
+    margin: 0 0 1rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 700;
+    color: var(--page-text);
+  }
+
+  &__lead {
+    margin: 0;
+    max-width: 40rem;
+    line-height: 1.6;
+    color: var(--header-muted);
+  }
+}
+
+// Блок только для отладки (?dbtest=1)
+.page-main__dev {
+  margin: 2rem 0 3rem;
+  padding: 1rem 1.25rem;
+  font-size: 0.875rem;
+  border: 1px dashed var(--header-border);
+  border-radius: 8px;
+  background: rgba(128, 128, 128, 0.06);
+}
+
+.page-main__ok {
+  color: #2d7a4a;
+}
+
+:root[data-theme="dark"] .page-main__ok {
+  color: #7dcea0;
+}
+
+.page-main__err {
+  color: #b00020;
+}
+
+:root[data-theme="dark"] .page-main__err {
+  color: #ff8a80;
+}

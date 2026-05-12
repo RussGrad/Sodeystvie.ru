@@ -1,0 +1,224 @@
+// Карточка вторички (референс: фото + счётчик, бейдж, избранное, цена, ипотека, мета, адрес)
+
+.resale-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.15rem;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.resale-card {
+  height: 100%;
+}
+
+.resale-card__link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+  background: var(--featured-card-bg);
+  border: 1px solid var(--featured-card-border);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--featured-card-shadow);
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+:root[data-theme="dark"] .resale-card__link:hover {
+  box-shadow: 0 12px 44px rgba(0, 0, 0, 0.4);
+}
+
+.resale-card__media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background-size: cover;
+  background-position: center;
+
+  &--tone-1 { background-image: linear-gradient(145deg, #8aa6c6 0%, #3b556f 100%); }
+  &--tone-2 { background-image: linear-gradient(145deg, #a5b7a2 0%, #55665a 100%); }
+  &--tone-3 { background-image: linear-gradient(145deg, #c6b08a 0%, #6e5a3b 100%); }
+  &--tone-4 { background-image: linear-gradient(145deg, #a0a8b8 0%, #4a5363 100%); }
+  &--tone-5 { background-image: linear-gradient(145deg, #c6a0a0 0%, #6b3b3b 100%); }
+  &--tone-6 { background-image: linear-gradient(145deg, #b2a8c6 0%, #4d3b6b 100%); }
+  &--tone-7 { background-image: linear-gradient(145deg, #9ac0b2 0%, #2f5c4d 100%); }
+  &--tone-8 { background-image: linear-gradient(145deg, #c4b7aa 0%, #5a5046 100%); }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.26) 100%);
+    pointer-events: none;
+  }
+}
+
+.resale-card__count {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 1;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.38);
+  color: #fff;
+}
+
+.resale-card__body {
+  padding: 1rem 1rem 1.1rem;
+}
+
+.resale-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: -0.25rem;
+  margin-bottom: 0.55rem;
+}
+
+.resale-card__pill {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  border-radius: 999px;
+  background: var(--resale-pill-bg);
+  color: var(--resale-pill-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.resale-card__fav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--resale-fav-bg);
+  border: 1px solid var(--resale-fav-border);
+  color: var(--header-muted);
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-smooth), box-shadow var(--duration-fast) var(--ease-smooth);
+
+  &:hover {
+    transform: scale(1.03);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.resale-card__fav-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: block;
+}
+
+.resale-card__price {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: var(--page-text);
+  line-height: 1.1;
+}
+
+.resale-card__price-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.resale-card__trend {
+  display: inline-flex;
+  align-items: center;
+  color: #1a936f;
+}
+
+:root[data-theme="dark"] .resale-card__trend {
+  color: #34d399;
+}
+
+.resale-card__price-m2 {
+  margin: 0.35rem 0 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--header-muted);
+}
+
+.resale-card__mortgage {
+  margin: 0.6rem 0 0;
+  font-size: 1.4rem;
+  line-height: 1.25;
+  color: var(--header-muted);
+  font-weight: 700;
+}
+
+.resale-card__mortgage a,
+.resale-card__mortgage span {
+  color: var(--resale-accent);
+  font-weight: 900;
+}
+
+.resale-card__meta {
+  margin: 0.85rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 0.85rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--page-text);
+
+  span {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+.resale-card__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--header-border);
+  opacity: 0.9;
+  margin-top: 0.15rem;
+}
+
+.resale-card__address {
+  margin: 0.75rem 0 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--page-text);
+  line-height: 1.25;
+}
+

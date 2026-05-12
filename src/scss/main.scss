@@ -1,0 +1,14 @@
+// Точка входа стилей: базовые правила, шапка, главная, первый экран (hero), подвал.
+@use "base";
+@use "components/site-header";
+@use "components/page-main";
+@use "components/hero";
+@use "components/services";
+@use "components/featured-listings";
+@use "components/mortgage";
+@use "components/catalog";
+@use "components/resale-card";
+@use "components/newbuild-card";
+@use "components/listing";
+@use "components/site-footer";
+@use "components/modal-lead";

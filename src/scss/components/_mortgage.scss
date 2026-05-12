@@ -1,0 +1,200 @@
+// Страница «Ипотека»: калькулятор + блок заявки
+
+.mortgage {
+  margin-top: 1.75rem;
+}
+
+.mortgage__grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 1.15rem;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mortgage__card {
+  background: var(--services-card-bg);
+  border: 1px solid var(--services-card-border);
+  border-radius: 14px;
+  box-shadow: var(--services-card-shadow);
+  padding: 1.35rem 1.2rem 1.45rem;
+}
+
+.mortgage__title {
+  margin: 0 0 1rem;
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--page-text);
+}
+
+.mortgage__fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem 1rem;
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mortgage__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.mortgage__label {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--header-muted);
+}
+
+.mortgage__input {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  font: inherit;
+  font-size: 0.9375rem;
+  color: var(--page-text);
+  background: var(--page-bg);
+  border: 1px solid var(--header-border);
+  border-radius: 10px;
+  transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+.mortgage__note {
+  margin: 0.9rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--header-muted);
+}
+
+.mortgage__result {
+  margin: 0;
+}
+
+.mortgage__result-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--header-border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  dt {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--header-muted);
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--page-text);
+    white-space: nowrap;
+  }
+}
+
+.mortgage__accent {
+  color: var(--cta-bg-hover);
+  font-size: 1.1rem;
+}
+
+.mortgage__cta {
+  margin-top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.2rem;
+  text-decoration: none;
+  font-weight: 700;
+  color: var(--cta-text);
+  background: linear-gradient(180deg, var(--cta-bg) 0%, var(--cta-bg-hover) 100%);
+  border-radius: 10px;
+  box-shadow: var(--btn-primary-shadow);
+  transition:
+    transform var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) var(--ease-smooth),
+    filter 0.2s ease;
+
+  &:hover {
+    filter: brightness(1.06);
+    box-shadow: var(--btn-primary-shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+}
+
+.mortgage-apply {
+  margin-top: 1.75rem;
+  padding: 1.25rem 1.2rem;
+  border-radius: 14px;
+  border: 1px solid var(--header-border);
+  background: linear-gradient(180deg, rgba(184, 148, 72, 0.12) 0%, rgba(184, 148, 72, 0.06) 100%);
+
+  :root[data-theme="dark"] & {
+    background: linear-gradient(180deg, rgba(201, 168, 90, 0.16) 0%, rgba(201, 168, 90, 0.06) 100%);
+  }
+}
+
+.mortgage-apply__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--page-text);
+}
+
+.mortgage-apply__lead {
+  margin: 0 0 1rem;
+  color: var(--header-muted);
+  line-height: 1.55;
+}
+
+.mortgage-apply__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.2rem;
+  font: inherit;
+  font-weight: 700;
+  color: var(--cta-text);
+  background: linear-gradient(180deg, var(--cta-bg) 0%, var(--cta-bg-hover) 100%);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: var(--btn-primary-shadow);
+  transition:
+    transform var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) var(--ease-smooth),
+    filter 0.2s ease;
+
+  &:hover {
+    filter: brightness(1.06);
+    box-shadow: var(--btn-primary-shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+}
+
