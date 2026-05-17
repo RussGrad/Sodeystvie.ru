@@ -30,19 +30,38 @@ function site_env(string $key, ?string $default = null): string
     return (string) $v;
 }
 
+function site_is_production_vitrina_host(): bool
+{
+    $host = isset($_SERVER['HTTP_HOST']) ? strtolower((string) $_SERVER['HTTP_HOST']) : '';
+
+    return in_array($host, ['an-sodeystvie.ru', 'www.an-sodeystvie.ru'], true);
+}
+
+function site_crm_default_api_base(): string
+{
+    if (site_is_production_vitrina_host()) {
+        return 'https://an-realty-crm.ru';
+    }
+
+    return 'http://localhost:3000';
+}
+
 function site_crm_api_base(): string
 {
-    $base = site_env('CRM_API_BASE', 'http://localhost:3000');
+    $fromEnv = site_env('CRM_API_BASE', '');
+    $base = $fromEnv !== '' ? $fromEnv : site_crm_default_api_base();
+
     return rtrim($base, '/');
 }
 
 /**
  * База для ссылок, которые будет открывать браузер (картинки, публичные страницы API).
- * По умолчанию — localhost, чтобы работало с хоста.
  */
 function site_crm_public_base(): string
 {
-    $base = site_env('CRM_PUBLIC_BASE', 'http://localhost:3000');
+    $fromEnv = site_env('CRM_PUBLIC_BASE', '');
+    $base = $fromEnv !== '' ? $fromEnv : site_crm_default_api_base();
+
     return rtrim($base, '/');
 }
 
@@ -68,6 +87,40 @@ function site_crm_api_base_resolved(): string
     }
 
     return $base;
+}
+
+/** Путь публичного каталога на Nest (через nginx на CRM — только под /api/). */
+function site_crm_listings_path(): string
+{
+    $path = site_env('CRM_LISTINGS_PATH', '/api/public/listings');
+    $path = '/' . trim($path, '/');
+
+    return $path;
+}
+
+function site_crm_listings_url(string $id = ''): string
+{
+    $base = site_crm_api_base_resolved() . site_crm_listings_path();
+    if ($id === '') {
+        return $base;
+    }
+
+    return $base . '/' . rawurlencode($id);
+}
+
+/** Подсказка, если на боевом домене не задан public/.env */
+function site_crm_env_setup_hint(): ?string
+{
+    $base = site_crm_api_base();
+    $host = isset($_SERVER['HTTP_HOST']) ? strtolower((string) $_SERVER['HTTP_HOST']) : '';
+    if ($host === '' || str_contains($host, 'localhost') || str_contains($host, '127.0.0.1')) {
+        return null;
+    }
+    if (!str_contains($base, 'localhost') && !str_contains($base, '127.0.0.1')) {
+        return null;
+    }
+
+    return 'Создайте на хостинге файл .env рядом с index.php (скопируйте из env.example.txt): CRM_API_BASE=https://an-realty-crm.ru и CRM_PUBLIC_BASE=https://an-realty-crm.ru';
 }
 
 function site_crm_public_url(string $pathOrUrl): string
@@ -228,8 +281,13 @@ function site_http_get_json(string $url, int $timeoutSeconds = 3): array
         }
     }
 
+    $rawStr = (string) $raw;
+    if ($rawStr !== '' && preg_match('/^\s*</', $rawStr)) {
+        return ['_error' => 'CRM API вернул HTML вместо JSON — проверьте CRM_API_BASE и путь ' . site_crm_listings_path() . ' (на VPS нужен /api/public/listings)'];
+    }
+
     try {
-        $decoded = json_decode((string) $raw, true, 512, JSON_THROW_ON_ERROR);
+        $decoded = json_decode($rawStr, true, 512, JSON_THROW_ON_ERROR);
     } catch (Throwable $e) {
         return ['_error' => 'CRM API вернул не-JSON'];
     }

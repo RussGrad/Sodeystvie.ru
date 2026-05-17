@@ -10,7 +10,7 @@ if ($id === '') {
     exit;
 }
 
-$apiUrl = site_crm_api_base_resolved() . '/public/listings/' . rawurlencode($id);
+$apiUrl = site_crm_listings_url($id);
 $obj = site_http_get_json($apiUrl, 25);
 $error = isset($obj['_error']) ? (string) $obj['_error'] : null;
 

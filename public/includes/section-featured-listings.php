@@ -2,108 +2,12 @@
 
 declare(strict_types=1);
 
-/**
- * Лучшие предложения: тестовые карточки объектов (новостройки и вторичка), сетка как у каталога.
- */
+require_once __DIR__ . '/crm-listing-helpers.php';
 
-$featuredListings = [
-    [
-        'title' => '2-комн. квартира, 58 м²',
-        'address' => 'ЖК «Северный», Ангарск',
-        'rooms' => '2 комнаты',
-        'area' => '58 м²',
-        'floor' => '12 из 17',
-        'price' => '4 850 000 ₽',
-        'badge' => 'Новостройка',
-        'badge_type' => 'new',
-        'tone' => 1,
-        'href' => '/catalog/?demo=1',
-    ],
-    [
-        'title' => 'Студия, 28 м²',
-        'address' => 'ЖК «Лесной», Ангарск',
-        'rooms' => 'Студия',
-        'area' => '28 м²',
-        'floor' => '5 из 25',
-        'price' => '2 950 000 ₽',
-        'badge' => 'Новостройка',
-        'badge_type' => 'new',
-        'tone' => 2,
-        'href' => '/catalog/?demo=2',
-    ],
-    [
-        'title' => '3-комн. квартира, 72 м²',
-        'address' => 'ул. Ленина, 14, Ангарск',
-        'rooms' => '3 комнаты',
-        'area' => '72 м²',
-        'floor' => '4 из 5',
-        'price' => '6 200 000 ₽',
-        'badge' => 'Вторичка',
-        'badge_type' => 'resale',
-        'tone' => 3,
-        'href' => '/catalog/?demo=3',
-    ],
-    [
-        'title' => '1-комн. квартира, 38 м²',
-        'address' => 'ЖК «Речной», Ангарск',
-        'rooms' => '1 комната',
-        'area' => '38 м²',
-        'floor' => '8 из 20',
-        'price' => '3 420 000 ₽',
-        'badge' => 'Новостройка',
-        'badge_type' => 'new',
-        'tone' => 4,
-        'href' => '/catalog/?demo=4',
-    ],
-    [
-        'title' => '4-комн. квартира, 98 м²',
-        'address' => 'пр-т Мира, 112, Ангарск',
-        'rooms' => '4 комнаты',
-        'area' => '98 м²',
-        'floor' => '2 из 9',
-        'price' => '7 900 000 ₽',
-        'badge' => 'Акция',
-        'badge_type' => 'sale',
-        'tone' => 5,
-        'href' => '/catalog/?demo=5',
-    ],
-    [
-        'title' => '2-комн. квартира, 54 м²',
-        'address' => 'ЖК «Солнечный», Ангарск',
-        'rooms' => '2 комнаты',
-        'area' => '54 м²',
-        'floor' => '14 из 22',
-        'price' => '4 100 000 ₽',
-        'badge' => 'Новостройка',
-        'badge_type' => 'new',
-        'tone' => 6,
-        'href' => '/catalog/?demo=6',
-    ],
-    [
-        'title' => 'Пентхаус, 120 м²',
-        'address' => 'ЖК «Панорама», Ангарск',
-        'rooms' => '4 комнаты',
-        'area' => '120 м²',
-        'floor' => '24 из 24',
-        'price' => '12 500 000 ₽',
-        'badge' => 'Новостройка',
-        'badge_type' => 'new',
-        'tone' => 7,
-        'href' => '/catalog/?demo=7',
-    ],
-    [
-        'title' => '2-комн. квартира, 48 м²',
-        'address' => 'ул. Кирова, 7, Ангарск',
-        'rooms' => '2 комнаты',
-        'area' => '48 м²',
-        'floor' => '3 из 5',
-        'price' => '3 890 000 ₽',
-        'badge' => 'Вторичка',
-        'badge_type' => 'resale',
-        'tone' => 8,
-        'href' => '/catalog/?demo=8',
-    ],
-];
+$featured = site_crm_fetch_listings(8, 0);
+$featuredItems = $featured['items'];
+$featuredError = $featured['error'];
+$useCrm = $featuredError === null && count($featuredItems) > 0;
 
 ?>
 <section class="featured" aria-labelledby="featured-heading">
@@ -111,35 +15,65 @@ $featuredListings = [
         <header class="featured__header">
             <div class="featured__intro">
                 <h2 class="featured__title" id="featured-heading">Лучшие предложения</h2>
-                <p class="featured__lead">Новостройки и проверенные объекты — подборка для ознакомления (тестовые данные).</p>
+                <?php if ($useCrm) { ?>
+                    <p class="featured__lead">Актуальные объекты из CRM (стадия «Активный»).</p>
+                <?php } elseif ($featuredError !== null) { ?>
+                    <p class="featured__lead">Сейчас не удалось загрузить объекты из CRM. Смотрите <a href="/catalog/">каталог</a> или попробуйте позже.</p>
+                <?php } else { ?>
+                    <p class="featured__lead">Пока нет опубликованных объектов — загляните в <a href="/catalog/">каталог</a> позже.</p>
+                <?php } ?>
             </div>
             <a class="featured__to-catalog" href="/catalog/">Весь каталог</a>
         </header>
 
+        <?php if ($useCrm) { ?>
         <ul class="featured__grid">
-            <?php foreach ($featuredListings as $item) { ?>
+            <?php foreach ($featuredItems as $row) {
+                if (!is_array($row)) {
+                    continue;
+                }
+                $id = isset($row['id']) ? (string) $row['id'] : '';
+                if ($id === '') {
+                    continue;
+                }
+                $title = isset($row['title']) ? (string) $row['title'] : 'Объект';
+                $address = isset($row['address']) ? (string) $row['address'] : '';
+                $rooms = isset($row['rooms']) && is_numeric($row['rooms']) ? (int) $row['rooms'] : null;
+                $areaTotal = isset($row['areaTotal']) && is_numeric($row['areaTotal']) ? (float) $row['areaTotal'] : null;
+                $floor = isset($row['floor']) ? (string) $row['floor'] : '—';
+                $priceRaw = isset($row['price']) ? (string) $row['price'] : null;
+                $objectType = isset($row['objectTypeValue']) ? (string) $row['objectTypeValue'] : null;
+                $coverPhotoRaw = isset($row['coverPhoto']) ? (string) $row['coverPhoto'] : '';
+                $coverPhoto = $coverPhotoRaw !== '' ? site_crm_photo_src($coverPhotoRaw) : '';
+                $tone = site_tone_from_id($id);
+                $meta = site_object_meta_label($objectType, $rooms);
+                $areaText = $areaTotal ? rtrim(rtrim(number_format($areaTotal, 2, '.', ''), '0'), '.') . ' м²' : '—';
+                $href = '/catalog/object/?id=' . rawurlencode($id);
+                $mediaStyle = $coverPhoto !== ''
+                    ? ' style="background-image:url(\'' . htmlspecialchars($coverPhoto, ENT_QUOTES, 'UTF-8') . '\');background-size:cover;background-position:center;"'
+                    : '';
+                ?>
                 <li class="featured__cell">
                     <article class="featured-card">
-                        <a class="featured-card__link" href="<?php echo htmlspecialchars($item['href'], ENT_QUOTES, 'UTF-8'); ?>">
-                            <div class="featured-card__media featured-card__media--tone-<?php echo (int) $item['tone']; ?>" aria-hidden="true">
-                                <span class="featured-card__badge featured-card__badge--<?php echo htmlspecialchars($item['badge_type'], ENT_QUOTES, 'UTF-8'); ?>">
-                                    <?php echo htmlspecialchars($item['badge'], ENT_QUOTES, 'UTF-8'); ?>
-                                </span>
+                        <a class="featured-card__link" href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>">
+                            <div class="featured-card__media featured-card__media--tone-<?php echo (int) $tone; ?>" aria-hidden="true"<?php echo $mediaStyle; ?>>
+                                <span class="featured-card__badge featured-card__badge--new">CRM</span>
                             </div>
                             <div class="featured-card__body">
-                                <h3 class="featured-card__title"><?php echo htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8'); ?></h3>
-                                <p class="featured-card__address"><?php echo htmlspecialchars($item['address'], ENT_QUOTES, 'UTF-8'); ?></p>
+                                <h3 class="featured-card__title"><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></h3>
+                                <p class="featured-card__address"><?php echo htmlspecialchars($address !== '' ? $address : $title, ENT_QUOTES, 'UTF-8'); ?></p>
                                 <ul class="featured-card__meta">
-                                    <li><?php echo htmlspecialchars($item['rooms'], ENT_QUOTES, 'UTF-8'); ?></li>
-                                    <li><?php echo htmlspecialchars($item['area'], ENT_QUOTES, 'UTF-8'); ?></li>
-                                    <li><?php echo htmlspecialchars($item['floor'], ENT_QUOTES, 'UTF-8'); ?></li>
+                                    <li><?php echo htmlspecialchars($meta, ENT_QUOTES, 'UTF-8'); ?></li>
+                                    <li><?php echo htmlspecialchars($areaText, ENT_QUOTES, 'UTF-8'); ?></li>
+                                    <li><?php echo htmlspecialchars($floor, ENT_QUOTES, 'UTF-8'); ?></li>
                                 </ul>
-                                <p class="featured-card__price"><?php echo htmlspecialchars($item['price'], ENT_QUOTES, 'UTF-8'); ?></p>
+                                <p class="featured-card__price"><?php echo htmlspecialchars(site_fmt_rub($priceRaw), ENT_QUOTES, 'UTF-8'); ?></p>
                             </div>
                         </a>
                     </article>
                 </li>
             <?php } ?>
         </ul>
+        <?php } ?>
     </div>
 </section>

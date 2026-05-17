@@ -30,7 +30,7 @@ cp -R "$ROOT/public/." "$OUT_DIR/"
 
 find "$OUT_DIR" -name '.DS_Store' -delete 2>/dev/null || true
 
-cp "$ROOT/.env.example" "$OUT_DIR/env.example.txt"
+cp "$ROOT/public/.env.example" "$OUT_DIR/env.example.txt"
 
 cat > "$OUT_DIR/README-REG-RU.txt" << 'EOF'
 Содействие — витрина для REG.RU / ispmgr
@@ -49,7 +49,7 @@ cat > "$OUT_DIR/README-REG-RU.txt" << 'EOF'
 
 4) Не заливайте сюда node_modules, src/, prisma/ — они для разработки, на shared не нужны.
 
-Каталог объектов тянет GET {CRM_API_BASE}/public/listings
+Каталог: GET {CRM_API_BASE}{CRM_LISTINGS_PATH} (по умолчанию /api/public/listings)
 EOF
 
 ZIP_NAME="an-sodeystvie-production-$STAMP.zip"

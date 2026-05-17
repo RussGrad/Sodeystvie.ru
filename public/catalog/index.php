@@ -11,77 +11,60 @@ if (isset($_GET['id']) && is_string($_GET['id']) && trim($_GET['id']) !== '') {
     exit;
 }
 
+require_once __DIR__ . '/../includes/crm-listing-helpers.php';
+
 require __DIR__ . '/../includes/header.php';
 
-/**
- * Публичные объекты из CRM (NestJS legacy).
- * Показываем только опубликованные (stage = «Активный») — API уже фильтрует.
- */
-$crm = site_http_get_json(site_crm_api_base_resolved() . '/public/listings?' . http_build_query([
-    'limit' => 60,
-    'offset' => 0,
-]), 25);
-$crmItems = (isset($crm['items']) && is_array($crm['items'])) ? $crm['items'] : [];
-$crmTotal = (isset($crm['total']) && is_numeric($crm['total'])) ? (int) $crm['total'] : null;
-$crmError = isset($crm['_error']) ? (string) $crm['_error'] : null;
+/** Публичные объекты CRM (стадия «Активный»). */
+$crmFetched = site_crm_fetch_listings(60, 0);
+$crmItems = $crmFetched['items'];
+$crmTotal = $crmFetched['total'];
+$crmError = $crmFetched['error'];
 
 function fmt_rub(?string $raw): string
 {
-    if ($raw === null || $raw === '') return '—';
-    $n = (float) preg_replace('/[^\d.]/', '', str_replace(',', '.', $raw));
-    if ($n <= 0) return '—';
-    return number_format((int) round($n), 0, '.', ' ') . ' ₽';
+    return site_fmt_rub($raw);
 }
 
 function fmt_m2(?float $areaTotal, ?string $priceRaw): ?string
 {
-    if ($areaTotal === null || $areaTotal <= 0) return null;
-    if ($priceRaw === null || $priceRaw === '') return null;
-    $price = (float) preg_replace('/[^\d.]/', '', str_replace(',', '.', $priceRaw));
-    if ($price <= 0) return null;
-    $v = (int) round($price / $areaTotal);
-    return number_format($v, 0, '.', ' ') . ' ₽/м²';
+    return site_fmt_m2($areaTotal, $priceRaw);
 }
 
 function estimate_mortgage_monthly(?string $priceRaw, float $downPercent = 0.2, float $rateYear = 12.5, int $years = 20): ?string
 {
-    if ($priceRaw === null || $priceRaw === '') return null;
+    if ($priceRaw === null || $priceRaw === '') {
+        return null;
+    }
     $price = (float) preg_replace('/[^\d.]/', '', str_replace(',', '.', $priceRaw));
-    if ($price <= 0) return null;
+    if ($price <= 0) {
+        return null;
+    }
     $loan = $price * (1.0 - $downPercent);
     $months = max(1, $years * 12);
     $i = max(0.0, $rateYear) / 100.0 / 12.0;
-    $monthly = 0.0;
     if ($loan <= 0) {
-        $monthly = 0.0;
-    } elseif ($i == 0.0) {
+        return null;
+    }
+    if ($i == 0.0) {
         $monthly = $loan / $months;
     } else {
         $p = pow(1.0 + $i, $months);
         $monthly = $loan * ($i * $p) / ($p - 1.0);
     }
     $m = (int) round($monthly);
-    if ($m <= 0) return null;
-    return 'от ' . number_format($m, 0, '.', ' ') . ' ₽/мес.';
+
+    return $m <= 0 ? null : 'от ' . number_format($m, 0, '.', ' ') . ' ₽/мес.';
 }
 
 function object_meta_label(?string $objectType, ?int $rooms): string
 {
-    $t = $objectType ? trim($objectType) : '';
-    if ($t === 'flat') {
-        if ($rooms !== null && $rooms > 0) return $rooms . '-комн. кв.';
-        return 'Квартира';
-    }
-    if ($t === 'house') return 'Дом';
-    if ($t === 'plot' || $t === 'land') return 'Участок';
-    if ($t === 'commercial') return 'Коммерция';
-    return 'Объект';
+    return site_object_meta_label($objectType, $rooms);
 }
 
 function tone_from_id(string $id): int
 {
-    $n = (int) (crc32($id) % 8);
-    return $n + 1;
+    return site_tone_from_id($id);
 }
 
 ?>
@@ -96,6 +79,9 @@ function tone_from_id(string $id): int
             <h2 class="catalog__title" id="cat-published-title">Опубликованные объекты</h2>
             <?php if ($crmError) { ?>
                 <p class="page-main__lead"><?php echo htmlspecialchars($crmError, ENT_QUOTES, 'UTF-8'); ?></p>
+                <?php $envHint = site_crm_env_setup_hint(); if ($envHint !== null) { ?>
+                    <p class="page-main__lead"><strong>Настройка:</strong> <?php echo htmlspecialchars($envHint, ENT_QUOTES, 'UTF-8'); ?></p>
+                <?php } ?>
             <?php } ?>
             <?php if (!$crmError && $crmTotal !== null && $crmTotal === 0) { ?>
                 <p class="page-main__lead">Пока нет опубликованных объектов (стадия «Активный»). После модерации они появятся здесь.</p>
