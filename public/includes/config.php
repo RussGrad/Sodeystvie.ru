@@ -33,8 +33,9 @@ function site_env(string $key, ?string $default = null): string
 function site_is_production_vitrina_host(): bool
 {
     $host = isset($_SERVER['HTTP_HOST']) ? strtolower((string) $_SERVER['HTTP_HOST']) : '';
+    $name = isset($_SERVER['SERVER_NAME']) ? strtolower((string) $_SERVER['SERVER_NAME']) : '';
 
-    return in_array($host, ['an-sodeystvie.ru', 'www.an-sodeystvie.ru'], true);
+    return str_contains($host, 'an-sodeystvie.ru') || str_contains($name, 'an-sodeystvie.ru');
 }
 
 function site_crm_default_api_base(): string

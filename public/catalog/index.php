@@ -72,7 +72,7 @@ function tone_from_id(string $id): int
     <div class="container">
         <header class="catalog__header">
             <h1 class="page-main__heading">Каталог</h1>
-            <p class="page-main__lead">Опубликованные объекты подтягиваются из CRM. Ниже также остаются демонстрационные блоки для прототипа.</p>
+            <p class="page-main__lead">Опубликованные объекты подтягиваются из CRM (стадия «Активный»).</p>
         </header>
 
         <section class="catalog__section" aria-labelledby="cat-published-title">

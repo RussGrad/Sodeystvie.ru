@@ -44,3 +44,8 @@ if (!function_exists('site_load_dotenv_file')) {
 
 $envPath = dirname(__DIR__) . '/.env';
 site_load_dotenv_file($envPath);
+
+$productionConfig = __DIR__ . '/config.production.php';
+if (is_readable($productionConfig)) {
+    require $productionConfig;
+}
