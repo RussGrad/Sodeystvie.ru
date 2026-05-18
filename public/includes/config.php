@@ -217,6 +217,34 @@ function site_crm_yandex_public_share_to_direct_url(string $publicViewerUrl, int
     return null;
 }
 
+/**
+ * Прямой URL картинки через Nest (если с REG.RU недоступен cloud-api.yandex.net).
+ *
+ * @return non-empty-string|null
+ */
+function site_crm_resolve_photo_via_crm_api(string $viewerOrStoredUrl): ?string
+{
+    $u = trim($viewerOrStoredUrl);
+    if ($u === '') {
+        return null;
+    }
+    $apiBase = site_crm_api_base_resolved();
+    $endpoint =
+        rtrim($apiBase, '/') .
+        '/api/public/listings/resolve-photo-url?' .
+        http_build_query(['url' => $u]);
+    $data = site_http_get_json($endpoint, 20);
+    if (isset($data['_error'])) {
+        return null;
+    }
+    $resolved = isset($data['url']) ? trim((string) $data['url']) : '';
+    if ($resolved !== '' && preg_match('#^https?://#i', $resolved)) {
+        return $resolved;
+    }
+
+    return null;
+}
+
 /** URL из CRM → то, что браузер может загрузить как изображение. */
 function site_crm_photo_src(string $urlFromApi): string
 {
@@ -224,14 +252,45 @@ function site_crm_photo_src(string $urlFromApi): string
     if ($u === '') {
         return '';
     }
-    if (site_crm_is_yandex_published_viewer_url($u)) {
-        $direct = site_crm_yandex_public_share_to_direct_url($u);
-        if ($direct !== null && $direct !== '') {
-            return $direct;
+    // Уже прямая ссылка на файл/превью (после resolve на CRM или локальные uploads).
+    if (preg_match('#^https?://#i', $u)) {
+        if (site_crm_is_yandex_published_viewer_url($u)) {
+            $direct = site_crm_yandex_public_share_to_direct_url($u, 15);
+            if ($direct !== null && $direct !== '') {
+                return $direct;
+            }
+            $viaCrm = site_crm_resolve_photo_via_crm_api($u);
+            if ($viaCrm !== null && $viaCrm !== '') {
+                return $viaCrm;
+            }
+            // Страница yadi.sk в <img> не отображается — не подставляем её.
+            return '';
         }
+
+        return $u;
     }
 
     return site_crm_public_url($u);
+}
+
+/**
+ * Тег <img> для фото с Яндекс.Диска: без Referer (иначе downloader.disk.yandex.ru отдаёт 403 на an-sodeystvie.ru).
+ *
+ * @param non-empty-string $src
+ */
+function site_crm_photo_img(string $src, string $alt = '', string $class = ''): string
+{
+    $src = trim($src);
+    if ($src === '') {
+        return '';
+    }
+    $classAttr = $class !== '' ? ' class="' . htmlspecialchars($class, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '"' : '';
+
+    return '<img src="' . htmlspecialchars($src, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '"'
+        . ' alt="' . htmlspecialchars($alt, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '"'
+        . ' loading="lazy" decoding="async" referrerpolicy="no-referrer"'
+        . $classAttr
+        . '>';
 }
 
 /**

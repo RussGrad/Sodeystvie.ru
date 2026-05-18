@@ -49,14 +49,14 @@ $useCrm = $featuredError === null && count($featuredItems) > 0;
                 $meta = site_object_meta_label($objectType, $rooms);
                 $areaText = $areaTotal ? rtrim(rtrim(number_format($areaTotal, 2, '.', ''), '0'), '.') . ' м²' : '—';
                 $href = '/catalog/object/?id=' . rawurlencode($id);
-                $mediaStyle = $coverPhoto !== ''
-                    ? ' style="background-image:url(\'' . htmlspecialchars($coverPhoto, ENT_QUOTES, 'UTF-8') . '\');background-size:cover;background-position:center;"'
-                    : '';
                 ?>
                 <li class="featured__cell">
                     <article class="featured-card">
                         <a class="featured-card__link" href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>">
-                            <div class="featured-card__media featured-card__media--tone-<?php echo (int) $tone; ?>" aria-hidden="true"<?php echo $mediaStyle; ?>>
+                            <div class="featured-card__media featured-card__media--tone-<?php echo (int) $tone; ?>" aria-hidden="true">
+                                <?php if ($coverPhoto !== '') {
+                                    echo site_crm_photo_img($coverPhoto, $title, 'featured-card__photo');
+                                } ?>
                                 <span class="featured-card__badge featured-card__badge--new">CRM</span>
                             </div>
                             <div class="featured-card__body">

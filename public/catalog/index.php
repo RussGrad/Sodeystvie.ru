@@ -117,10 +117,10 @@ function tone_from_id(string $id): int
                                     <div
                                         class="resale-card__media resale-card__media--tone-<?php echo (int) $tone; ?>"
                                         aria-hidden="true"
-                                        <?php if ($coverPhoto !== '') { ?>
-                                            style="background-image: url('<?php echo htmlspecialchars($coverPhoto, ENT_QUOTES, 'UTF-8'); ?>'); background-size: cover; background-position: center;"
-                                        <?php } ?>
                                     >
+                                        <?php if ($coverPhoto !== '') {
+                                            echo site_crm_photo_img($coverPhoto, $title, 'resale-card__photo');
+                                        } ?>
                                         <span class="resale-card__count">1/<?php echo (int) max(1, $photosCount); ?></span>
                                     </div>
                                     <div class="resale-card__body">

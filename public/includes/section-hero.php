@@ -3,9 +3,10 @@
 declare(strict_types=1);
 
 /**
- * Первый экран: фоновое фото + оверлей, заголовок, вкладки 5 + «Зарубежная», белая панель фильтров.
- * Референс — только компоновка; фон: /assets/hero/hero-bg.jpg (заменяемый файл).
+ * Первый экран: слайдер фона (CRM или запасной кадр), заголовок, вкладки, панель фильтров.
  */
+
+require_once __DIR__ . '/crm-listing-helpers.php';
 
 $heroTabsMain = [
     'buy' => 'Купить',
@@ -15,9 +16,37 @@ $heroTabsMain = [
     'new' => 'Новостройки',
 ];
 
+$heroSlides = site_hero_slides_resolve(5);
+$heroSlides = array_values(array_filter(
+    $heroSlides,
+    static function (array $slide): bool {
+        return trim((string) ($slide['src'] ?? '')) !== '';
+    }
+));
+
+$heroSlideCount = count($heroSlides);
+$heroSliderEnabled = $heroSlideCount > 1;
+
 ?>
 <section class="hero" aria-labelledby="hero-title">
-    <div class="hero__media" aria-hidden="true"></div>
+    <div class="hero__media" data-hero-slider aria-hidden="true">
+        <?php foreach ($heroSlides as $i => $slide) {
+            $src = trim((string) ($slide['src'] ?? ''));
+            $alt = trim((string) ($slide['alt'] ?? ''));
+            $active = $i === 0 ? ' is-active' : '';
+            ?>
+            <img
+                class="hero__slide<?php echo $active; ?>"
+                src="<?php echo htmlspecialchars($src, ENT_QUOTES, 'UTF-8'); ?>"
+                alt="<?php echo htmlspecialchars($alt, ENT_QUOTES, 'UTF-8'); ?>"
+                width="1920"
+                height="1080"
+                decoding="async"
+                <?php echo $i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'; ?>
+                referrerpolicy="no-referrer"
+            >
+        <?php } ?>
+    </div>
 
     <div class="container hero__layout">
         <h1 class="hero__title" id="hero-title">Поможем найти квартиру вашей мечты</h1>
@@ -116,19 +145,30 @@ $heroTabsMain = [
                 <a class="hero__btn hero__btn--map" href="/catalog/?view=map">На карте</a>
             </div>
         </div>
-
-        <div class="hero__slider-ui" aria-hidden="true">
-            <span class="hero__slider-nav">
-                <span class="hero__slider-arrow">&#8249;</span>
-                <span class="hero__slider-arrow">&#8250;</span>
-            </span>
-            <span class="hero__slider-dots">
-                <span class="hero__slider-dot hero__slider-dot--active"></span>
-                <span class="hero__slider-dot"></span>
-                <span class="hero__slider-dot"></span>
-            </span>
-        </div>
     </div>
+
+    <?php if ($heroSliderEnabled) { ?>
+    <div class="hero__slider-ui" data-hero-slider-ui>
+            <div class="hero__slider-nav">
+                <button type="button" class="hero__slider-arrow" data-hero-prev aria-label="Предыдущее фото">&#8249;</button>
+                <button type="button" class="hero__slider-arrow" data-hero-next aria-label="Следующее фото">&#8250;</button>
+            </div>
+            <div class="hero__slider-dots" role="tablist" aria-label="Слайды фона">
+                <?php foreach ($heroSlides as $i => $slide) {
+                    $dotActive = $i === 0 ? ' hero__slider-dot--active' : '';
+                    ?>
+                    <button
+                        type="button"
+                        class="hero__slider-dot<?php echo $dotActive; ?>"
+                        data-hero-dot="<?php echo (int) $i; ?>"
+                        role="tab"
+                        aria-selected="<?php echo $i === 0 ? 'true' : 'false'; ?>"
+                        aria-label="Слайд <?php echo (int) ($i + 1); ?>"
+                    ></button>
+                <?php } ?>
+            </div>
+    </div>
+    <?php } ?>
 
     <a class="hero__chat" href="/contacts/" aria-label="Связаться с нами">
         <svg class="hero__chat-icon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">

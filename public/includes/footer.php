@@ -9,6 +9,7 @@ $nav = site_nav_items();
 $currentNav = $currentNav ?? '';
 $siteHeaderJsVersion = (string) (@filemtime(__DIR__ . '/../js/site-header.js') ?: time());
 $siteFooterJsVersion = (string) (@filemtime(__DIR__ . '/../js/site-footer.js') ?: time());
+$heroJsVersion = (string) (@filemtime(__DIR__ . '/../js/hero.js') ?: time());
 
 ?>
 <footer class="site-footer" id="site-footer">
@@ -113,7 +114,7 @@ $siteFooterJsVersion = (string) (@filemtime(__DIR__ . '/../js/site-footer.js') ?
     <script src="/js/site-header.js?v=<?php echo htmlspecialchars($siteHeaderJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <script src="/js/site-footer.js?v=<?php echo htmlspecialchars($siteFooterJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <script src="/js/lead-modal.js" defer></script>
-    <script src="/js/hero.js" defer></script>
+    <script src="/js/hero.js?v=<?php echo htmlspecialchars($heroJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <script src="/js/mortgage.js" defer></script>
     <script src="/js/listing-page.js" defer></script>
 </body>
