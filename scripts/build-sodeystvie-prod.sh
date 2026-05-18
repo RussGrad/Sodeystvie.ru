@@ -58,7 +58,11 @@ ZIP_NAME="an-sodeystvie-production-$STAMP.zip"
 STABLE_ZIP="$ROOT/build/an-sodeystvie-public-hosting.zip"
 cp -f "$ROOT/build/$ZIP_NAME" "$STABLE_ZIP"
 
+mkdir -p "$ROOT/releases"
+cp -f "$STABLE_ZIP" "$ROOT/releases/an-sodeystvie-public-hosting.zip"
+
 echo "Готово:"
 echo "  Папка: $OUT_DIR"
 echo "  Архив: $ROOT/build/$ZIP_NAME"
 echo "  Удобная копия (всегда одно имя): $STABLE_ZIP"
+echo "  Для GitHub (releases/): $ROOT/releases/an-sodeystvie-public-hosting.zip"
