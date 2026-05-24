@@ -99,6 +99,7 @@ $headerTagline = site_header_tagline();
             </ul>
             <div class="site-header__actions">
                 <div class="site-header__contact">
+                    <p class="site-header__hours"><?php echo htmlspecialchars(SITE_WORK_HOURS, ENT_QUOTES, 'UTF-8'); ?></p>
                     <div class="site-header__phone-row">
                         <a class="site-header__phone" href="tel:<?php echo htmlspecialchars(SITE_PHONE_TEL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_PHONE_DISPLAY, ENT_QUOTES, 'UTF-8'); ?></a>
                         <?php if ($whatsappUrl !== null) { ?>
@@ -124,7 +125,6 @@ $headerTagline = site_header_tagline();
                             </a>
                         <?php } ?>
                     </div>
-                    <p class="site-header__hours"><?php echo htmlspecialchars(SITE_WORK_HOURS, ENT_QUOTES, 'UTF-8'); ?></p>
                 </div>
                 <a class="site-header__fav" href="/catalog/" id="site-header-favorites" aria-label="Избранное">
                     <svg class="site-header__fav-icon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
@@ -145,12 +145,15 @@ $headerTagline = site_header_tagline();
                     </svg>
                     <span class="site-header__cta-text">Оставить заявку</span>
                 </button>
-                <button type="button" class="site-header__theme" id="site-theme-toggle" aria-label="Переключить тему оформления">
-                    <svg class="site-header__theme-icon site-header__theme-label--light" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-                        <path fill="currentColor" d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12Zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM11 1h2v3h-2V1Zm0 18h2v3h-2v-3ZM3.515 4.929l1.414-1.414L7.05 5.636 5.636 7.05 3.515 4.93ZM16.95 18.364l1.414-1.414 2.121 2.121-1.414 1.414-2.121-2.121Zm2.121-14.435-1.414-1.414-2.121 2.121 1.414 1.414 2.121-2.121ZM5.636 16.95l-1.414 1.414-2.121-2.121 1.414-1.414 2.121 2.121ZM23 11v2h-3v-2h3ZM4 11v2H1v-2h3Z"/>
+                <button type="button" class="site-header__theme" id="site-theme-toggle" aria-label="Включить светлую тему">
+                    <?php /* Светлая тема активна → показать луну (переключить на тёмную) */ ?>
+                    <svg class="site-header__theme-icon site-header__theme-icon--moon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    <svg class="site-header__theme-icon site-header__theme-label--dark" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-                        <path fill="currentColor" d="M21 14.5A7.5 7.5 0 0 1 9.5 3a7.5 7.5 0 1 0 11.5 11.5Z"/>
+                    <?php /* Тёмная тема активна → показать солнце */ ?>
+                    <svg class="site-header__theme-icon site-header__theme-icon--sun" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                     </svg>
                 </button>
             </div>
