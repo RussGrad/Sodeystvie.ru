@@ -31,7 +31,7 @@
 
 }
 
-// Внутренняя полоса: логотип + меню + блок действий + бургер
+// Внутренняя полоса: кластер по центру (desktop) или логотип + бургер (mobile)
 .site-header__inner {
   position: relative;
   z-index: 102;
@@ -46,11 +46,26 @@
     padding 0.25s var(--ease-smooth);
 
   @media (min-width: $breakpoint-nav) {
-    gap: 0.5rem 0.75rem;
+    justify-content: center;
+    gap: 0;
+  }
+}
+
+// Логотип + меню + контакты — одна группа по центру страницы
+.site-header__cluster {
+  display: contents;
+
+  @media (min-width: $breakpoint-nav) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 0.75rem 1rem;
+    max-width: 100%;
   }
 
   @media (min-width: $breakpoint-header-comfort) {
-    gap: 0.75rem 1.25rem;
+    gap: 1rem 1.5rem;
   }
 }
 
@@ -60,11 +75,6 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-
-  @media (min-width: $breakpoint-nav) {
-    align-self: center;
-    order: 1;
-  }
 }
 
 .site-header__logo-link {
@@ -168,15 +178,25 @@
   }
 
   @media (min-width: $breakpoint-nav) {
-    // Меню и actions — прямые flex-элементы .site-header__inner (одна строка, без переноса)
     position: static;
-    display: contents;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem 0.75rem;
+    flex: 0 1 auto;
+    min-width: 0;
     padding: 0;
     background: transparent;
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
     overflow: visible;
+  }
+
+  @media (min-width: $breakpoint-header-comfort) {
+    gap: 0.65rem 1rem;
   }
 }
 
@@ -197,14 +217,13 @@
   gap: 0.25rem;
 
   @media (min-width: $breakpoint-nav) {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
     gap: 0.125rem;
     min-width: 0;
-    order: 2;
   }
 
   @media (min-width: $breakpoint-header-comfort) {
@@ -403,7 +422,6 @@ $header-tool-size: 2rem; // 32px
     gap: 0.5rem;
     margin-top: 0;
     flex: 0 0 auto;
-    order: 3;
   }
 
   @media (min-width: $breakpoint-header-comfort) {

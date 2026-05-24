@@ -53,6 +53,7 @@ $telegramUrl = site_telegram_url();
 <body>
 <header class="site-header" id="site-header">
     <div class="site-header__inner container">
+        <div class="site-header__cluster">
         <div class="site-header__brand">
             <a class="site-header__logo-link" href="/" aria-label="Содействие — на главную">
                 <?php require __DIR__ . '/logo-markup.php'; ?>
@@ -153,6 +154,7 @@ $telegramUrl = site_telegram_url();
                 </div>
             </div>
         </nav>
+        </div>
         <button type="button" class="site-header__burger" id="site-header-burger" aria-controls="site-header-menu" aria-expanded="false" aria-label="Открыть меню">
             <span class="site-header__burger-line"></span>
             <span class="site-header__burger-line"></span>
