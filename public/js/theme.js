@@ -9,18 +9,42 @@
         return;
     }
 
-    function syncAria() {
-        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        btn.setAttribute('aria-label', isDark ? 'Включить светлую тему' : 'Включить тёмную тему');
+    var moon = btn.querySelector('.site-header__theme-icon--moon');
+    var sun = btn.querySelector('.site-header__theme-icon--sun');
+
+    function isDarkTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'dark';
     }
 
-    syncAria();
+    function syncThemeIcons() {
+        var dark = isDarkTheme();
+        if (moon) {
+            moon.hidden = !dark;
+        }
+        if (sun) {
+            sun.hidden = dark;
+        }
+    }
+
+    function syncAria() {
+        btn.setAttribute(
+            'aria-label',
+            isDarkTheme() ? 'Включить светлую тему' : 'Включить тёмную тему',
+        );
+    }
+
+    function syncAll() {
+        syncThemeIcons();
+        syncAria();
+    }
+
+    syncAll();
 
     btn.addEventListener('click', function () {
         var root = document.documentElement;
-        var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        var next = isDarkTheme() ? 'light' : 'dark';
         root.setAttribute('data-theme', next);
-        syncAria();
+        syncAll();
         try {
             localStorage.setItem('sodeystvie-theme', next);
         } catch (e) {

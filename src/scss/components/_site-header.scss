@@ -647,12 +647,14 @@ $header-tool-size: 2rem; // 32px
     transform: scale(0.96);
   }
 
-  // Не через общий `svg { display:block }` — иначе видны и луна, и солнце
   .site-header__theme-icon {
-    @include header-toolbar-icon;
     position: absolute;
     top: 50%;
     left: 50%;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin: 0;
+    padding: 0;
     transform: translate(-50%, -50%);
     pointer-events: none;
 
@@ -662,21 +664,31 @@ $header-tool-size: 2rem; // 32px
     }
   }
 
-  .site-header__theme-icon--sun {
-    display: none;
-  }
-
+  // Тёмная тема: только луна (важно — без display:block на общем .theme-icon)
   .site-header__theme-icon--moon {
     display: block;
+  }
+
+  .site-header__theme-icon--sun {
+    display: none !important;
   }
 }
 
 :root[data-theme="light"] .site-header__theme {
   .site-header__theme-icon--moon {
-    display: none;
+    display: none !important;
   }
 
   .site-header__theme-icon--sun {
-    display: block;
+    display: block !important;
   }
+}
+
+// Если data-theme ещё не на <html> — по умолчанию тёмная, только луна
+:root:not([data-theme="light"]) .site-header__theme .site-header__theme-icon--sun {
+  display: none !important;
+}
+
+:root:not([data-theme="light"]) .site-header__theme .site-header__theme-icon--moon {
+  display: block !important;
 }
