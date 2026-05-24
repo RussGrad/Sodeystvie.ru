@@ -622,35 +622,61 @@ $header-tool-size: 2rem; // 32px
 }
 
 .site-header__theme {
-  @include header-toolbar-interactive;
+  @include header-toolbar-control;
+  position: relative;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--header-tool-icon);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-smooth),
+    color var(--duration-fast) ease,
+    transform 0.12s ease;
 
   &:hover {
+    background: var(--header-tool-hover-bg);
     transform: scale(1.04);
   }
-}
 
-.site-header__theme-icon {
-  @include header-toolbar-icon;
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
 
-  path,
-  circle {
-    stroke: currentColor;
+  &:active {
+    transform: scale(0.96);
+  }
+
+  // Не через общий `svg { display:block }` — иначе видны и луна, и солнце
+  .site-header__theme-icon {
+    @include header-toolbar-icon;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+
+    path,
+    circle {
+      stroke: currentColor;
+    }
+  }
+
+  .site-header__theme-icon--sun {
+    display: none;
+  }
+
+  .site-header__theme-icon--moon {
+    display: block;
   }
 }
 
-// Тёмная тема → луна (переключить на светлую)
-.site-header__theme-icon--sun {
-  display: none;
-}
+:root[data-theme="light"] .site-header__theme {
+  .site-header__theme-icon--moon {
+    display: none;
+  }
 
-.site-header__theme-icon--moon {
-  display: block;
-}
-
-:root[data-theme="light"] .site-header__theme-icon--moon {
-  display: none;
-}
-
-:root[data-theme="light"] .site-header__theme-icon--sun {
-  display: block;
+  .site-header__theme-icon--sun {
+    display: block;
+  }
 }
