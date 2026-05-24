@@ -503,6 +503,36 @@ $header-tool-size: 2rem; // 32px
   flex-shrink: 0;
 }
 
+// Прозрачный фон, иконка --header-tool-icon, заливка только :hover
+@mixin header-toolbar-interactive {
+  @include header-toolbar-control;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--header-tool-icon);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-smooth),
+    color var(--duration-fast) ease,
+    transform 0.12s ease;
+
+  &:hover {
+    background: var(--header-tool-hover-bg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+
+  svg {
+    @include header-toolbar-icon;
+  }
+}
+
 .site-header__toolbar {
   display: flex;
   flex-wrap: nowrap;
@@ -540,57 +570,21 @@ $header-tool-size: 2rem; // 32px
 }
 
 .site-header__messenger {
-  @include header-toolbar-control;
-  border: none;
-  color: var(--header-text);
+  @include header-toolbar-interactive;
   text-decoration: none;
-  transition:
-    background var(--duration-fast) ease,
-    color var(--duration-fast) ease,
-    transform 0.12s ease;
 
   &:hover {
-    background: var(--nav-hover);
     transform: scale(1.04);
   }
-
-  &:focus-visible {
-    outline: 2px solid var(--focus-ring);
-    outline-offset: 2px;
-  }
-
-  svg {
-    @include header-toolbar-icon;
-  }
-}
-
-:root[data-theme="dark"] .site-header__messenger--tg {
-  color: #2aabee;
-}
-
-:root[data-theme="light"] .site-header__messenger--tg {
-  color: #229ed9;
 }
 
 .site-header__fav {
-  @include header-toolbar-control;
+  @include header-toolbar-interactive;
   position: relative;
-  color: var(--header-text);
   text-decoration: none;
-  border: 1px solid var(--header-border);
-  transition:
-    background var(--duration-fast) ease,
-    border-color var(--duration-fast) ease,
-    color var(--duration-fast) ease;
 
   &:hover {
-    background: var(--nav-hover);
-    color: var(--cta-bg);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--focus-ring);
-    outline-offset: 2px;
+    transform: scale(1.04);
   }
 }
 
@@ -615,28 +609,11 @@ $header-tool-size: 2rem; // 32px
 }
 
 .site-header__cta {
-  @include header-toolbar-control;
-  color: var(--cta-text);
-  background: var(--cta-bg);
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  cursor: pointer;
-  box-shadow: none;
-  transition:
-    filter 0.2s ease,
-    background var(--duration-fast) ease;
+  @include header-toolbar-interactive;
+  font: inherit;
 
   &:hover {
-    filter: brightness(1.05);
-    background: var(--cta-bg-hover);
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--focus-ring);
-    outline-offset: 2px;
+    transform: scale(1.04);
   }
 }
 
@@ -644,52 +621,21 @@ $header-tool-size: 2rem; // 32px
   @include header-toolbar-icon;
 }
 
-// Переключатель темы — те же габариты, что у Telegram
 .site-header__theme {
-  @include header-toolbar-control;
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--header-text);
-  cursor: pointer;
-  transition:
-    background var(--duration-fast) var(--ease-smooth),
-    color var(--duration-fast) ease,
-    transform 0.12s ease;
+  @include header-toolbar-interactive;
 
   &:hover {
-    background: var(--nav-hover);
     transform: scale(1.04);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--focus-ring);
-    outline-offset: 2px;
-  }
-
-  &:active {
-    transform: scale(0.96);
-  }
-}
-
-:root[data-theme="dark"] .site-header__theme {
-  color: #f0e0b8;
-
-  &:hover {
-    background: rgba(201, 169, 97, 0.18);
-    color: #fff8e7;
-  }
-}
-
-:root[data-theme="light"] .site-header__theme {
-  color: #8a6d2f;
-
-  &:hover {
-    background: rgba(184, 148, 72, 0.12);
   }
 }
 
 .site-header__theme-icon {
   @include header-toolbar-icon;
+
+  path,
+  circle {
+    stroke: currentColor;
+  }
 }
 
 // Тёмная тема → луна (переключить на светлую)
