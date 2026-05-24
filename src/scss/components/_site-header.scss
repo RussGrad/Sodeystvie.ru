@@ -34,19 +34,27 @@
   }
 }
 
-// Внутренняя полоса: логотип + навигация + бургер; z-index выше полноэкранного меню
+// Внутренняя полоса: логотип + меню + блок действий + бургер
 .site-header__inner {
   position: relative;
   z-index: 102;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.75rem;
   min-height: 4.25rem;
   padding-block: 0.75rem;
   transition:
     min-height 0.25s var(--ease-smooth),
     padding 0.25s var(--ease-smooth);
+
+  @media (min-width: $breakpoint-nav) {
+    gap: 0.5rem 0.75rem;
+  }
+
+  @media (min-width: $breakpoint-header-comfort) {
+    gap: 0.75rem 1.25rem;
+  }
 }
 
 .site-header__brand {
@@ -56,10 +64,17 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center;
   gap: 0.15rem;
-  max-width: 11rem;
+  max-width: 9.5rem;
 
   @media (min-width: $breakpoint-nav) {
+    max-width: 10.5rem;
+    align-self: center;
+    order: 1;
+  }
+
+  @media (min-width: $breakpoint-header-comfort) {
     max-width: none;
   }
 }
@@ -177,13 +192,9 @@
   }
 
   @media (min-width: $breakpoint-nav) {
+    // Меню и actions — прямые flex-элементы .site-header__inner (одна строка, без переноса)
     position: static;
-    display: flex;
-    flex: 1;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 1.25rem;
+    display: contents;
     padding: 0;
     background: transparent;
     opacity: 1;
@@ -210,10 +221,18 @@
   gap: 0.25rem;
 
   @media (min-width: $breakpoint-nav) {
+    flex: 1 1 auto;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
-    gap: 0.25rem 0.5rem;
+    justify-content: center;
+    gap: 0.125rem;
+    min-width: 0;
+    order: 2;
+  }
+
+  @media (min-width: $breakpoint-header-comfort) {
+    gap: 0.25rem 0.35rem;
   }
 }
 
@@ -369,6 +388,7 @@
   font-weight: 500;
   color: var(--header-text);
   border-radius: 6px;
+  white-space: nowrap;
   transition: background 0.15s ease;
 
   &:hover {
@@ -377,6 +397,16 @@
 
   &--current {
     background: var(--nav-hover);
+  }
+
+  @media (min-width: $breakpoint-nav) {
+    padding: 0.4rem 0.45rem;
+    font-size: 0.8125rem;
+  }
+
+  @media (min-width: $breakpoint-header-comfort) {
+    padding: 0.45rem 0.65rem;
+    font-size: 0.875rem;
   }
 }
 
@@ -389,23 +419,34 @@
 
   @media (min-width: $breakpoint-nav) {
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
-    gap: 0.65rem;
+    gap: 0.4rem;
     margin-top: 0;
-    flex-shrink: 0;
+    flex: 0 0 auto;
+    order: 3;
+  }
+
+  @media (min-width: $breakpoint-header-comfort) {
+    gap: 0.55rem;
   }
 }
 
 .site-header__contact {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  justify-content: center;
+  gap: 0.1rem;
+
+  @media (min-width: $breakpoint-nav) {
+    align-items: flex-end;
+    text-align: right;
+  }
 }
 
 .site-header__phone-row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 0.35rem 0.5rem;
 }
@@ -418,6 +459,16 @@
   white-space: nowrap;
   padding: 0.35rem 0.5rem;
   border-radius: 6px;
+  line-height: 1.2;
+
+  @media (min-width: $breakpoint-nav) {
+    padding: 0.2rem 0.35rem;
+    font-size: 0.8125rem;
+  }
+
+  @media (min-width: $breakpoint-header-comfort) {
+    font-size: 0.9375rem;
+  }
 
   &:hover {
     background: var(--nav-hover);
@@ -435,6 +486,16 @@
   font-size: 0.75rem; // 12px
   line-height: 1.3;
   color: var(--header-muted);
+  white-space: nowrap;
+
+  @media (min-width: $breakpoint-nav) {
+    padding-left: 0;
+    font-size: 0.6875rem;
+  }
+
+  @media (min-width: $breakpoint-header-comfort) {
+    font-size: 0.75rem;
+  }
 }
 
 .site-header__messenger {
@@ -528,6 +589,13 @@
   font: inherit;
   font-size: 0.875rem;
   font-weight: 600;
+  white-space: nowrap;
+
+  @media (min-width: $breakpoint-nav) and (max-width: ($breakpoint-header-comfort - 0.02px)) {
+    padding: 0.55rem 0.85rem;
+    font-size: 0.8125rem;
+    gap: 0.35rem;
+  }
   text-decoration: none;
   color: var(--cta-text);
   background: linear-gradient(180deg, var(--cta-bg) 0%, var(--cta-bg-hover) 100%);
@@ -558,6 +626,24 @@
 
 .site-header__cta-icon {
   flex-shrink: 0;
+}
+
+@media (min-width: $breakpoint-nav) and (max-width: 1099px) {
+  .site-header__cta-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .site-header__cta {
+    padding: 0.55rem;
+  }
 }
 
 // Компактный переключатель темы; в тёмной теме — контрастная обводка и фон

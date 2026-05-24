@@ -1,5 +1,6 @@
 // Переменные Sass (брейкпоинты, шрифты). Цвета темы — через CSS custom properties ниже.
 $breakpoint-nav: 1024px; // от этой ширины — полное горизонтальное меню в шапке
+$breakpoint-header-comfort: 1200px; // комфортные отступы в шапке без переноса
 $container-max: 1280px; // максимальная ширина контентной области
 $font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
