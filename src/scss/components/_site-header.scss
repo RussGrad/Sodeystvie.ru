@@ -321,6 +321,12 @@
 .site-header__submenu-item {
   margin: 0;
   list-style: none;
+
+  // Старый header.php дублировал родительский пункт в подменю — скрыть до выката includes/header.php
+  &:has(> .site-header__submenu-link[href="/about/"]),
+  &:has(> .site-header__submenu-link[href="/contacts/"]) {
+    display: none;
+  }
 }
 
 .site-header__submenu-link {
