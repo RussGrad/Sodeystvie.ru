@@ -410,7 +410,10 @@
   }
 }
 
-// Телефон, мессенджеры, избранное, CTA, тема
+// Высота иконок и кнопок в одной линии (desktop)
+$header-tool-size: 2.125rem; // 34px
+
+// Телефон + панель иконок
 .site-header__actions {
   display: flex;
   flex-direction: column;
@@ -421,14 +424,14 @@
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.5rem;
     margin-top: 0;
     flex: 0 0 auto;
     order: 3;
   }
 
   @media (min-width: $breakpoint-header-comfort) {
-    gap: 0.55rem;
+    gap: 0.65rem;
   }
 }
 
@@ -437,35 +440,34 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.12rem;
   text-align: center;
-}
+  flex-shrink: 0;
 
-.site-header__phone-row {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem 0.5rem;
+  @media (min-width: $breakpoint-nav) {
+    align-self: center;
+  }
 }
 
 .site-header__phone {
+  display: block;
   font-size: 0.9375rem;
   font-weight: 600;
   text-decoration: none;
   color: var(--header-text);
   white-space: nowrap;
-  padding: 0.35rem 0.5rem;
+  padding: 0.15rem 0.35rem;
   border-radius: 6px;
   line-height: 1.2;
+  text-align: center;
 
   @media (min-width: $breakpoint-nav) {
-    padding: 0.2rem 0.35rem;
     font-size: 0.8125rem;
+    padding: 0.1rem 0.25rem;
   }
 
   @media (min-width: $breakpoint-header-comfort) {
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
   }
 
   &:hover {
@@ -475,6 +477,24 @@
   &:focus-visible {
     outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
+  }
+}
+
+// Telegram, избранное, CTA, тема — одна линия, одна высота
+.site-header__toolbar {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+
+  @media (min-width: $breakpoint-nav) {
+    gap: 0.3rem;
+    align-self: center;
+  }
+
+  @media (min-width: $breakpoint-header-comfort) {
+    gap: 0.4rem;
   }
 }
 
@@ -501,9 +521,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
+  flex-shrink: 0;
+  width: $header-tool-size;
+  height: $header-tool-size;
+  border-radius: 8px;
   color: var(--header-text);
   text-decoration: none;
   transition:
@@ -513,7 +534,7 @@
 
   &:hover {
     background: var(--nav-hover);
-    transform: scale(1.06);
+    transform: scale(1.04);
   }
 
   &:focus-visible {
@@ -523,8 +544,8 @@
 
   svg {
     display: block;
-    width: 1.35rem;
-    height: 1.35rem;
+    width: 1.2rem;
+    height: 1.2rem;
   }
 }
 
@@ -541,8 +562,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  flex-shrink: 0;
+  width: $header-tool-size;
+  height: $header-tool-size;
   border-radius: 8px;
   color: var(--header-text);
   text-decoration: none;
@@ -561,6 +583,12 @@
     outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
   }
+}
+
+.site-header__fav-icon {
+  display: block;
+  width: 1.05rem;
+  height: 1.05rem;
 }
 
 .site-header__fav-count {
@@ -583,18 +611,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
-  padding: 0.875rem 1.75rem; // 14px 28px
+  flex-shrink: 0;
+  gap: 0.3rem;
+  height: $header-tool-size;
+  padding: 0 0.65rem;
   font: inherit;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
+  line-height: 1;
   white-space: nowrap;
-
-  @media (min-width: $breakpoint-nav) and (max-width: ($breakpoint-header-comfort - 0.02px)) {
-    padding: 0.55rem 0.85rem;
-    font-size: 0.8125rem;
-    gap: 0.35rem;
-  }
   text-decoration: none;
   color: var(--cta-text);
   background: linear-gradient(180deg, var(--cta-bg) 0%, var(--cta-bg-hover) 100%);
@@ -603,18 +628,22 @@
   cursor: pointer;
   box-shadow: var(--btn-primary-shadow);
   transition:
-    transform var(--duration-fast) var(--ease-smooth),
-    box-shadow var(--duration-fast) var(--ease-smooth),
-    filter 0.2s ease;
+    filter 0.2s ease,
+    box-shadow var(--duration-fast) var(--ease-smooth);
+
+  @media (min-width: $breakpoint-header-comfort) {
+    padding: 0 0.85rem;
+    font-size: 0.8125rem;
+    gap: 0.35rem;
+  }
 
   &:hover {
     filter: brightness(1.06);
     box-shadow: var(--btn-primary-shadow-hover);
-    transform: translateY(-2px);
   }
 
   &:active {
-    transform: translateY(0) scale(0.98);
+    transform: scale(0.98);
   }
 
   &:focus-visible {
@@ -625,9 +654,16 @@
 
 .site-header__cta-icon {
   flex-shrink: 0;
+  width: 0.9rem;
+  height: 0.9rem;
+
+  @media (min-width: $breakpoint-header-comfort) {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
 }
 
-@media (min-width: $breakpoint-nav) and (max-width: 1099px) {
+@media (min-width: $breakpoint-nav) and (max-width: 1139px) {
   .site-header__cta-text {
     position: absolute;
     width: 1px;
@@ -641,7 +677,8 @@
   }
 
   .site-header__cta {
-    padding: 0.55rem;
+    width: $header-tool-size;
+    padding: 0;
   }
 }
 
@@ -650,8 +687,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  flex-shrink: 0;
+  width: $header-tool-size;
+  height: $header-tool-size;
   padding: 0;
   border: 1px solid var(--header-border);
   border-radius: 6px;
@@ -667,7 +705,7 @@
 
   &:hover {
     background: var(--nav-hover);
-    transform: scale(1.05);
+    transform: scale(1.04);
   }
 
   &:focus-visible {
