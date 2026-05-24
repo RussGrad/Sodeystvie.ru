@@ -479,7 +479,30 @@ $header-tool-size: 2rem; // 32px
   }
 }
 
-// Telegram, избранное, CTA, тема — одна линия, одна высота
+// Telegram, избранное, CTA, тема — одна линия, строго одинаковый габарит
+@mixin header-toolbar-control {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 $header-tool-size;
+  width: $header-tool-size;
+  height: $header-tool-size;
+  min-width: $header-tool-size;
+  max-width: $header-tool-size;
+  min-height: $header-tool-size;
+  max-height: $header-tool-size;
+  padding: 0;
+  border-radius: 8px;
+}
+
+@mixin header-toolbar-icon {
+  display: block;
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+}
+
 .site-header__toolbar {
   display: flex;
   flex-wrap: nowrap;
@@ -517,13 +540,8 @@ $header-tool-size: 2rem; // 32px
 }
 
 .site-header__messenger {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: $header-tool-size;
-  height: $header-tool-size;
-  border-radius: 8px;
+  @include header-toolbar-control;
+  border: none;
   color: var(--header-text);
   text-decoration: none;
   transition:
@@ -542,9 +560,7 @@ $header-tool-size: 2rem; // 32px
   }
 
   svg {
-    display: block;
-    width: 1.2rem;
-    height: 1.2rem;
+    @include header-toolbar-icon;
   }
 }
 
@@ -557,14 +573,8 @@ $header-tool-size: 2rem; // 32px
 }
 
 .site-header__fav {
+  @include header-toolbar-control;
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: $header-tool-size;
-  height: $header-tool-size;
-  border-radius: 8px;
   color: var(--header-text);
   text-decoration: none;
   border: 1px solid var(--header-border);
@@ -585,9 +595,7 @@ $header-tool-size: 2rem; // 32px
 }
 
 .site-header__fav-icon {
-  display: block;
-  width: 1.05rem;
-  height: 1.05rem;
+  @include header-toolbar-icon;
 }
 
 .site-header__fav-count {
@@ -607,26 +615,19 @@ $header-tool-size: 2rem; // 32px
 }
 
 .site-header__cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: $header-tool-size;
-  height: $header-tool-size;
-  padding: 0;
+  @include header-toolbar-control;
   color: var(--cta-text);
-  background: linear-gradient(180deg, var(--cta-bg) 0%, var(--cta-bg-hover) 100%);
-  border: none;
-  border-radius: 8px;
+  background: var(--cta-bg);
+  border: 1px solid rgba(0, 0, 0, 0.12);
   cursor: pointer;
-  box-shadow: var(--btn-primary-shadow);
+  box-shadow: none;
   transition:
     filter 0.2s ease,
-    box-shadow var(--duration-fast) var(--ease-smooth);
+    background var(--duration-fast) ease;
 
   &:hover {
-    filter: brightness(1.06);
-    box-shadow: var(--btn-primary-shadow-hover);
+    filter: brightness(1.05);
+    background: var(--cta-bg-hover);
   }
 
   &:active {
@@ -640,23 +641,13 @@ $header-tool-size: 2rem; // 32px
 }
 
 .site-header__cta-icon {
-  flex-shrink: 0;
-  width: 1rem;
-  height: 1rem;
+  @include header-toolbar-icon;
 }
 
 // Переключатель темы — те же габариты, что у Telegram
 .site-header__theme {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-sizing: border-box;
-  width: $header-tool-size;
-  height: $header-tool-size;
-  padding: 0;
-  border: none;
-  border-radius: 8px;
+  @include header-toolbar-control;
+  border: 1px solid transparent;
   background: transparent;
   color: var(--header-text);
   cursor: pointer;
@@ -698,10 +689,7 @@ $header-tool-size: 2rem; // 32px
 }
 
 .site-header__theme-icon {
-  display: block;
-  width: 1.2rem;
-  height: 1.2rem;
-  flex-shrink: 0;
+  @include header-toolbar-icon;
 }
 
 // Тёмная тема → луна (переключить на светлую)
