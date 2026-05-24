@@ -137,8 +137,7 @@
       var on = isFav(id);
       btn.setAttribute('aria-pressed', on ? 'true' : 'false');
       btn.classList.toggle('is-active', on);
-      var label = btn.querySelector('.listing-card__fav-label');
-      if (label) label.textContent = on ? 'в избранном' : 'добавить в избранное';
+      btn.setAttribute('aria-label', on ? 'Убрать из избранного' : 'Добавить в избранное');
     }
 
     sync();

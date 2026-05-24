@@ -580,9 +580,7 @@ function site_render_catalog_listing_card(array $row): void
     $jk = isset($row['residentialComplex']) ? (string) $row['residentialComplex'] : null;
     $district = isset($row['districtValue']) ? trim((string) $row['districtValue']) : '';
     $priceRaw = isset($row['price']) ? (string) $row['price'] : null;
-    $description = isset($row['description']) ? (string) $row['description'] : null;
     $contactPhone = isset($row['contactPhone']) ? (string) $row['contactPhone'] : null;
-    $updatedAt = isset($row['updatedAt']) ? (string) $row['updatedAt'] : null;
     $photosCount = isset($row['photosCount']) && is_numeric($row['photosCount']) ? (int) $row['photosCount'] : 0;
 
     $photoBundle = site_crm_listing_photo_bundle($row, 2);
@@ -595,118 +593,282 @@ function site_render_catalog_listing_card(array $row): void
     $floorText = site_listing_floor_label($floor, $floorTotal);
     $buildingText = site_listing_building_label($yearBuilt, $jk);
     $addressLine = site_listing_address_line($row);
-    $updatedLabel = site_listing_updated_label($updatedAt);
-    $publicId = site_listing_public_id($id);
     $phoneDisplay = site_mask_phone_display($contactPhone);
     $phoneTel = site_mask_phone_tel($contactPhone);
-    $descHtml = site_listing_description_html($description);
     $areaLand = isset($row['areaLand']) && is_numeric($row['areaLand']) ? (float) $row['areaLand'] : null;
     $tone = site_tone_from_id($id);
     $totalPhotos = max(count($photoUrls), $photosCount, 1);
+
+    $specParts = [];
+    if ($areaTotal !== null && $areaTotal > 0) {
+        $specParts[] = site_fmt_area_short($areaTotal) . ' м²';
+    }
+    $living = site_fmt_area_short($areaLiving);
+    $kitchen = site_fmt_area_short($areaKitchen);
+    if ($living !== null) {
+        $specParts[] = 'жилая ' . $living;
+    }
+    if ($kitchen !== null) {
+        $specParts[] = 'кухня ' . $kitchen;
+    }
+    if ($areaLand !== null && $areaLand > 0) {
+        $land = site_fmt_area_short($areaLand);
+        if ($land !== null) {
+            $specParts[] = $land . ' сот.';
+        }
+    }
+    if ($floorText !== null) {
+        $specParts[] = $floorText;
+    }
+    if ($buildingText !== null) {
+        $specParts[] = $buildingText;
+    }
+    $specLine = implode(' · ', $specParts);
     ?>
     <li class="catalog-list__item">
-        <article class="listing-card" data-listing-card data-listing-id="<?php echo htmlspecialchars($id, ENT_QUOTES, 'UTF-8'); ?>">
-            <header class="listing-card__bar">
-                <span class="listing-card__updated">Дата изменения: <?php echo htmlspecialchars($updatedLabel, ENT_QUOTES, 'UTF-8'); ?></span>
-                <span class="listing-card__id">id <?php echo htmlspecialchars($publicId, ENT_QUOTES, 'UTF-8'); ?></span>
-            </header>
-            <div class="listing-card__main">
-                <div
-                    class="listing-card__media listing-card__media--tone-<?php echo (int) $tone; ?>"
-                    data-listing-gallery
-                    data-photos-b64="<?php echo htmlspecialchars($photosB64, ENT_QUOTES, 'UTF-8'); ?>"
-                    data-photos-raw-b64="<?php echo htmlspecialchars($photosRawB64, ENT_QUOTES, 'UTF-8'); ?>"
-                >
-                    <?php if (count($photoUrls) > 0) {
-                        echo site_crm_photo_img($photoUrls[0], $cardTitle, 'listing-card__photo', 'data-listing-gallery-img');
-                    } ?>
+        <article class="listing-card listing-card--compact" data-listing-card data-listing-id="<?php echo htmlspecialchars($id, ENT_QUOTES, 'UTF-8'); ?>">
+            <div
+                class="listing-card__media listing-card__media--tone-<?php echo (int) $tone; ?>"
+                data-listing-gallery
+                data-photos-b64="<?php echo htmlspecialchars($photosB64, ENT_QUOTES, 'UTF-8'); ?>"
+                data-photos-raw-b64="<?php echo htmlspecialchars($photosRawB64, ENT_QUOTES, 'UTF-8'); ?>"
+            >
+                <?php if (count($photoUrls) > 0) {
+                    echo site_crm_photo_img($photoUrls[0], $cardTitle, 'listing-card__photo', 'data-listing-gallery-img');
+                } ?>
+                <?php if ($totalPhotos > 1) { ?>
                     <span class="listing-card__count" data-listing-gallery-count>1/<?php echo (int) $totalPhotos; ?></span>
-                    <?php if ($totalPhotos > 1) { ?>
-                        <button type="button" class="listing-card__nav listing-card__nav--prev" data-listing-gallery-prev aria-label="Предыдущее фото"></button>
-                        <button type="button" class="listing-card__nav listing-card__nav--next" data-listing-gallery-next aria-label="Следующее фото"></button>
-                    <?php } ?>
-                    <a class="listing-card__media-link" href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>" aria-label="Открыть объект"></a>
-                </div>
-                <div class="listing-card__info">
-                    <h3 class="listing-card__title">
-                        <a href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($cardTitle, ENT_QUOTES, 'UTF-8'); ?></a>
-                    </h3>
+                    <button type="button" class="listing-card__nav listing-card__nav--prev" data-listing-gallery-prev aria-label="Предыдущее фото"></button>
+                    <button type="button" class="listing-card__nav listing-card__nav--next" data-listing-gallery-next aria-label="Следующее фото"></button>
+                <?php } ?>
+                <a class="listing-card__media-link" href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>" aria-label="Открыть объект"></a>
+            </div>
+            <div class="listing-card__body">
+                <h3 class="listing-card__title">
+                    <a href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($cardTitle, ENT_QUOTES, 'UTF-8'); ?></a>
+                </h3>
+                <?php if ($dealLine !== '') { ?>
                     <p class="listing-card__deal"><?php echo htmlspecialchars($dealLine, ENT_QUOTES, 'UTF-8'); ?></p>
-                    <ul class="listing-card__specs">
-                        <?php
-                        $living = site_fmt_area_short($areaLiving);
-                        $kitchen = site_fmt_area_short($areaKitchen);
-                        if ($living !== null) {
-                            echo '<li><span class="listing-card__spec-val">' . htmlspecialchars($living, ENT_QUOTES, 'UTF-8') . '</span> жилая</li>';
-                        }
-                        if ($kitchen !== null) {
-                            echo '<li><span class="listing-card__spec-val">' . htmlspecialchars($kitchen, ENT_QUOTES, 'UTF-8') . '</span> кухня</li>';
-                        }
-                        if ($areaLand !== null && $areaLand > 0) {
-                            $land = site_fmt_area_short($areaLand);
-                            if ($land !== null) {
-                                echo '<li><span class="listing-card__spec-val">' . htmlspecialchars($land, ENT_QUOTES, 'UTF-8') . '</span> сот.</li>';
-                            }
-                        }
-                        ?>
-                    </ul>
-                    <?php if ($floorText !== null || $buildingText !== null) { ?>
-                        <p class="listing-card__building">
-                            <?php if ($floorText !== null) { ?>
-                                <span><?php echo htmlspecialchars($floorText, ENT_QUOTES, 'UTF-8'); ?></span>
-                            <?php } ?>
-                            <?php if ($floorText !== null && $buildingText !== null) { ?>
-                                <span class="listing-card__sep" aria-hidden="true">·</span>
-                            <?php } ?>
-                            <?php if ($buildingText !== null) { ?>
-                                <span><?php echo htmlspecialchars($buildingText, ENT_QUOTES, 'UTF-8'); ?></span>
-                            <?php } ?>
-                        </p>
-                    <?php } ?>
-                    <?php if ($addressLine !== '') { ?>
-                        <p class="listing-card__address"><?php echo htmlspecialchars($addressLine, ENT_QUOTES, 'UTF-8'); ?></p>
-                    <?php } ?>
-                    <?php if ($district !== '') { ?>
-                        <p class="listing-card__district"><?php echo htmlspecialchars($district, ENT_QUOTES, 'UTF-8'); ?></p>
-                    <?php } ?>
-                </div>
-                <div class="listing-card__aside">
-                    <a class="listing-card__shop" href="/catalog/">Магазин квартир</a>
-                    <p class="listing-card__price"><?php echo htmlspecialchars($priceText, ENT_QUOTES, 'UTF-8'); ?></p>
-                    <?php if ($priceM2 !== null) { ?>
-                        <p class="listing-card__price-m2"><?php echo htmlspecialchars($priceM2, ENT_QUOTES, 'UTF-8'); ?></p>
-                    <?php } ?>
-                    <?php if ($descHtml !== '') { ?>
-                        <div class="listing-card__desc-wrap">
-                            <div class="listing-card__desc"><?php echo $descHtml; ?></div>
-                        </div>
-                    <?php } ?>
+                <?php } ?>
+                <?php if ($specLine !== '') { ?>
+                    <p class="listing-card__spec-line"><?php echo htmlspecialchars($specLine, ENT_QUOTES, 'UTF-8'); ?></p>
+                <?php } ?>
+                <?php if ($addressLine !== '') { ?>
+                    <p class="listing-card__address"><?php echo htmlspecialchars($addressLine, ENT_QUOTES, 'UTF-8'); ?></p>
+                <?php } ?>
+                <?php if ($district !== '') { ?>
+                    <p class="listing-card__district"><?php echo htmlspecialchars($district, ENT_QUOTES, 'UTF-8'); ?></p>
+                <?php } ?>
+            </div>
+            <div class="listing-card__side">
+                <p class="listing-card__price"><?php echo htmlspecialchars($priceText, ENT_QUOTES, 'UTF-8'); ?></p>
+                <?php if ($priceM2 !== null) { ?>
+                    <p class="listing-card__price-m2"><?php echo htmlspecialchars($priceM2, ENT_QUOTES, 'UTF-8'); ?></p>
+                <?php } ?>
+                <div class="listing-card__actions">
+                    <a class="listing-card__more" href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>">Подробнее</a>
+                    <a class="listing-card__phone" href="tel:<?php echo htmlspecialchars(preg_replace('/\s+/', '', $phoneTel) ?? $phoneTel, ENT_QUOTES, 'UTF-8'); ?>" title="<?php echo htmlspecialchars($phoneDisplay, ENT_QUOTES, 'UTF-8'); ?>">
+                        <span class="listing-card__phone-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden"><?php echo htmlspecialchars($phoneDisplay, ENT_QUOTES, 'UTF-8'); ?></span>
+                    </a>
+                    <button type="button" class="listing-card__fav" data-listing-fav aria-pressed="false" aria-label="В избранное">
+                        <svg class="listing-card__fav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="none" stroke="currentColor" stroke-width="1.8" d="M12 21s-7-4.6-9.5-9C.5 7.5 3.4 4.5 7 4.5c2 0 3.7 1.1 5 2.7 1.3-1.6 3-2.7 5-2.7 3.6 0 6.5 3 4.5 7.5C19 16.4 12 21 12 21Z"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
-            <footer class="listing-card__footer">
-                <a class="listing-card__phone" href="tel:<?php echo htmlspecialchars(preg_replace('/\s+/', '', $phoneTel) ?? $phoneTel, ENT_QUOTES, 'UTF-8'); ?>">
-                    <span class="listing-card__phone-icon" aria-hidden="true"></span>
-                    <?php echo htmlspecialchars($phoneDisplay, ENT_QUOTES, 'UTF-8'); ?>
-                </a>
-                <a class="listing-card__more" href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>">подробнее →</a>
-                <button type="button" class="listing-card__fav" data-listing-fav aria-pressed="false">
-                    <span class="listing-card__fav-label">добавить в избранное</span>
-                    <svg class="listing-card__fav-icon" viewBox="0 0 24 24" aria-hidden="true">
-                        <path fill="none" stroke="currentColor" stroke-width="1.8" d="M12 21s-7-4.6-9.5-9C.5 7.5 3.4 4.5 7 4.5c2 0 3.7 1.1 5 2.7 1.3-1.6 3-2.7 5-2.7 3.6 0 6.5 3 4.5 7.5C19 16.4 12 21 12 21Z"/>
-                    </svg>
-                </button>
-            </footer>
         </article>
     </li>
     <?php
 }
 
-function site_crm_fetch_listings(int $limit = 24, int $offset = 0): array
+/**
+ * @return array<string, string>
+ */
+function site_catalog_filters_from_request(): array
 {
-    $crm = site_http_get_json_cached(site_crm_listings_url() . '?' . http_build_query([
-        'limit' => $limit,
-        'offset' => $offset,
-    ]), 10, 300);
+    $str = static function (string $key): string {
+        $v = $_GET[$key] ?? '';
+        return is_string($v) ? trim($v) : '';
+    };
+
+    return [
+        'q' => $str('q'),
+        'region' => $str('region'),
+        'city' => $str('city'),
+        'objectType' => $str('type') !== '' ? $str('type') : $str('objectType'),
+        'rooms' => $str('rooms'),
+        'price' => $str('price'),
+        'area_min' => $str('area_min'),
+        'area_max' => $str('area_max'),
+        'price_min' => $str('price_min'),
+        'price_max' => $str('price_max'),
+    ];
+}
+
+function site_catalog_region_to_city(string $region): ?string
+{
+    $map = [
+        'irkutsk' => 'Иркутск',
+        'angarsk' => 'Ангарск',
+        'bratsk' => 'Братск',
+        'shelekhov' => 'Шелехов',
+        'moscow' => 'Москва',
+        'mo' => 'Московск',
+    ];
+
+    return $map[$region] ?? null;
+}
+
+function site_listing_price_number(?string $raw): ?float
+{
+    if ($raw === null || trim($raw) === '') {
+        return null;
+    }
+    $n = (float) preg_replace('/[^\d.]/', '', str_replace(',', '.', $raw));
+
+    return $n > 0 ? $n : null;
+}
+
+/**
+ * @param array<string, string> $filters
+ */
+function site_catalog_filters_has_local(array $filters): bool
+{
+    foreach (['rooms', 'price', 'area_min', 'area_max', 'price_min', 'price_max'] as $key) {
+        if (($filters[$key] ?? '') !== '') {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * @param array<string, mixed> $row
+ * @param array<string, string> $filters
+ */
+function site_catalog_row_matches_filters(array $row, array $filters): bool
+{
+    $roomsFilter = $filters['rooms'] ?? '';
+    if ($roomsFilter !== '') {
+        $rooms = isset($row['rooms']) && is_numeric($row['rooms']) ? (int) $row['rooms'] : null;
+        if ($roomsFilter === 'studio') {
+            if ($rooms !== null && $rooms > 0) {
+                return false;
+            }
+        } elseif ($roomsFilter === '4plus') {
+            if ($rooms === null || $rooms < 4) {
+                return false;
+            }
+        } else {
+            $want = (int) $roomsFilter;
+            if ($rooms === null || $rooms !== $want) {
+                return false;
+            }
+        }
+    }
+
+    $area = isset($row['areaTotal']) && is_numeric($row['areaTotal']) ? (float) $row['areaTotal'] : null;
+    $areaMin = ($filters['area_min'] ?? '') !== '' ? (float) $filters['area_min'] : null;
+    $areaMax = ($filters['area_max'] ?? '') !== '' ? (float) $filters['area_max'] : null;
+    if ($areaMin !== null && ($area === null || $area < $areaMin)) {
+        return false;
+    }
+    if ($areaMax !== null && ($area === null || $area > $areaMax)) {
+        return false;
+    }
+
+    $price = site_listing_price_number(isset($row['price']) ? (string) $row['price'] : null);
+    $priceMin = ($filters['price_min'] ?? '') !== '' ? (float) $filters['price_min'] : null;
+    $priceMax = ($filters['price_max'] ?? '') !== '' ? (float) $filters['price_max'] : null;
+    if ($priceMin !== null && ($price === null || $price < $priceMin)) {
+        return false;
+    }
+    if ($priceMax !== null && ($price === null || $price > $priceMax)) {
+        return false;
+    }
+
+    $pricePreset = $filters['price'] ?? '';
+    if ($pricePreset !== '' && $price !== null) {
+        $ok = match ($pricePreset) {
+            '0-3' => $price <= 3_000_000,
+            '3-5' => $price > 3_000_000 && $price <= 5_000_000,
+            '5-10' => $price > 5_000_000 && $price <= 10_000_000,
+            '10-20' => $price > 10_000_000 && $price <= 20_000_000,
+            '20+' => $price >= 20_000_000,
+            default => true,
+        };
+        if (!$ok) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * @param array<string, string> $filters
+ * @return array{items: list<array<string, mixed>>, total: ?int, error: ?string, filtered: bool}
+ */
+function site_crm_fetch_listings_catalog(array $filters, int $displayLimit = 48): array
+{
+    $apiQuery = [];
+    if (($filters['q'] ?? '') !== '') {
+        $apiQuery['q'] = $filters['q'];
+    }
+    if (($filters['objectType'] ?? '') !== '') {
+        $apiQuery['objectType'] = $filters['objectType'];
+    }
+    $city = ($filters['city'] ?? '') !== ''
+        ? $filters['city']
+        : (site_catalog_region_to_city($filters['region'] ?? '') ?? '');
+    if ($city !== '') {
+        $apiQuery['city'] = $city;
+    }
+
+    $needsLocal = site_catalog_filters_has_local($filters);
+    $fetchLimit = $needsLocal ? 100 : max($displayLimit, 24);
+
+    $crm = site_crm_fetch_listings($fetchLimit, 0, $apiQuery);
+    if ($crm['error'] !== null) {
+        return ['items' => [], 'total' => null, 'error' => $crm['error'], 'filtered' => false];
+    }
+
+    $items = $crm['items'];
+    if ($needsLocal) {
+        $filtered = [];
+        foreach ($items as $row) {
+            if (is_array($row) && site_catalog_row_matches_filters($row, $filters)) {
+                $filtered[] = $row;
+            }
+        }
+        $items = array_slice($filtered, 0, $displayLimit);
+        $total = count($filtered);
+
+        return ['items' => $items, 'total' => $total, 'error' => null, 'filtered' => true];
+    }
+
+    return [
+        'items' => array_slice($items, 0, $displayLimit),
+        'total' => $crm['total'],
+        'error' => null,
+        'filtered' => count($apiQuery) > 0,
+    ];
+}
+
+/**
+ * @param array<string, string> $apiQuery
+ * @return array{items: list<array<string, mixed>>, total: ?int, error: ?string}
+ */
+function site_crm_fetch_listings(int $limit = 24, int $offset = 0, array $apiQuery = []): array
+{
+    $params = array_merge(
+        ['limit' => $limit, 'offset' => $offset],
+        array_filter($apiQuery, static fn ($v) => $v !== null && $v !== ''),
+    );
+    $crm = site_http_get_json_cached(site_crm_listings_url() . '?' . http_build_query($params), 10, 300);
 
     $items = (isset($crm['items']) && is_array($crm['items'])) ? $crm['items'] : [];
     $total = (isset($crm['total']) && is_numeric($crm['total'])) ? (int) $crm['total'] : null;
