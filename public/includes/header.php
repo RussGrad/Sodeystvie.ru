@@ -15,8 +15,6 @@ site_send_security_headers();
 $nav = site_nav_items();
 $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());
 $telegramUrl = site_telegram_url();
-$headerTagline = site_header_tagline();
-
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -59,7 +57,6 @@ $headerTagline = site_header_tagline();
             <a class="site-header__logo-link" href="/" aria-label="Содействие — на главную">
                 <?php require __DIR__ . '/logo-markup.php'; ?>
             </a>
-            <p class="site-header__tagline"><?php echo htmlspecialchars($headerTagline, ENT_QUOTES, 'UTF-8'); ?></p>
         </div>
         <nav class="site-header__nav" id="site-header-menu" aria-label="Основное меню">
             <ul class="site-header__menu">

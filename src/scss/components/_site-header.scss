@@ -29,9 +29,6 @@
     }
   }
 
-  .site-header__tagline {
-    font-size: 0.625rem;
-  }
 }
 
 // Внутренняя полоса: логотип + меню + блок действий + бургер
@@ -62,11 +59,7 @@
   z-index: 103;
   flex-shrink: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.2rem;
-  text-align: center;
 
   @media (min-width: $breakpoint-nav) {
     align-self: center;
@@ -78,22 +71,6 @@
   display: block;
   line-height: 0;
   text-decoration: none;
-}
-
-.site-header__tagline {
-  margin: 0;
-  padding: 0;
-  font-size: 0.6875rem; // 11px
-  line-height: 1.2;
-  color: var(--cta-bg);
-  letter-spacing: 0.03em;
-  white-space: nowrap;
-  text-align: center;
-  width: 100%;
-
-  @media (max-width: ($breakpoint-nav - 0.02px)) {
-    display: none;
-  }
 }
 
 // Встроенный SVG: монограмма и подпись — градиенты; крупные буквы и перемычка — класс .st26 (см. logo-markup.php)
