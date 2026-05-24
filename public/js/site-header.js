@@ -25,7 +25,7 @@
         for (var i = 0; i < dropdownItems.length; i++) {
             var li = dropdownItems[i];
             li.classList.remove('site-header__menu-item--open');
-            var btn = li.querySelector('.site-header__dropdown-toggle');
+            var btn = li.querySelector('.site-header__dropdown-trigger');
             if (btn) {
                 btn.setAttribute('aria-expanded', 'false');
             }
@@ -33,14 +33,14 @@
     }
 
     function toggleDropdown(li) {
-        var btn = li.querySelector('.site-header__dropdown-toggle');
+        var btn = li.querySelector('.site-header__dropdown-trigger');
         var willOpen = !li.classList.contains('site-header__menu-item--open');
 
         for (var i = 0; i < dropdownItems.length; i++) {
             var other = dropdownItems[i];
             if (other !== li) {
                 other.classList.remove('site-header__menu-item--open');
-                var ob = other.querySelector('.site-header__dropdown-toggle');
+                var ob = other.querySelector('.site-header__dropdown-trigger');
                 if (ob) {
                     ob.setAttribute('aria-expanded', 'false');
                 }
@@ -68,10 +68,10 @@
             closeAllDropdowns();
         }
 
-        var toggle = e.target.closest('.site-header__dropdown-toggle');
-        if (toggle && header.contains(toggle)) {
+        var trigger = e.target.closest('.site-header__dropdown-trigger');
+        if (trigger && header.contains(trigger)) {
             e.preventDefault();
-            var li = toggle.closest('[data-nav-dropdown]');
+            var li = trigger.closest('[data-nav-dropdown]');
             if (li) {
                 toggleDropdown(li);
             }
@@ -80,12 +80,6 @@
 
         var topLink = e.target.closest('.site-header__menu-link');
         if (topLink && nav.contains(topLink) && !topLink.closest('.site-header__submenu')) {
-            var dropdownLi = topLink.closest('[data-nav-dropdown]');
-            if (mq.matches && dropdownLi && !dropdownLi.classList.contains('site-header__menu-item--open')) {
-                e.preventDefault();
-                toggleDropdown(dropdownLi);
-                return;
-            }
             closeAllDropdowns();
         }
 
