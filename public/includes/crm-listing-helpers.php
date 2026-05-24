@@ -202,9 +202,25 @@ function site_fmt_area_short(?float $value): ?string
     return rtrim(rtrim(number_format($value, 2, '.', ''), '0'), '.');
 }
 
-function site_listing_card_title(?int $rooms, ?float $areaTotal, string $fallback): string
-{
+function site_listing_card_title(
+    ?string $objectType,
+    ?int $rooms,
+    ?float $areaTotal,
+    string $fallback,
+): string {
+    $t = trim((string) $objectType);
     $area = site_fmt_area_short($areaTotal);
+    $areaSuffix = $area !== null ? ' ' . $area . ' м²' : '';
+
+    if ($t === 'house') {
+        return 'Дом' . $areaSuffix;
+    }
+    if ($t === 'plot' || $t === 'land') {
+        return 'Участок' . $areaSuffix;
+    }
+    if ($t === 'commercial') {
+        return 'Коммерческая недвижимость' . $areaSuffix;
+    }
     if ($rooms !== null && $rooms > 0 && $area !== null) {
         return $rooms . '-комнатная квартира ' . $area . ' м²';
     }
@@ -213,6 +229,25 @@ function site_listing_card_title(?int $rooms, ?float $areaTotal, string $fallbac
     }
 
     return $fallback !== '' ? $fallback : 'Объект';
+}
+
+/**
+ * @return non-empty-string|null
+ */
+function site_crm_fetch_listing_description(string $id): ?string
+{
+    $id = trim($id);
+    if ($id === '' || !site_validate_crm_object_id($id)) {
+        return null;
+    }
+    $url = site_crm_listings_url($id) . '/description';
+    $data = site_http_get_json($url, 20);
+    if (!is_array($data) || isset($data['_error'])) {
+        return null;
+    }
+    $desc = isset($data['description']) ? trim((string) $data['description']) : '';
+
+    return $desc !== '' ? $desc : null;
 }
 
 function site_deal_line_public_label(?string $raw): string
@@ -351,14 +386,14 @@ function site_crm_listing_enrich_row(array $row): array
     $needPhotos = $photosCount > 0 && !$hasPhotosList;
     $needDesc = trim((string) ($row['description'] ?? '')) === '';
 
-    if (!$needPhotos && !$needDesc) {
-        return $row;
+    if ($needDesc) {
+        $descOnly = site_crm_fetch_listing_description($id);
+        if ($descOnly !== null) {
+            $row['description'] = $descOnly;
+            $needDesc = false;
+        }
     }
 
-    // Уже полная карточка (GET /:id): повторный запрос не добавит description на старом API.
-    if ($needDesc && $hasPhotosList && count($row['photos']) >= min($photosCount, 2)) {
-        $needDesc = false;
-    }
     if (!$needPhotos && !$needDesc) {
         return $row;
     }
@@ -434,6 +469,22 @@ function site_excerpt_text(?string $text, int $maxLen = 280): string
     return rtrim(mb_substr($s, 0, $maxLen - 1, 'UTF-8')) . '…';
 }
 
+function site_listing_description_html(?string $text, int $maxLen = 600): string
+{
+    $s = trim((string) $text);
+    if ($s === '') {
+        return '';
+    }
+    $s = preg_replace("/\r\n?/", "\n", $s) ?? $s;
+    $s = preg_replace("/[ \t]+/u", ' ', $s) ?? $s;
+    $s = preg_replace("/\n{3,}/", "\n\n", $s) ?? $s;
+    if (mb_strlen($s, 'UTF-8') > $maxLen) {
+        $s = rtrim(mb_substr($s, 0, $maxLen - 1, 'UTF-8')) . '…';
+    }
+
+    return nl2br(htmlspecialchars($s, ENT_QUOTES, 'UTF-8'), false);
+}
+
 /**
  * @param array<string, mixed> $row
  */
@@ -448,7 +499,8 @@ function site_render_catalog_listing_card(array $row): void
     $titleRaw = isset($row['title']) ? (string) $row['title'] : 'Объект';
     $rooms = isset($row['rooms']) && is_numeric($row['rooms']) ? (int) $row['rooms'] : null;
     $areaTotal = isset($row['areaTotal']) && is_numeric($row['areaTotal']) ? (float) $row['areaTotal'] : null;
-    $cardTitle = site_listing_card_title($rooms, $areaTotal, $titleRaw);
+    $objectType = isset($row['objectTypeValue']) ? (string) $row['objectTypeValue'] : null;
+    $cardTitle = site_listing_card_title($objectType, $rooms, $areaTotal, $titleRaw);
     $dealLine = site_deal_line_public_label(isset($row['dealLineValue']) ? (string) $row['dealLineValue'] : null);
     $areaLiving = isset($row['areaLiving']) && is_numeric($row['areaLiving']) ? (float) $row['areaLiving'] : null;
     $areaKitchen = isset($row['areaKitchen']) && is_numeric($row['areaKitchen']) ? (float) $row['areaKitchen'] : null;
@@ -477,7 +529,8 @@ function site_render_catalog_listing_card(array $row): void
     $publicId = site_listing_public_id($id);
     $phoneDisplay = site_mask_phone_display($contactPhone);
     $phoneTel = site_mask_phone_tel($contactPhone);
-    $excerpt = site_excerpt_text($description);
+    $descHtml = site_listing_description_html($description);
+    $areaLand = isset($row['areaLand']) && is_numeric($row['areaLand']) ? (float) $row['areaLand'] : null;
     $tone = site_tone_from_id($id);
     $totalPhotos = max(count($photoUrls), $photosCount, 1);
     ?>
@@ -518,6 +571,12 @@ function site_render_catalog_listing_card(array $row): void
                         if ($kitchen !== null) {
                             echo '<li><span class="listing-card__spec-val">' . htmlspecialchars($kitchen, ENT_QUOTES, 'UTF-8') . '</span> кухня</li>';
                         }
+                        if ($areaLand !== null && $areaLand > 0) {
+                            $land = site_fmt_area_short($areaLand);
+                            if ($land !== null) {
+                                echo '<li><span class="listing-card__spec-val">' . htmlspecialchars($land, ENT_QUOTES, 'UTF-8') . '</span> сот.</li>';
+                            }
+                        }
                         ?>
                     </ul>
                     <?php if ($floorText !== null || $buildingText !== null) { ?>
@@ -537,10 +596,6 @@ function site_render_catalog_listing_card(array $row): void
                     <?php if ($district !== '') { ?>
                         <p class="listing-card__district"><?php echo htmlspecialchars($district, ENT_QUOTES, 'UTF-8'); ?></p>
                     <?php } ?>
-                    <a class="listing-card__phone" href="tel:<?php echo htmlspecialchars(preg_replace('/\s+/', '', $phoneTel) ?? $phoneTel, ENT_QUOTES, 'UTF-8'); ?>">
-                        <span class="listing-card__phone-icon" aria-hidden="true"></span>
-                        <?php echo htmlspecialchars($phoneDisplay, ENT_QUOTES, 'UTF-8'); ?>
-                    </a>
                 </div>
                 <div class="listing-card__aside">
                     <a class="listing-card__shop" href="/catalog/">Магазин квартир</a>
@@ -548,12 +603,18 @@ function site_render_catalog_listing_card(array $row): void
                     <?php if ($priceM2 !== null) { ?>
                         <p class="listing-card__price-m2"><?php echo htmlspecialchars($priceM2, ENT_QUOTES, 'UTF-8'); ?></p>
                     <?php } ?>
-                    <?php if ($excerpt !== '') { ?>
-                        <p class="listing-card__desc"><?php echo htmlspecialchars($excerpt, ENT_QUOTES, 'UTF-8'); ?></p>
+                    <?php if ($descHtml !== '') { ?>
+                        <div class="listing-card__desc-wrap">
+                            <div class="listing-card__desc"><?php echo $descHtml; ?></div>
+                        </div>
                     <?php } ?>
                 </div>
             </div>
             <footer class="listing-card__footer">
+                <a class="listing-card__phone" href="tel:<?php echo htmlspecialchars(preg_replace('/\s+/', '', $phoneTel) ?? $phoneTel, ENT_QUOTES, 'UTF-8'); ?>">
+                    <span class="listing-card__phone-icon" aria-hidden="true"></span>
+                    <?php echo htmlspecialchars($phoneDisplay, ENT_QUOTES, 'UTF-8'); ?>
+                </a>
                 <a class="listing-card__more" href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>">подробнее →</a>
                 <button type="button" class="listing-card__fav" data-listing-fav aria-pressed="false">
                     <span class="listing-card__fav-label">добавить в избранное</span>

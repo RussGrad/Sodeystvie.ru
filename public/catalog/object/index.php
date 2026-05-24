@@ -78,6 +78,12 @@ $floorTotal = !$error && isset($obj['floorTotal']) && is_numeric($obj['floorTota
 $priceRaw = !$error ? v_str($obj, 'price') : null;
 $objectTypeValue = !$error ? v_str($obj, 'objectTypeValue') : null;
 $description = !$error ? (v_str($obj, 'description') ?? '') : '';
+if (!$error && trim($description) === '' && is_array($obj) && isset($obj['id'])) {
+    $fromApi = site_crm_fetch_listing_description((string) $obj['id']);
+    if ($fromApi !== null) {
+        $description = $fromApi;
+    }
+}
 
 $photos = [];
 if (!$error && is_array($obj)) {
