@@ -321,12 +321,6 @@
 .site-header__submenu-item {
   margin: 0;
   list-style: none;
-
-  // Старый header.php дублировал родительский пункт в подменю — скрыть до выката includes/header.php
-  &:has(> .site-header__submenu-link[href="/about/"]),
-  &:has(> .site-header__submenu-link[href="/contacts/"]) {
-    display: none;
-  }
 }
 
 .site-header__submenu-link {
@@ -386,22 +380,10 @@
   justify-content: center;
   gap: 0.25rem;
   margin: 0;
-  border: none;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
+  text-decoration: none;
   line-height: 1.3;
   vertical-align: middle;
   background: transparent;
-
-  .site-header__dropdown-label,
-  .site-header__dropdown-icon {
-    pointer-events: none;
-  }
-
-  .site-header__dropdown-label {
-    flex: 0 1 auto;
-  }
 
   .site-header__dropdown-icon {
     display: block;

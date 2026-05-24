@@ -70,10 +70,14 @@
 
         var trigger = e.target.closest('.site-header__dropdown-trigger');
         if (trigger && header.contains(trigger)) {
-            e.preventDefault();
-            var li = trigger.closest('[data-nav-dropdown]');
-            if (li) {
-                toggleDropdown(li);
+            var dropdownLi = trigger.closest('[data-nav-dropdown]');
+            if (mq.matches && dropdownLi && !dropdownLi.classList.contains('site-header__menu-item--open')) {
+                e.preventDefault();
+                toggleDropdown(dropdownLi);
+                return;
+            }
+            if (!mq.matches) {
+                closeAllDropdowns();
             }
             return;
         }

@@ -69,18 +69,15 @@ $telegramUrl = site_telegram_url();
                         ?>
                         <li class="site-header__menu-item site-header__menu-item--dropdown" data-nav-dropdown>
                             <div class="site-header__dropdown">
-                                <button
-                                    type="button"
+                                <a
                                     class="site-header__menu-link site-header__dropdown-trigger<?php echo $parentCurrent ? ' site-header__menu-link--current' : ''; ?>"
+                                    href="<?php echo htmlspecialchars($item['href'], ENT_QUOTES, 'UTF-8'); ?>"
                                     aria-expanded="false"
                                     aria-controls="<?php echo htmlspecialchars($dropdownId, ENT_QUOTES, 'UTF-8'); ?>"
                                     aria-haspopup="true"
-                                >
-                                    <span class="site-header__dropdown-label"><?php echo htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8'); ?></span>
-                                    <svg class="site-header__dropdown-icon" width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                ><?php echo htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8'); ?><svg class="site-header__dropdown-icon" width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                         <path d="M2.75 4.5 L6 8.25 L9.25 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
+                                    </svg></a>
                                 <ul class="site-header__submenu" id="<?php echo htmlspecialchars($dropdownId, ENT_QUOTES, 'UTF-8'); ?>" role="list">
                                     <?php foreach ($item['children'] as $cslug => $child) { ?>
                                         <li class="site-header__submenu-item">
