@@ -528,12 +528,12 @@
   }
 }
 
-:root[data-theme="dark"] .site-header__messenger--wa {
-  color: #25d366;
-}
-
 :root[data-theme="dark"] .site-header__messenger--tg {
   color: #2aabee;
+}
+
+:root[data-theme="light"] .site-header__messenger--tg {
+  color: #229ed9;
 }
 
 .site-header__fav {

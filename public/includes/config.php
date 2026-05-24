@@ -40,11 +40,21 @@ function site_whatsapp_url(): ?string
     return null;
 }
 
+/**
+ * Telegram: SITE_TELEGRAM_URL в .env или t.me/+номер по SITE_PHONE_TEL.
+ */
 function site_telegram_url(): ?string
 {
-    $u = trim(site_env('SITE_TELEGRAM_URL', ''));
+    $fromEnv = trim(site_env('SITE_TELEGRAM_URL', ''));
+    if ($fromEnv !== '') {
+        return $fromEnv;
+    }
+    $digits = preg_replace('/\D+/', '', SITE_PHONE_TEL) ?? '';
+    if (strlen($digits) >= 11) {
+        return 'https://t.me/+' . ltrim($digits, '+');
+    }
 
-    return $u !== '' ? $u : null;
+    return null;
 }
 
 /** Реквизиты — уточняются у заказчика */
