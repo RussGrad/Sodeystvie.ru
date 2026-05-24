@@ -31,6 +31,10 @@ declare(strict_types=1);
             >&times;</button>
         </div>
         <form class="modal-lead__form" id="lead-form" novalidate>
+            <div class="modal-lead__hp visually-hidden" aria-hidden="true">
+                <label for="lead-company">Компания</label>
+                <input type="text" id="lead-company" name="company" tabindex="-1" autocomplete="off">
+            </div>
             <div class="modal-lead__field">
                 <label class="modal-lead__label" for="lead-name">Имя</label>
                 <input
@@ -51,12 +55,17 @@ declare(strict_types=1);
                     name="phone"
                     type="tel"
                     autocomplete="tel"
-                    inputmode="tel"
+                    inputmode="numeric"
+                    placeholder="+7 (999) 999-99-99"
                     required
+                    maxlength="18"
+                    aria-describedby="lead-phone-hint"
                 >
+                <span class="modal-lead__hint visually-hidden" id="lead-phone-hint">Формат: +7 и 10 цифр номера</span>
             </div>
+            <p class="modal-lead__error" id="lead-form-error" hidden role="alert"></p>
             <p class="modal-lead__success" id="lead-form-success" hidden role="status" tabindex="-1">Спасибо! Мы свяжемся с вами.</p>
-            <button type="submit" class="modal-lead__submit">Отправить</button>
+            <button type="submit" class="modal-lead__submit" id="lead-form-submit">Отправить</button>
         </form>
     </div>
 </div>

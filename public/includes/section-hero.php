@@ -125,11 +125,12 @@ $heroSliderEnabled = $heroSlideCount > 1;
                             </label>
                         </div>
                         <div class="hero__filter">
-                            <span class="hero__filter-name visually-hidden" id="hero-lbl-region">Ангарск</span>
+                            <span class="hero__filter-name visually-hidden" id="hero-lbl-region">Регион</span>
                             <label class="hero__filter-field">
                                 <span class="hero__filter-hint">Выберите регион</span>
                                 <select class="hero__select" name="region" aria-labelledby="hero-lbl-region">
                                     <option value="">Регион</option>
+                                    <option value="irkutsk" selected>Иркутск</option>
                                     <option value="angarsk">Ангарск</option>
                                     <option value="moscow">Москва</option>
                                     <option value="mo">Московская область</option>

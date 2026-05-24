@@ -1,0 +1,50 @@
+[
+  {
+    "id": "tbank",
+    "name": "Т-Банк",
+    "abbr": "Т",
+    "logo": "tbank.png",
+    "rateDelta": 0,
+    "enabled": true
+  },
+  {
+    "id": "metallinvest",
+    "name": "Металлинвестбанк",
+    "abbr": "М",
+    "logo": "metallinvest.png",
+    "rateDelta": 0.15,
+    "enabled": true
+  },
+  {
+    "id": "domrf",
+    "name": "ДОМ.РФ",
+    "abbr": "Д",
+    "logo": "domrf.png",
+    "rateDelta": 0.05,
+    "enabled": true
+  },
+  {
+    "id": "mkb",
+    "name": "Московский кредитный банк",
+    "abbr": "МКБ",
+    "logo": "mkb.png",
+    "rateDelta": 0.2,
+    "enabled": true
+  },
+  {
+    "id": "uralsib",
+    "name": "Уралсиб",
+    "abbr": "У",
+    "logo": "uralsib.png",
+    "rateDelta": 0.25,
+    "enabled": true
+  },
+  {
+    "id": "sber",
+    "name": "Сбер",
+    "abbr": "С",
+    "logo": "sber.png",
+    "rateDelta": 0.1,
+    "enabled": true
+  }
+]

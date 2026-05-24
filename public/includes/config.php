@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/env-bootstrap.php';
+require_once __DIR__ . '/security.php';
 
 /** Телефон (подставьте реальный номер заказчика) */
 const SITE_PHONE_TEL = '+7(3952) 60-38-08';
@@ -23,11 +24,12 @@ const SITE_LEGAL_OGRN = '0000000000000';
  */
 function site_env(string $key, ?string $default = null): string
 {
-    $v = getenv($key);
-    if ($v === false || $v === null || $v === '') {
+    $v = site_read_env_var($key);
+    if ($v === '') {
         return $default ?? '';
     }
-    return (string) $v;
+
+    return $v;
 }
 
 function site_is_production_vitrina_host(): bool
@@ -99,10 +101,32 @@ function site_crm_listings_path(): string
     return $path;
 }
 
+/** Путь приёма заявок с витрины на Nest (POST, ключ PUBLIC_SITE_API_KEY). */
+function site_crm_leads_path(): string
+{
+    $path = site_env('CRM_LEADS_PATH', '/api/public/leads');
+    $path = '/' . trim($path, '/');
+
+    return $path;
+}
+
+function site_crm_leads_url(): string
+{
+    return site_crm_api_base_resolved() . site_crm_leads_path();
+}
+
+function site_public_site_api_key(): string
+{
+    return site_env('PUBLIC_SITE_API_KEY', '');
+}
+
 function site_crm_listings_url(string $id = ''): string
 {
     $base = site_crm_api_base_resolved() . site_crm_listings_path();
     if ($id === '') {
+        return $base;
+    }
+    if (!site_validate_crm_object_id($id)) {
         return $base;
     }
 
@@ -308,6 +332,9 @@ function site_http_get_json(string $url, int $timeoutSeconds = 3): array
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_MAXREDIRS => 3,
+                CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+                CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
                 CURLOPT_CONNECTTIMEOUT => $timeoutSeconds,
                 CURLOPT_TIMEOUT => $timeoutSeconds,
                 CURLOPT_HTTPHEADER => [
@@ -356,6 +383,80 @@ function site_http_get_json(string $url, int $timeoutSeconds = 3): array
 }
 
 /**
+ * POST JSON на CRM (заявки с витрины).
+ *
+ * @param array<string, mixed> $payload
+ * @return array<string, mixed>
+ */
+function site_http_post_json(string $url, array $payload, int $timeoutSeconds = 8): array
+{
+    $body = json_encode($payload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+    $headers = [
+        'Content-Type: application/json',
+        'Accept: application/json',
+    ];
+    $apiKey = site_public_site_api_key();
+    if ($apiKey !== '') {
+        $headers[] = 'X-Api-Key: ' . $apiKey;
+    }
+
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        if ($ch !== false) {
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_MAXREDIRS => 3,
+                CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+                CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => $body,
+                CURLOPT_CONNECTTIMEOUT => $timeoutSeconds,
+                CURLOPT_TIMEOUT => $timeoutSeconds,
+                CURLOPT_HTTPHEADER => $headers,
+            ]);
+            $raw = curl_exec($ch);
+            $err = curl_error($ch);
+            $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            if ($raw === false) {
+                return ['_error' => 'CRM API недоступен: ' . ($err ?: 'curl error')];
+            }
+            if ($code >= 400) {
+                $msg = 'CRM API ответил ошибкой HTTP ' . $code;
+                if (is_string($raw) && $raw !== '') {
+                    try {
+                        $parsed = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+                        if (is_array($parsed) && isset($parsed['message'])) {
+                            $m = $parsed['message'];
+                            if (is_string($m)) {
+                                $msg = $m;
+                            } elseif (is_array($m)) {
+                                $msg = implode(' ', array_map('strval', $m));
+                            }
+                        }
+                    } catch (Throwable $e) {
+                        /* ignore */
+                    }
+                }
+
+                return ['_error' => $msg, '_http' => $code];
+            }
+
+            try {
+                $decoded = json_decode((string) $raw, true, 512, JSON_THROW_ON_ERROR);
+            } catch (Throwable $e) {
+                return ['_error' => 'CRM API вернул не-JSON'];
+            }
+
+            return is_array($decoded) ? $decoded : ['_error' => 'CRM API вернул неожиданный формат'];
+        }
+    }
+
+    return ['_error' => 'На сервере не доступен curl для отправки заявки'];
+}
+
+/**
  * Пункты основного меню (шапка и подвал).
  * У пункта может быть вложенный массив `children` — выпадающее подменю (например «О компании» → «Отзывы»).
  *
@@ -367,24 +468,7 @@ function site_nav_items(): array
         'home' => ['href' => '/', 'label' => 'Главная'],
         'catalog' => ['href' => '/catalog/', 'label' => 'Каталог'],
         'services' => ['href' => '/services/', 'label' => 'Услуги'],
-        'mortgage' => [
-            'href' => '/mortgage/',
-            'label' => 'Ипотека',
-            'children' => [
-                'mortgage_2026' => ['href' => '/mortgage/#2026', 'label' => 'Ипотека 2026'],
-                'mortgage_family' => ['href' => '/mortgage/#family', 'label' => '🔥 Семейная ипотека'],
-                'mortgage_rural' => ['href' => '/mortgage/#rural', 'label' => 'Сельская ипотека'],
-                'mortgage_resale' => ['href' => '/mortgage/#resale', 'label' => 'Ипотека на вторичное жилье'],
-                'mortgage_newbuild' => ['href' => '/mortgage/#newbuild', 'label' => 'Ипотека на новостройки'],
-                'mortgage_house' => ['href' => '/mortgage/#house', 'label' => 'Ипотека на дом'],
-                'mortgage_build' => ['href' => '/mortgage/#build', 'label' => 'Ипотека на строительство'],
-                'mortgage_military' => ['href' => '/mortgage/#military', 'label' => 'Военная ипотека'],
-                'mortgage_it' => ['href' => '/mortgage/#it', 'label' => 'IT-ипотека'],
-                'mortgage_maternity' => ['href' => '/mortgage/#maternity', 'label' => 'Материнский капитал'],
-                'mortgage_calc' => ['href' => '/mortgage/#calculator', 'label' => 'Калькулятор'],
-                'mortgage_apply' => ['href' => '/mortgage/#apply', 'label' => 'Заявка'],
-            ],
-        ],
+        'mortgage' => ['href' => '/mortgage/', 'label' => 'ИПОТЕКА'],
         'about' => [
             'href' => '/about/',
             'label' => 'О компании',

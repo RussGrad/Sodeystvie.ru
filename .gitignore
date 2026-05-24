@@ -1,16 +1,21 @@
+# Зависимости и сборка
 node_modules/
 build/
+releases/
 
+# Секреты (никогда в git и в zip на хостинг)
 .env
 .env.*
 !.env.example
+public/.env
+public/crm-config.env
+public/includes/crm-config.local.php
 
-# OS
-.DS_Store
-
-# Logs
+# Логи
 *.log
 npm-debug.log*
 
-# IDE
+# macOS / IDE
+.DS_Store
 .idea/
+.vscode/

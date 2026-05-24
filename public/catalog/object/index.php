@@ -5,7 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../../includes/config.php';
 
 $id = isset($_GET['id']) && is_string($_GET['id']) ? trim($_GET['id']) : '';
-if ($id === '') {
+if ($id === '' || !site_validate_crm_object_id($id)) {
     header('Location: /catalog/', true, 302);
     exit;
 }

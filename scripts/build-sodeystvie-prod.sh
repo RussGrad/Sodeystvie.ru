@@ -29,6 +29,8 @@ mkdir -p "$OUT_DIR"
 cp -R "$ROOT/public/." "$OUT_DIR/"
 
 find "$OUT_DIR" -name '.DS_Store' -delete 2>/dev/null || true
+# Не заливать секреты с Mac на REG.RU
+rm -f "$OUT_DIR/.env" "$OUT_DIR/crm-config.env" 2>/dev/null || true
 
 cp "$ROOT/public/.env.example" "$OUT_DIR/env.example.txt"
 

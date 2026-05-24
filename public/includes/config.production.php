@@ -17,13 +17,23 @@ if (!$isVitrina) {
 
 /** @param non-empty-string $key @param non-empty-string $value */
 $force = static function (string $key, string $value): void {
-    $cur = getenv($key);
-    if ($cur === false || $cur === '' || str_contains((string) $cur, 'localhost') || str_contains((string) $cur, '127.0.0.1')) {
-        putenv($key . '=' . $value);
-        $_ENV[$key] = $value;
+    $cur = site_read_env_var($key);
+    if ($cur === '' || str_contains($cur, 'localhost') || str_contains($cur, '127.0.0.1')) {
+        site_set_env_var($key, $value);
     }
 };
 
 $force('CRM_API_BASE', 'https://an-realty-crm.ru');
 $force('CRM_PUBLIC_BASE', 'https://an-realty-crm.ru');
 $force('CRM_LISTINGS_PATH', '/api/public/listings');
+$force('CRM_LEADS_PATH', '/api/public/leads');
+
+/**
+ * Ключ заявок с витрины (тот же — PUBLIC_SITE_API_KEY в apps/api/.env на CRM).
+ * Подставляется на an-sodeystvie.ru, если .env на хостинге не прочитался (часто отключён putenv).
+ * Для смены ключа: public/.env, crm-config.env или includes/crm-config.local.php.
+ */
+$siteApiKey = site_read_env_var('PUBLIC_SITE_API_KEY');
+if ($siteApiKey === '') {
+    site_set_env_var('PUBLIC_SITE_API_KEY', 'f950274c-273d-466f-9161-8b404571380e');
+}

@@ -3,12 +3,14 @@
 declare(strict_types=1);
 
 /** @var string $pageTitle Заголовок вкладки (<title>) */
-/** @var string $currentNav Активный пункт меню: home | catalog | services | mortgage | mortgage_calc | mortgage_apply | about | reviews | contacts | vacancies */
+/** @var string $currentNav Активный пункт меню: home | catalog | services | mortgage | about | reviews | contacts | vacancies */
 
 $pageTitle = $pageTitle ?? 'Содействие — агентство недвижимости';
 $currentNav = $currentNav ?? '';
 
 require_once __DIR__ . '/config.php';
+
+site_send_security_headers();
 
 $nav = site_nav_items();
 $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());

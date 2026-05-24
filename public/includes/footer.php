@@ -10,6 +10,7 @@ $currentNav = $currentNav ?? '';
 $siteHeaderJsVersion = (string) (@filemtime(__DIR__ . '/../js/site-header.js') ?: time());
 $siteFooterJsVersion = (string) (@filemtime(__DIR__ . '/../js/site-footer.js') ?: time());
 $heroJsVersion = (string) (@filemtime(__DIR__ . '/../js/hero.js') ?: time());
+$leadModalJsVersion = (string) (@filemtime(__DIR__ . '/../js/lead-modal.js') ?: time());
 
 ?>
 <footer class="site-footer" id="site-footer">
@@ -113,9 +114,12 @@ $heroJsVersion = (string) (@filemtime(__DIR__ . '/../js/hero.js') ?: time());
     <script src="/js/theme.js" defer></script>
     <script src="/js/site-header.js?v=<?php echo htmlspecialchars($siteHeaderJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <script src="/js/site-footer.js?v=<?php echo htmlspecialchars($siteFooterJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
-    <script src="/js/lead-modal.js" defer></script>
+    <script src="/js/lead-modal.js?v=<?php echo htmlspecialchars($leadModalJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <script src="/js/hero.js?v=<?php echo htmlspecialchars($heroJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
-    <script src="/js/mortgage.js" defer></script>
+    <?php
+    $mortgageJsVersion = (string) (@filemtime(__DIR__ . '/../js/mortgage.js') ?: time());
+    ?>
+    <script src="/js/mortgage.js?v=<?php echo htmlspecialchars($mortgageJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <script src="/js/listing-page.js" defer></script>
 </body>
 </html>
