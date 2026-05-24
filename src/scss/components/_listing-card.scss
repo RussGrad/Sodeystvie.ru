@@ -74,7 +74,8 @@
   &--tone-8 { background-image: linear-gradient(145deg, #c4b7aa 0%, #5a5046 100%); }
 }
 
-.listing-card__photo {
+.listing-card__media .listing-card__photo,
+.listing-card__media img.listing-card__photo {
   position: absolute;
   inset: 0;
   width: 100%;

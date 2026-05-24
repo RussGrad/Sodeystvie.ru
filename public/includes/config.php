@@ -279,13 +279,14 @@ function site_crm_photo_src(string $urlFromApi): string
     // Уже прямая ссылка на файл/превью (после resolve на CRM или локальные uploads).
     if (preg_match('#^https?://#i', $u)) {
         if (site_crm_is_yandex_published_viewer_url($u)) {
-            $direct = site_crm_yandex_public_share_to_direct_url($u, 15);
-            if ($direct !== null && $direct !== '') {
-                return $direct;
-            }
+            // С REG.RU cloud-api часто недоступен — сначала Nest resolve-photo-url.
             $viaCrm = site_crm_resolve_photo_via_crm_api($u);
             if ($viaCrm !== null && $viaCrm !== '') {
                 return $viaCrm;
+            }
+            $direct = site_crm_yandex_public_share_to_direct_url($u, 15);
+            if ($direct !== null && $direct !== '') {
+                return $direct;
             }
             // Страница yadi.sk в <img> не отображается — не подставляем её.
             return '';
@@ -302,18 +303,20 @@ function site_crm_photo_src(string $urlFromApi): string
  *
  * @param non-empty-string $src
  */
-function site_crm_photo_img(string $src, string $alt = '', string $class = ''): string
+function site_crm_photo_img(string $src, string $alt = '', string $class = '', string $extraAttrs = ''): string
 {
     $src = trim($src);
     if ($src === '') {
         return '';
     }
     $classAttr = $class !== '' ? ' class="' . htmlspecialchars($class, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '"' : '';
+    $extra = trim($extraAttrs);
 
     return '<img src="' . htmlspecialchars($src, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '"'
         . ' alt="' . htmlspecialchars($alt, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '"'
         . ' loading="lazy" decoding="async" referrerpolicy="no-referrer"'
         . $classAttr
+        . ($extra !== '' ? ' ' . $extra : '')
         . '>';
 }
 

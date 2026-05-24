@@ -36,12 +36,21 @@
   }
 
   function initGallery(root) {
-    var raw = root.getAttribute('data-photos') || '[]';
     var photos = [];
-    try {
-      photos = JSON.parse(raw);
-    } catch (e) {
-      photos = [];
+    var b64 = root.getAttribute('data-photos-b64') || '';
+    if (b64) {
+      try {
+        photos = JSON.parse(atob(b64));
+      } catch (e) {
+        photos = [];
+      }
+    } else {
+      var raw = root.getAttribute('data-photos') || '[]';
+      try {
+        photos = JSON.parse(raw);
+      } catch (err) {
+        photos = [];
+      }
     }
     if (!Array.isArray(photos) || photos.length === 0) return;
 

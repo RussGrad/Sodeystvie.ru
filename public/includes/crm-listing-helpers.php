@@ -331,6 +331,96 @@ function site_mask_phone_tel(?string $raw): string
     return SITE_PHONE_TEL;
 }
 
+/**
+ * Догрузка карточки из GET /api/public/listings/:id (на проде список часто без photos[] и description).
+ *
+ * @param array<string, mixed> $row
+ * @return array<string, mixed>
+ */
+function site_crm_listing_enrich_row(array $row): array
+{
+    $id = trim((string) ($row['id'] ?? ''));
+    if ($id === '') {
+        return $row;
+    }
+
+    $photosCount = isset($row['photosCount']) && is_numeric($row['photosCount'])
+        ? (int) $row['photosCount']
+        : 0;
+    $hasPhotosList = isset($row['photos']) && is_array($row['photos']) && count($row['photos']) > 0;
+    $needPhotos = $photosCount > 0 && !$hasPhotosList;
+    $needDesc = trim((string) ($row['description'] ?? '')) === '';
+
+    if (!$needPhotos && !$needDesc) {
+        return $row;
+    }
+
+    // Уже полная карточка (GET /:id): повторный запрос не добавит description на старом API.
+    if ($needDesc && $hasPhotosList && count($row['photos']) >= min($photosCount, 2)) {
+        $needDesc = false;
+    }
+    if (!$needPhotos && !$needDesc) {
+        return $row;
+    }
+
+    $detail = site_http_get_json(site_crm_listings_url($id), 30);
+    if (!is_array($detail) || isset($detail['_error'])) {
+        return $row;
+    }
+
+    if ($needDesc && isset($detail['description']) && is_string($detail['description'])) {
+        $desc = trim($detail['description']);
+        if ($desc !== '') {
+            $row['description'] = $desc;
+        }
+    }
+    if ($needPhotos) {
+        if (isset($detail['photos']) && is_array($detail['photos']) && count($detail['photos']) > 0) {
+            $row['photos'] = $detail['photos'];
+        }
+        if (isset($detail['coverPhoto']) && is_string($detail['coverPhoto']) && trim($detail['coverPhoto']) !== '') {
+            $row['coverPhoto'] = $detail['coverPhoto'];
+        }
+    }
+
+    return $row;
+}
+
+/**
+ * @param array<string, mixed> $row
+ * @return list<string>
+ */
+function site_crm_listing_resolved_photos(array $row, int $max = 12): array
+{
+    $max = max(1, min(30, $max));
+    $urls = [];
+    if (isset($row['photos']) && is_array($row['photos'])) {
+        foreach ($row['photos'] as $p) {
+            if (!is_string($p)) {
+                continue;
+            }
+            $src = site_crm_photo_src(trim($p));
+            if ($src !== '') {
+                $urls[] = $src;
+            }
+            if (count($urls) >= $max) {
+                break;
+            }
+        }
+    }
+    if (count($urls) === 0) {
+        $coverRaw = isset($row['coverPhoto']) ? trim((string) $row['coverPhoto']) : '';
+        if ($coverRaw !== '') {
+            $cover = site_crm_photo_src($coverRaw);
+            if ($cover !== '') {
+                $urls[] = $cover;
+            }
+        }
+    }
+
+    return $urls;
+}
+
 function site_excerpt_text(?string $text, int $maxLen = 280): string
 {
     $s = trim(preg_replace('/\s+/u', ' ', (string) $text) ?? '');
@@ -375,28 +465,8 @@ function site_render_catalog_listing_card(array $row): void
     $updatedAt = isset($row['updatedAt']) ? (string) $row['updatedAt'] : null;
     $photosCount = isset($row['photosCount']) && is_numeric($row['photosCount']) ? (int) $row['photosCount'] : 0;
 
-    $photoUrls = [];
-    if (isset($row['photos']) && is_array($row['photos'])) {
-        foreach ($row['photos'] as $p) {
-            if (!is_string($p)) {
-                continue;
-            }
-            $src = site_crm_photo_src(trim($p));
-            if ($src !== '') {
-                $photoUrls[] = $src;
-            }
-        }
-    }
-    if (count($photoUrls) === 0) {
-        $coverRaw = isset($row['coverPhoto']) ? trim((string) $row['coverPhoto']) : '';
-        if ($coverRaw !== '') {
-            $cover = site_crm_photo_src($coverRaw);
-            if ($cover !== '') {
-                $photoUrls[] = $cover;
-            }
-        }
-    }
-    $photosJson = htmlspecialchars(json_encode($photoUrls, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '[]', ENT_QUOTES, 'UTF-8');
+    $photoUrls = site_crm_listing_resolved_photos($row, 12);
+    $photosB64 = base64_encode(json_encode($photoUrls, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '[]');
 
     $priceText = site_fmt_rub($priceRaw);
     $priceM2 = site_fmt_m2($areaTotal, $priceRaw);
@@ -421,18 +491,11 @@ function site_render_catalog_listing_card(array $row): void
                 <div
                     class="listing-card__media listing-card__media--tone-<?php echo (int) $tone; ?>"
                     data-listing-gallery
-                    data-photos="<?php echo $photosJson; ?>"
+                    data-photos-b64="<?php echo htmlspecialchars($photosB64, ENT_QUOTES, 'UTF-8'); ?>"
                 >
-                    <?php if (count($photoUrls) > 0) { ?>
-                        <img
-                            class="listing-card__photo"
-                            src="<?php echo htmlspecialchars($photoUrls[0], ENT_QUOTES, 'UTF-8'); ?>"
-                            alt=""
-                            loading="lazy"
-                            decoding="async"
-                            data-listing-gallery-img
-                        >
-                    <?php } ?>
+                    <?php if (count($photoUrls) > 0) {
+                        echo site_crm_photo_img($photoUrls[0], $cardTitle, 'listing-card__photo', 'data-listing-gallery-img');
+                    } ?>
                     <span class="listing-card__count" data-listing-gallery-count>1/<?php echo (int) $totalPhotos; ?></span>
                     <?php if ($totalPhotos > 1) { ?>
                         <button type="button" class="listing-card__nav listing-card__nav--prev" data-listing-gallery-prev aria-label="Предыдущее фото"></button>
@@ -514,6 +577,14 @@ function site_crm_fetch_listings(int $limit = 24, int $offset = 0): array
     $items = (isset($crm['items']) && is_array($crm['items'])) ? $crm['items'] : [];
     $total = (isset($crm['total']) && is_numeric($crm['total'])) ? (int) $crm['total'] : null;
     $error = isset($crm['_error']) ? (string) $crm['_error'] : null;
+
+    if ($error === null && count($items) > 0) {
+        $enriched = [];
+        foreach ($items as $row) {
+            $enriched[] = is_array($row) ? site_crm_listing_enrich_row($row) : $row;
+        }
+        $items = $enriched;
+    }
 
     return ['items' => $items, 'total' => $total, 'error' => $error];
 }

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../../includes/config.php';
+require_once __DIR__ . '/../../includes/crm-listing-helpers.php';
 
 $id = isset($_GET['id']) && is_string($_GET['id']) ? trim($_GET['id']) : '';
 if ($id === '' || !site_validate_crm_object_id($id)) {
@@ -13,6 +14,10 @@ if ($id === '' || !site_validate_crm_object_id($id)) {
 $apiUrl = site_crm_listings_url($id);
 $obj = site_http_get_json($apiUrl, 25);
 $error = isset($obj['_error']) ? (string) $obj['_error'] : null;
+
+if (!$error && is_array($obj)) {
+    $obj = site_crm_listing_enrich_row($obj);
+}
 
 if (!$error && (!is_array($obj) || !isset($obj['id']))) {
     $error = 'Объект не найден';
@@ -75,22 +80,9 @@ $objectTypeValue = !$error ? v_str($obj, 'objectTypeValue') : null;
 $description = !$error ? (v_str($obj, 'description') ?? '') : '';
 
 $photos = [];
-if (!$error && isset($obj['photos']) && is_array($obj['photos'])) {
-    foreach ($obj['photos'] as $p) {
-        if (!is_string($p)) continue;
-        $u = trim($p);
-        if ($u === '') continue;
-        $photos[] = site_crm_photo_src($u);
-    }
+if (!$error && is_array($obj)) {
+    $photos = site_crm_listing_resolved_photos($obj, 30);
 }
-$cover = !$error ? (v_str($obj, 'coverPhoto') ?? '') : '';
-if ($cover !== '') {
-    $coverUrl = site_crm_photo_src($cover);
-    if (!in_array($coverUrl, $photos, true)) {
-        array_unshift($photos, $coverUrl);
-    }
-}
-
 $typeLabel = object_type_label($objectTypeValue, $rooms);
 $priceText = fmt_rub($priceRaw);
 $subtitleParts = [];
