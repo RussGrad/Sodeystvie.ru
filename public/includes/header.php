@@ -14,6 +14,9 @@ site_send_security_headers();
 
 $nav = site_nav_items();
 $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());
+$whatsappUrl = site_whatsapp_url();
+$telegramUrl = site_telegram_url();
+$headerTagline = site_header_tagline();
 
 ?>
 <!DOCTYPE html>
@@ -40,9 +43,12 @@ $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());
 <body>
 <header class="site-header" id="site-header">
     <div class="site-header__inner container">
-        <a class="site-header__logo-link" href="/" aria-label="Содействие — на главную">
-            <?php require __DIR__ . '/logo-markup.php'; ?>
-        </a>
+        <div class="site-header__brand">
+            <a class="site-header__logo-link" href="/" aria-label="Содействие — на главную">
+                <?php require __DIR__ . '/logo-markup.php'; ?>
+            </a>
+            <p class="site-header__tagline"><?php echo htmlspecialchars($headerTagline, ENT_QUOTES, 'UTF-8'); ?></p>
+        </div>
         <nav class="site-header__nav" id="site-header-menu" aria-label="Основное меню">
             <ul class="site-header__menu">
                 <?php foreach ($nav as $slug => $item) { ?>
@@ -92,19 +98,57 @@ $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());
                 <?php } ?>
             </ul>
             <div class="site-header__actions">
-                <a class="site-header__phone" href="tel:<?php echo htmlspecialchars(SITE_PHONE_TEL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_PHONE_DISPLAY, ENT_QUOTES, 'UTF-8'); ?></a>
+                <div class="site-header__contact">
+                    <div class="site-header__phone-row">
+                        <a class="site-header__phone" href="tel:<?php echo htmlspecialchars(SITE_PHONE_TEL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_PHONE_DISPLAY, ENT_QUOTES, 'UTF-8'); ?></a>
+                        <?php if ($whatsappUrl !== null) { ?>
+                            <a
+                                class="site-header__messenger site-header__messenger--wa"
+                                href="<?php echo htmlspecialchars($whatsappUrl, ENT_QUOTES, 'UTF-8'); ?>"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="Написать в WhatsApp"
+                            >
+                                <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                            </a>
+                        <?php } ?>
+                        <?php if ($telegramUrl !== null) { ?>
+                            <a
+                                class="site-header__messenger site-header__messenger--tg"
+                                href="<?php echo htmlspecialchars($telegramUrl, ENT_QUOTES, 'UTF-8'); ?>"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="Написать в Telegram"
+                            >
+                                <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                            </a>
+                        <?php } ?>
+                    </div>
+                    <p class="site-header__hours"><?php echo htmlspecialchars(SITE_WORK_HOURS, ENT_QUOTES, 'UTF-8'); ?></p>
+                </div>
+                <a class="site-header__fav" href="/catalog/" id="site-header-favorites" aria-label="Избранное">
+                    <svg class="site-header__fav-icon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                    <span class="site-header__fav-count" id="site-favorites-count" hidden>0</span>
+                </a>
                 <button
                     type="button"
                     class="site-header__cta"
                     id="site-header-lead-open"
                     aria-haspopup="dialog"
                     aria-controls="lead-modal"
-                >Оставить заявку</button>
+                >
+                    <svg class="site-header__cta-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="currentColor" d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.07 21 3 13.93 3 5a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.46.57 3.58a1 1 0 0 1-.25 1.01l-2.2 2.2z"/>
+                    </svg>
+                    <span>Оставить заявку</span>
+                </button>
                 <button type="button" class="site-header__theme" id="site-theme-toggle" aria-label="Переключить тему оформления">
-                    <svg class="site-header__theme-icon site-header__theme-label--light" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg class="site-header__theme-icon site-header__theme-label--light" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
                         <path fill="currentColor" d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12Zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM11 1h2v3h-2V1Zm0 18h2v3h-2v-3ZM3.515 4.929l1.414-1.414L7.05 5.636 5.636 7.05 3.515 4.93ZM16.95 18.364l1.414-1.414 2.121 2.121-1.414 1.414-2.121-2.121Zm2.121-14.435-1.414-1.414-2.121 2.121 1.414 1.414 2.121-2.121ZM5.636 16.95l-1.414 1.414-2.121-2.121 1.414-1.414 2.121 2.121ZM23 11v2h-3v-2h3ZM4 11v2H1v-2h3Z"/>
                     </svg>
-                    <svg class="site-header__theme-icon site-header__theme-label--dark" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg class="site-header__theme-icon site-header__theme-label--dark" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
                         <path fill="currentColor" d="M21 14.5A7.5 7.5 0 0 1 9.5 3a7.5 7.5 0 1 0 11.5 11.5Z"/>
                     </svg>
                 </button>

@@ -132,4 +132,11 @@
             closeAllDropdowns();
         }
     });
+
+    var scrollThreshold = 12;
+    function onScroll() {
+        header.classList.toggle('site-header--scrolled', window.scrollY > scrollThreshold);
+    }
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
 })();

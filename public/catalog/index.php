@@ -20,7 +20,7 @@ require_once __DIR__ . '/../includes/crm-listing-helpers.php';
 require __DIR__ . '/../includes/header.php';
 
 /** Публичные объекты CRM (стадия «Активный»). */
-$crmFetched = site_crm_fetch_listings(60, 0);
+$crmFetched = site_crm_fetch_listings(24, 0);
 $crmItems = $crmFetched['items'];
 $crmTotal = $crmFetched['total'];
 $crmError = $crmFetched['error'];

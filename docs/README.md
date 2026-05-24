@@ -21,6 +21,8 @@
 | 7 | [07-integrations.md](07-integrations.md) | Интеграции (Bitrix24 и др.) |
 | 8 | [08-acceptance-criteria.md](08-acceptance-criteria.md) | Критерии приёмки |
 | 9 | [09-open-questions.md](09-open-questions.md) | Нерешённые вопросы |
+| — | [tz-an-sodeystvie-2026.md](tz-an-sodeystvie-2026.md) | **ТЗ доработки сайта 2026** + чеклист фаз |
+| — | [deploy-vitrina-checklist.md](deploy-vitrina-checklist.md) | Выкат витрины и CRM API |
 | — | [10-next-steps-after-tz.md](10-next-steps-after-tz.md) | Шаги после заморозки ТЗ |
 | — | [11-architecture.md](11-architecture.md) | **Архитектура кода и инфраструктуры** (реализация) |
 

@@ -13,6 +13,40 @@ const SITE_PHONE_DISPLAY = '+7 (3952) 60-38-08';
 const SITE_EMAIL = 'info@an-sodeystvie.ru';
 const SITE_ADDRESS = 'г. Иркутск, ул. Карла Либкнехта 107а, офис 17';
 
+/** Подпись в шапке */
+const SITE_CITY_TAG = 'Иркутск';
+const SITE_FOUNDED_YEAR = 2010;
+const SITE_WORK_HOURS = 'Пн–Пт 9:00–19:00';
+
+function site_header_tagline(): string
+{
+    return SITE_CITY_TAG . ' • с ' . SITE_FOUNDED_YEAR . ' года';
+}
+
+/**
+ * WhatsApp: SITE_WHATSAPP_URL в .env или wa.me по номеру SITE_PHONE_TEL.
+ */
+function site_whatsapp_url(): ?string
+{
+    $fromEnv = trim(site_env('SITE_WHATSAPP_URL', ''));
+    if ($fromEnv !== '') {
+        return $fromEnv;
+    }
+    $digits = preg_replace('/\D+/', '', SITE_PHONE_TEL) ?? '';
+    if (strlen($digits) >= 11) {
+        return 'https://wa.me/' . ltrim($digits, '+');
+    }
+
+    return null;
+}
+
+function site_telegram_url(): ?string
+{
+    $u = trim(site_env('SITE_TELEGRAM_URL', ''));
+
+    return $u !== '' ? $u : null;
+}
+
 /** Реквизиты — уточняются у заказчика */
 const SITE_LEGAL_NAME = 'ООО «Содействие»';
 const SITE_LEGAL_INN = '0000000000';
@@ -257,7 +291,7 @@ function site_crm_resolve_photo_via_crm_api(string $viewerOrStoredUrl): ?string
         rtrim($apiBase, '/') .
         '/api/public/listings/resolve-photo-url?' .
         http_build_query(['url' => $u]);
-    $data = site_http_get_json($endpoint, 20);
+    $data = site_http_get_json($endpoint, 6);
     if (isset($data['_error'])) {
         return null;
     }
@@ -269,33 +303,42 @@ function site_crm_resolve_photo_via_crm_api(string $viewerOrStoredUrl): ?string
     return null;
 }
 
-/** URL из CRM → то, что браузер может загрузить как изображение. */
+/** URL из CRM → то, что браузер может загрузить как изображение (с кэшем в рамках запроса). */
 function site_crm_photo_src(string $urlFromApi): string
 {
+    static $memo = [];
     $u = trim($urlFromApi);
     if ($u === '') {
         return '';
     }
-    // Уже прямая ссылка на файл/превью (после resolve на CRM или локальные uploads).
-    if (preg_match('#^https?://#i', $u)) {
-        if (site_crm_is_yandex_published_viewer_url($u)) {
-            // С REG.RU cloud-api часто недоступен — сначала Nest resolve-photo-url.
-            $viaCrm = site_crm_resolve_photo_via_crm_api($u);
-            if ($viaCrm !== null && $viaCrm !== '') {
-                return $viaCrm;
-            }
-            $direct = site_crm_yandex_public_share_to_direct_url($u, 15);
-            if ($direct !== null && $direct !== '') {
-                return $direct;
-            }
-            // Страница yadi.sk в <img> не отображается — не подставляем её.
-            return '';
-        }
-
-        return $u;
+    if (isset($memo[$u])) {
+        return $memo[$u];
     }
 
-    return site_crm_public_url($u);
+    $out = '';
+    if (preg_match('#^https?://#i', $u)) {
+        if (str_contains($u, 'downloader.disk.yandex.ru') || str_contains($u, 'preview.disk.yandex.ru')) {
+            $out = $u;
+        } elseif (site_crm_is_yandex_published_viewer_url($u)) {
+            $viaCrm = site_crm_resolve_photo_via_crm_api($u);
+            if ($viaCrm !== null && $viaCrm !== '') {
+                $out = $viaCrm;
+            } else {
+                $direct = site_crm_yandex_public_share_to_direct_url($u, 8);
+                if ($direct !== null && $direct !== '') {
+                    $out = $direct;
+                }
+            }
+        } else {
+            $out = $u;
+        }
+    } else {
+        $out = site_crm_public_url($u);
+    }
+
+    $memo[$u] = $out;
+
+    return $out;
 }
 
 /**
@@ -383,6 +426,77 @@ function site_http_get_json(string $url, int $timeoutSeconds = 3): array
     }
 
     return is_array($decoded) ? $decoded : ['_error' => 'CRM API вернул неожиданный формат'];
+}
+
+function site_crm_disk_cache_dir(): string
+{
+    $dir = dirname(__DIR__) . '/var/crm-cache';
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0755, true);
+    }
+
+    return $dir;
+}
+
+function site_crm_cache_file_path(string $key): string
+{
+    return site_crm_disk_cache_dir() . '/' . hash('sha256', $key) . '.json';
+}
+
+/**
+ * @return array<string, mixed>|null
+ */
+function site_crm_cache_read_json(string $key, int $ttlSeconds = 900): ?array
+{
+    $path = site_crm_cache_file_path($key);
+    if (!is_file($path)) {
+        return null;
+    }
+    if (filemtime($path) + $ttlSeconds < time()) {
+        @unlink($path);
+
+        return null;
+    }
+    $raw = @file_get_contents($path);
+    if ($raw === false || $raw === '') {
+        return null;
+    }
+    try {
+        $decoded = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+    } catch (Throwable) {
+        return null;
+    }
+
+    return is_array($decoded) ? $decoded : null;
+}
+
+/**
+ * @param array<string, mixed> $data
+ */
+function site_crm_cache_write_json(string $key, array $data): void
+{
+    $path = site_crm_cache_file_path($key);
+    @file_put_contents($path, json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+}
+
+/**
+ * GET JSON с файловым кэшем (ускоряет повторные открытия каталога).
+ *
+ * @return array<string, mixed>
+ */
+function site_http_get_json_cached(string $url, int $timeoutSeconds = 8, int $ttlSeconds = 900): array
+{
+    $cacheKey = 'crm_json:' . $url;
+    $cached = site_crm_cache_read_json($cacheKey, $ttlSeconds);
+    if ($cached !== null) {
+        return $cached;
+    }
+    $fresh = site_http_get_json($url, $timeoutSeconds);
+    if (!isset($fresh['_error'])) {
+        site_crm_cache_write_json($cacheKey, $fresh);
+    }
+
+    return $fresh;
 }
 
 /**

@@ -3,6 +3,7 @@
  */
 (function () {
   var FAV_KEY = 'sodeystvie:catalog-favs';
+  var resolveCache = Object.create(null);
 
   function readFavs() {
     try {
@@ -35,53 +36,93 @@
     return idx < 0;
   }
 
-  function initGallery(root) {
-    var photos = [];
-    var b64 = root.getAttribute('data-photos-b64') || '';
-    if (b64) {
-      try {
-        photos = JSON.parse(atob(b64));
-      } catch (e) {
-        photos = [];
-      }
-    } else {
-      var raw = root.getAttribute('data-photos') || '[]';
-      try {
-        photos = JSON.parse(raw);
-      } catch (err) {
-        photos = [];
-      }
+  function parseB64Json(attr) {
+    if (!attr) return [];
+    try {
+      var parsed = JSON.parse(atob(attr));
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
     }
-    if (!Array.isArray(photos) || photos.length === 0) return;
+  }
 
-    var img = root.querySelector('[data-listing-gallery-img]');
+  function resolvePhotoUrl(rawUrl) {
+    var u = String(rawUrl || '').trim();
+    if (!u) return Promise.resolve('');
+    if (resolveCache[u]) return Promise.resolve(resolveCache[u]);
+    if (/^https?:\/\//i.test(u) && u.indexOf('downloader.disk.yandex.ru') >= 0) {
+      resolveCache[u] = u;
+      return Promise.resolve(u);
+    }
+    return fetch('/api/crm-resolve-photo.php?url=' + encodeURIComponent(u), {
+      credentials: 'same-origin',
+    })
+      .then(function (r) {
+        return r.ok ? r.json() : null;
+      })
+      .then(function (data) {
+        var resolved = data && typeof data.url === 'string' ? data.url.trim() : '';
+        if (resolved) resolveCache[u] = resolved;
+        return resolved;
+      })
+      .catch(function () {
+        return '';
+      });
+  }
+
+  function initGallery(root) {
+    var resolved = parseB64Json(root.getAttribute('data-photos-b64'));
+    var raw = parseB64Json(root.getAttribute('data-photos-raw-b64'));
+    if (raw.length === 0 && resolved.length > 0) {
+      raw = resolved.slice();
+    }
+
+    var img = root.querySelector('[data-listing-gallery-img], .listing-card__photo');
     var countEl = root.querySelector('[data-listing-gallery-count]');
     var prev = root.querySelector('[data-listing-gallery-prev]');
     var next = root.querySelector('[data-listing-gallery-next]');
     if (!(img instanceof HTMLImageElement)) return;
 
     var index = 0;
-    var total = photos.length;
+    var total = Math.max(raw.length, resolved.length, 1);
+    var displayUrls = resolved.slice();
+
+    function ensureUrlAt(i) {
+      if (displayUrls[i]) return Promise.resolve(displayUrls[i]);
+      var rawUrl = raw[i];
+      if (!rawUrl) return Promise.resolve('');
+      return resolvePhotoUrl(rawUrl).then(function (url) {
+        if (url) displayUrls[i] = url;
+        return url;
+      });
+    }
 
     function render() {
-      img.src = photos[index];
+      var url = displayUrls[index] || '';
+      if (url) img.src = url;
       if (countEl) countEl.textContent = String(index + 1) + '/' + String(total);
+    }
+
+    render();
+
+    function go(delta) {
+      if (total <= 1) return;
+      index = (index + delta + total) % total;
+      ensureUrlAt(index).then(render);
     }
 
     if (prev instanceof HTMLButtonElement) {
       prev.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
-        index = (index - 1 + total) % total;
-        render();
+        go(-1);
       });
     }
     if (next instanceof HTMLButtonElement) {
       next.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
-        index = (index + 1) % total;
-        render();
+        go(1);
       });
     }
   }

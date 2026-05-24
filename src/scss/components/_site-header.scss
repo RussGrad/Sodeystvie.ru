@@ -7,7 +7,31 @@
   z-index: 100;
   background: var(--header-bg);
   border-bottom: 1px solid var(--header-border);
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.25s var(--ease-smooth);
+}
+
+.site-header--scrolled {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+
+  .site-header__inner {
+    min-height: 3.4rem;
+    padding-block: 0.5rem;
+  }
+
+  .site-header__logo-svg {
+    height: 2rem;
+
+    @media (min-width: $breakpoint-nav) {
+      height: 2.15rem;
+    }
+  }
+
+  .site-header__tagline {
+    font-size: 0.625rem;
+  }
 }
 
 // Внутренняя полоса: логотип + навигация + бургер; z-index выше полноэкранного меню
@@ -20,14 +44,42 @@
   gap: 1rem;
   min-height: 4.25rem;
   padding-block: 0.75rem;
+  transition:
+    min-height 0.25s var(--ease-smooth),
+    padding 0.25s var(--ease-smooth);
 }
 
-.site-header__logo-link {
+.site-header__brand {
   position: relative;
   z-index: 103;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  max-width: 11rem;
+
+  @media (min-width: $breakpoint-nav) {
+    max-width: none;
+  }
+}
+
+.site-header__logo-link {
   line-height: 0;
   text-decoration: none;
+}
+
+.site-header__tagline {
+  margin: 0;
+  font-size: 0.6875rem; // 11px
+  line-height: 1.2;
+  color: var(--header-muted);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+
+  @media (max-width: ($breakpoint-nav - 0.02px)) {
+    display: none;
+  }
 }
 
 // Встроенный SVG: монограмма и подпись — градиенты; крупные буквы и перемычка — класс .st26 (см. logo-markup.php)
@@ -328,7 +380,7 @@
   }
 }
 
-// Телефон, кнопка заявки, переключатель темы
+// Телефон, мессенджеры, избранное, CTA, тема
 .site-header__actions {
   display: flex;
   flex-direction: column;
@@ -339,10 +391,23 @@
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.65rem;
     margin-top: 0;
     flex-shrink: 0;
   }
+}
+
+.site-header__contact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.site-header__phone-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
 }
 
 .site-header__phone {
@@ -357,13 +422,109 @@
   &:hover {
     background: var(--nav-hover);
   }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+.site-header__hours {
+  margin: 0;
+  padding-left: 0.5rem;
+  font-size: 0.75rem; // 12px
+  line-height: 1.3;
+  color: var(--header-muted);
+}
+
+.site-header__messenger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  color: var(--header-text);
+  text-decoration: none;
+  transition:
+    background var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    transform 0.12s ease;
+
+  &:hover {
+    background: var(--nav-hover);
+    transform: scale(1.06);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  svg {
+    display: block;
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+}
+
+:root[data-theme="dark"] .site-header__messenger--wa {
+  color: #25d366;
+}
+
+:root[data-theme="dark"] .site-header__messenger--tg {
+  color: #2aabee;
+}
+
+.site-header__fav {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 8px;
+  color: var(--header-text);
+  text-decoration: none;
+  border: 1px solid var(--header-border);
+  transition:
+    background var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+
+  &:hover {
+    background: var(--nav-hover);
+    color: var(--cta-bg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+.site-header__fav-count {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.35rem;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1.1rem;
+  text-align: center;
+  color: var(--cta-text);
+  background: var(--cta-bg);
+  border-radius: 999px;
 }
 
 .site-header__cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.55rem 1.2rem;
+  gap: 0.45rem;
+  padding: 0.875rem 1.75rem; // 14px 28px
   font: inherit;
   font-size: 0.875rem;
   font-weight: 600;
@@ -388,39 +549,66 @@
   &:active {
     transform: translateY(0) scale(0.98);
   }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
 }
 
-// Иконки солнце/луна; видимость переключается через data-theme на <html>
+.site-header__cta-icon {
+  flex-shrink: 0;
+}
+
+// Компактный переключатель темы; в тёмной теме — контрастная обводка и фон
 .site-header__theme {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2rem;
+  height: 2rem;
   padding: 0;
   border: 1px solid var(--header-border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: var(--header-text);
   cursor: pointer;
+  flex-shrink: 0;
   transition:
     background var(--duration-fast) var(--ease-smooth),
     border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
     transform 0.12s ease;
 
   &:hover {
     background: var(--nav-hover);
-    transform: scale(1.04);
+    transform: scale(1.05);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
   }
 
   &:active {
-    transform: scale(0.97);
+    transform: scale(0.96);
+  }
+}
+
+:root[data-theme="dark"] .site-header__theme {
+  background: rgba(201, 169, 97, 0.14);
+  border-color: rgba(201, 169, 97, 0.55);
+  color: #e8d5a8;
+
+  &:hover {
+    background: rgba(201, 169, 97, 0.24);
+    color: #f5e6c0;
   }
 }
 
 .site-header__theme-icon {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1rem;
+  height: 1rem;
   display: block;
 }
 

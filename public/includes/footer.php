@@ -8,6 +8,7 @@ require_once __DIR__ . '/config.php';
 $nav = site_nav_items();
 $currentNav = $currentNav ?? '';
 $siteHeaderJsVersion = (string) (@filemtime(__DIR__ . '/../js/site-header.js') ?: time());
+$siteFavoritesJsVersion = (string) (@filemtime(__DIR__ . '/../js/site-favorites.js') ?: time());
 $siteFooterJsVersion = (string) (@filemtime(__DIR__ . '/../js/site-footer.js') ?: time());
 $heroJsVersion = (string) (@filemtime(__DIR__ . '/../js/hero.js') ?: time());
 $leadModalJsVersion = (string) (@filemtime(__DIR__ . '/../js/lead-modal.js') ?: time());
@@ -112,6 +113,7 @@ $leadModalJsVersion = (string) (@filemtime(__DIR__ . '/../js/lead-modal.js') ?: 
 </footer>
 <?php require __DIR__ . '/modal-lead.php'; ?>
     <script src="/js/theme.js" defer></script>
+    <script src="/js/site-favorites.js?v=<?php echo htmlspecialchars($siteFavoritesJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <script src="/js/site-header.js?v=<?php echo htmlspecialchars($siteHeaderJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <script src="/js/site-footer.js?v=<?php echo htmlspecialchars($siteFooterJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <script src="/js/lead-modal.js?v=<?php echo htmlspecialchars($leadModalJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>

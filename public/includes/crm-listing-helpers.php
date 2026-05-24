@@ -232,6 +232,8 @@ function site_listing_card_title(
 }
 
 /**
+ * Текст описания из CRM (кэш + fallback на полную карточку).
+ *
  * @return non-empty-string|null
  */
 function site_crm_fetch_listing_description(string $id): ?string
@@ -240,12 +242,21 @@ function site_crm_fetch_listing_description(string $id): ?string
     if ($id === '' || !site_validate_crm_object_id($id)) {
         return null;
     }
-    $url = site_crm_listings_url($id) . '/description';
-    $data = site_http_get_json($url, 20);
-    if (!is_array($data) || isset($data['_error'])) {
+
+    $descUrl = site_crm_listings_url($id) . '/description';
+    $data = site_http_get_json_cached($descUrl, 6, 900);
+    if (is_array($data) && !isset($data['_error'])) {
+        $desc = isset($data['description']) ? trim((string) $data['description']) : '';
+        if ($desc !== '') {
+            return $desc;
+        }
+    }
+
+    $detail = site_http_get_json_cached(site_crm_listings_url($id), 8, 900);
+    if (!is_array($detail) || isset($detail['_error'])) {
         return null;
     }
-    $desc = isset($data['description']) ? trim((string) $data['description']) : '';
+    $desc = isset($detail['description']) ? trim((string) $detail['description']) : '';
 
     return $desc !== '' ? $desc : null;
 }
@@ -289,21 +300,31 @@ function site_listing_building_label(?int $yearBuilt, ?string $residentialComple
     return null;
 }
 
-function site_listing_address_line(?string $city, ?string $address, string $title): string
+/**
+ * Адрес для карточки каталога — только из CRM (addressLine / city + address), без подстановки title.
+ *
+ * @param array<string, mixed> $row
+ */
+function site_listing_address_line(array $row): string
 {
-    $c = trim((string) $city);
-    $a = trim((string) $address);
-    if ($c !== '' && $a !== '') {
-        return $c . ', ' . $a;
-    }
-    if ($a !== '') {
-        return $a;
-    }
-    if ($c !== '') {
-        return $c;
+    if (isset($row['addressLine']) && is_string($row['addressLine'])) {
+        $line = trim($row['addressLine']);
+        if ($line !== '') {
+            return $line;
+        }
     }
 
-    return $title;
+    $city = isset($row['city']) ? trim((string) $row['city']) : '';
+    $address = isset($row['address']) ? trim((string) $row['address']) : '';
+    if ($address !== '') {
+        if ($city !== '' && mb_stripos($address, $city, 0, 'UTF-8') === false) {
+            return $city . ', ' . $address;
+        }
+
+        return $address;
+    }
+
+    return $city;
 }
 
 function site_listing_updated_label(?string $iso): string
@@ -385,20 +406,15 @@ function site_crm_listing_enrich_row(array $row): array
     $hasPhotosList = isset($row['photos']) && is_array($row['photos']) && count($row['photos']) > 0;
     $needPhotos = $photosCount > 0 && !$hasPhotosList;
     $needDesc = trim((string) ($row['description'] ?? '')) === '';
+    $needAddress = trim((string) ($row['address'] ?? '')) === ''
+        && trim((string) ($row['addressLine'] ?? '')) === '';
 
-    if ($needDesc) {
-        $descOnly = site_crm_fetch_listing_description($id);
-        if ($descOnly !== null) {
-            $row['description'] = $descOnly;
-            $needDesc = false;
-        }
-    }
-
-    if (!$needPhotos && !$needDesc) {
+    if (!$needPhotos && !$needDesc && !$needAddress) {
         return $row;
     }
 
-    $detail = site_http_get_json(site_crm_listings_url($id), 30);
+    // Один запрос на объект (кэш 15 мин), без отдельного /description (на старом API — 404).
+    $detail = site_http_get_json_cached(site_crm_listings_url($id), 8, 900);
     if (!is_array($detail) || isset($detail['_error'])) {
         return $row;
     }
@@ -407,6 +423,13 @@ function site_crm_listing_enrich_row(array $row): array
         $desc = trim($detail['description']);
         if ($desc !== '') {
             $row['description'] = $desc;
+        }
+    }
+    if ($needAddress) {
+        foreach (['addressLine', 'address', 'city'] as $key) {
+            if (isset($detail[$key]) && is_string($detail[$key]) && trim($detail[$key]) !== '') {
+                $row[$key] = trim($detail[$key]);
+            }
         }
     }
     if ($needPhotos) {
@@ -425,31 +448,78 @@ function site_crm_listing_enrich_row(array $row): array
  * @param array<string, mixed> $row
  * @return list<string>
  */
-function site_crm_listing_resolved_photos(array $row, int $max = 12): array
+function site_crm_listing_raw_photo_urls(array $row, int $max = 30): array
 {
     $max = max(1, min(30, $max));
-    $urls = [];
+    $raw = [];
     if (isset($row['photos']) && is_array($row['photos'])) {
         foreach ($row['photos'] as $p) {
             if (!is_string($p)) {
                 continue;
             }
-            $src = site_crm_photo_src(trim($p));
-            if ($src !== '') {
-                $urls[] = $src;
+            $u = trim($p);
+            if ($u !== '') {
+                $raw[] = $u;
             }
-            if (count($urls) >= $max) {
+            if (count($raw) >= $max) {
                 break;
             }
         }
     }
-    if (count($urls) === 0) {
-        $coverRaw = isset($row['coverPhoto']) ? trim((string) $row['coverPhoto']) : '';
-        if ($coverRaw !== '') {
-            $cover = site_crm_photo_src($coverRaw);
-            if ($cover !== '') {
-                $urls[] = $cover;
-            }
+    if (count($raw) === 0) {
+        $cover = isset($row['coverPhoto']) ? trim((string) $row['coverPhoto']) : '';
+        if ($cover !== '') {
+            $raw[] = $cover;
+        }
+    }
+
+    return $raw;
+}
+
+/**
+ * Для каталога: на сервере резолвим только 1–2 фото (обложка), остальное — в браузере через /api/crm-resolve-photo.php.
+ *
+ * @param array<string, mixed> $row
+ * @return array{resolved: list<string>, raw: list<string>}
+ */
+function site_crm_listing_photo_bundle(array $row, int $resolveOnServer = 2): array
+{
+    $raw = site_crm_listing_raw_photo_urls($row, 30);
+    $resolved = [];
+    $limit = max(1, min(3, $resolveOnServer));
+    foreach ($raw as $i => $u) {
+        if ($i >= $limit) {
+            break;
+        }
+        $src = site_crm_photo_src($u);
+        if ($src !== '') {
+            $resolved[] = $src;
+        }
+    }
+    if (count($resolved) === 0 && count($raw) > 0) {
+        $src = site_crm_photo_src($raw[0]);
+        if ($src !== '') {
+            $resolved[] = $src;
+        }
+    }
+
+    return ['resolved' => $resolved, 'raw' => $raw];
+}
+
+/**
+ * Все фото для страницы объекта (кэш URL в рамках запроса).
+ *
+ * @param array<string, mixed> $row
+ * @return list<string>
+ */
+function site_crm_listing_resolved_photos(array $row, int $max = 12): array
+{
+    $max = max(1, min(30, $max));
+    $urls = [];
+    foreach (site_crm_listing_raw_photo_urls($row, $max) as $u) {
+        $src = site_crm_photo_src($u);
+        if ($src !== '') {
+            $urls[] = $src;
         }
     }
 
@@ -508,8 +578,6 @@ function site_render_catalog_listing_card(array $row): void
     $floorTotal = isset($row['floorTotal']) && is_numeric($row['floorTotal']) ? (int) $row['floorTotal'] : null;
     $yearBuilt = isset($row['yearBuilt']) && is_numeric($row['yearBuilt']) ? (int) $row['yearBuilt'] : null;
     $jk = isset($row['residentialComplex']) ? (string) $row['residentialComplex'] : null;
-    $city = isset($row['city']) ? (string) $row['city'] : null;
-    $address = isset($row['address']) ? (string) $row['address'] : null;
     $district = isset($row['districtValue']) ? trim((string) $row['districtValue']) : '';
     $priceRaw = isset($row['price']) ? (string) $row['price'] : null;
     $description = isset($row['description']) ? (string) $row['description'] : null;
@@ -517,14 +585,16 @@ function site_render_catalog_listing_card(array $row): void
     $updatedAt = isset($row['updatedAt']) ? (string) $row['updatedAt'] : null;
     $photosCount = isset($row['photosCount']) && is_numeric($row['photosCount']) ? (int) $row['photosCount'] : 0;
 
-    $photoUrls = site_crm_listing_resolved_photos($row, 12);
+    $photoBundle = site_crm_listing_photo_bundle($row, 2);
+    $photoUrls = $photoBundle['resolved'];
     $photosB64 = base64_encode(json_encode($photoUrls, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '[]');
+    $photosRawB64 = base64_encode(json_encode($photoBundle['raw'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '[]');
 
     $priceText = site_fmt_rub($priceRaw);
     $priceM2 = site_fmt_m2($areaTotal, $priceRaw);
     $floorText = site_listing_floor_label($floor, $floorTotal);
     $buildingText = site_listing_building_label($yearBuilt, $jk);
-    $addressLine = site_listing_address_line($city, $address, $titleRaw);
+    $addressLine = site_listing_address_line($row);
     $updatedLabel = site_listing_updated_label($updatedAt);
     $publicId = site_listing_public_id($id);
     $phoneDisplay = site_mask_phone_display($contactPhone);
@@ -545,6 +615,7 @@ function site_render_catalog_listing_card(array $row): void
                     class="listing-card__media listing-card__media--tone-<?php echo (int) $tone; ?>"
                     data-listing-gallery
                     data-photos-b64="<?php echo htmlspecialchars($photosB64, ENT_QUOTES, 'UTF-8'); ?>"
+                    data-photos-raw-b64="<?php echo htmlspecialchars($photosRawB64, ENT_QUOTES, 'UTF-8'); ?>"
                 >
                     <?php if (count($photoUrls) > 0) {
                         echo site_crm_photo_img($photoUrls[0], $cardTitle, 'listing-card__photo', 'data-listing-gallery-img');
@@ -592,7 +663,9 @@ function site_render_catalog_listing_card(array $row): void
                             <?php } ?>
                         </p>
                     <?php } ?>
-                    <p class="listing-card__address"><?php echo htmlspecialchars($addressLine, ENT_QUOTES, 'UTF-8'); ?></p>
+                    <?php if ($addressLine !== '') { ?>
+                        <p class="listing-card__address"><?php echo htmlspecialchars($addressLine, ENT_QUOTES, 'UTF-8'); ?></p>
+                    <?php } ?>
                     <?php if ($district !== '') { ?>
                         <p class="listing-card__district"><?php echo htmlspecialchars($district, ENT_QUOTES, 'UTF-8'); ?></p>
                     <?php } ?>
@@ -630,10 +703,10 @@ function site_render_catalog_listing_card(array $row): void
 
 function site_crm_fetch_listings(int $limit = 24, int $offset = 0): array
 {
-    $crm = site_http_get_json(site_crm_listings_url() . '?' . http_build_query([
+    $crm = site_http_get_json_cached(site_crm_listings_url() . '?' . http_build_query([
         'limit' => $limit,
         'offset' => $offset,
-    ]), 25);
+    ]), 10, 300);
 
     $items = (isset($crm['items']) && is_array($crm['items'])) ? $crm['items'] : [];
     $total = (isset($crm['total']) && is_numeric($crm['total'])) ? (int) $crm['total'] : null;
