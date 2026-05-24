@@ -82,12 +82,6 @@ $telegramUrl = site_telegram_url();
                                     </svg>
                                 </button>
                                 <ul class="site-header__submenu" id="<?php echo htmlspecialchars($dropdownId, ENT_QUOTES, 'UTF-8'); ?>" role="list">
-                                    <li class="site-header__submenu-item">
-                                        <a
-                                            class="site-header__submenu-link<?php echo $parentCurrent ? ' site-header__submenu-link--current' : ''; ?>"
-                                            href="<?php echo htmlspecialchars($item['href'], ENT_QUOTES, 'UTF-8'); ?>"
-                                        ><?php echo htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8'); ?></a>
-                                    </li>
                                     <?php foreach ($item['children'] as $cslug => $child) { ?>
                                         <li class="site-header__submenu-item">
                                             <a
