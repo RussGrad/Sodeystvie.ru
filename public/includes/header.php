@@ -127,10 +127,9 @@ $headerTagline = site_header_tagline();
                         aria-controls="lead-modal"
                         aria-label="Оставить заявку"
                     >
-                        <svg class="site-header__cta-icon" width="15" height="15" viewBox="0 0 24 24" aria-hidden="true">
+                        <svg class="site-header__cta-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
                             <path fill="currentColor" d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.07 21 3 13.93 3 5a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.46.57 3.58a1 1 0 0 1-.25 1.01l-2.2 2.2z"/>
                         </svg>
-                        <span class="site-header__cta-text">Заявка</span>
                     </button>
                     <button type="button" class="site-header__theme" id="site-theme-toggle" aria-label="Включить светлую тему">
                         <svg class="site-header__theme-icon site-header__theme-icon--moon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">

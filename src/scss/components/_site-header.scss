@@ -611,16 +611,9 @@ $header-tool-size: 2rem; // 32px
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  gap: 0.25rem;
   width: $header-tool-size;
   height: $header-tool-size;
   padding: 0;
-  font: inherit;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  line-height: 1;
-  white-space: nowrap;
-  text-decoration: none;
   color: var(--cta-text);
   background: linear-gradient(180deg, var(--cta-bg) 0%, var(--cta-bg-hover) 100%);
   border: none;
@@ -630,14 +623,6 @@ $header-tool-size: 2rem; // 32px
   transition:
     filter 0.2s ease,
     box-shadow var(--duration-fast) var(--ease-smooth);
-
-  @media (min-width: $breakpoint-header-comfort) {
-    width: auto;
-    min-width: $header-tool-size;
-    padding: 0 0.5rem;
-    font-size: 0.6875rem;
-    gap: 0.28rem;
-  }
 
   &:hover {
     filter: brightness(1.06);
@@ -656,22 +641,8 @@ $header-tool-size: 2rem; // 32px
 
 .site-header__cta-icon {
   flex-shrink: 0;
-  width: 0.8rem;
-  height: 0.8rem;
-}
-
-@media (min-width: $breakpoint-nav) and (max-width: ($breakpoint-header-comfort - 0.02px)) {
-  .site-header__cta-text {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
+  width: 1rem;
+  height: 1rem;
 }
 
 // Переключатель темы — те же габариты, что у Telegram
