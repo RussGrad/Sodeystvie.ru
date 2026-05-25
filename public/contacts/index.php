@@ -32,48 +32,48 @@ require __DIR__ . '/../includes/header.php';
         <p class="page-main__lead">Свяжитесь с нами удобным способом или приезжайте в офис.</p>
 
         <div class="contacts-page">
-            <div class="contacts-page__info">
-                <article class="contacts-page__card">
-                    <h2 class="contacts-page__card-title">Телефон</h2>
-                    <p class="contacts-page__card-value">
-                        <a href="tel:<?php echo htmlspecialchars(SITE_PHONE_TEL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_PHONE_DISPLAY, ENT_QUOTES, 'UTF-8'); ?></a>
-                    </p>
-                </article>
-
-                <article class="contacts-page__card">
-                    <h2 class="contacts-page__card-title">Email</h2>
-                    <p class="contacts-page__card-value">
-                        <a href="mailto:<?php echo htmlspecialchars(SITE_EMAIL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_EMAIL, ENT_QUOTES, 'UTF-8'); ?></a>
-                    </p>
-                </article>
-
-                <article class="contacts-page__card">
-                    <h2 class="contacts-page__card-title">Адрес</h2>
-                    <p class="contacts-page__card-value"><?php echo htmlspecialchars(SITE_ADDRESS, ENT_QUOTES, 'UTF-8'); ?></p>
-                </article>
-
-                <article class="contacts-page__card">
-                    <h2 class="contacts-page__card-title">Режим работы</h2>
-                    <p class="contacts-page__card-value"><?php echo htmlspecialchars(SITE_WORK_HOURS, ENT_QUOTES, 'UTF-8'); ?></p>
-                </article>
-
-                <?php if ($telegramUrl !== null || $whatsappUrl !== null || $maxUrl !== '') { ?>
-                    <article class="contacts-page__card">
-                        <h2 class="contacts-page__card-title">Мессенджеры</h2>
-                        <ul class="contacts-page__messengers">
-                            <?php if ($telegramUrl !== null) { ?>
-                                <li><a href="<?php echo htmlspecialchars($telegramUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">Telegram</a></li>
-                            <?php } ?>
-                            <?php if ($whatsappUrl !== null) { ?>
-                                <li><a href="<?php echo htmlspecialchars($whatsappUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
-                            <?php } ?>
-                            <?php if ($maxUrl !== '') { ?>
-                                <li><a href="<?php echo htmlspecialchars($maxUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">MAX</a></li>
-                            <?php } ?>
-                        </ul>
-                    </article>
-                <?php } ?>
-            </div>
+            <aside class="contacts-page__aside" aria-label="Контактная информация">
+                <dl class="contacts-page__details">
+                    <div class="contacts-page__row">
+                        <dt class="contacts-page__label">Телефон</dt>
+                        <dd class="contacts-page__value">
+                            <a href="tel:<?php echo htmlspecialchars(SITE_PHONE_TEL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_PHONE_DISPLAY, ENT_QUOTES, 'UTF-8'); ?></a>
+                        </dd>
+                    </div>
+                    <div class="contacts-page__row">
+                        <dt class="contacts-page__label">Email</dt>
+                        <dd class="contacts-page__value">
+                            <a href="mailto:<?php echo htmlspecialchars(SITE_EMAIL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_EMAIL, ENT_QUOTES, 'UTF-8'); ?></a>
+                        </dd>
+                    </div>
+                    <div class="contacts-page__row">
+                        <dt class="contacts-page__label">Адрес</dt>
+                        <dd class="contacts-page__value"><?php echo htmlspecialchars(SITE_ADDRESS, ENT_QUOTES, 'UTF-8'); ?></dd>
+                    </div>
+                    <div class="contacts-page__row">
+                        <dt class="contacts-page__label">Режим работы</dt>
+                        <dd class="contacts-page__value"><?php echo htmlspecialchars(SITE_WORK_HOURS, ENT_QUOTES, 'UTF-8'); ?></dd>
+                    </div>
+                    <?php if ($telegramUrl !== null || $whatsappUrl !== null || $maxUrl !== '') { ?>
+                        <div class="contacts-page__row">
+                            <dt class="contacts-page__label">Мессенджеры</dt>
+                            <dd class="contacts-page__value">
+                                <ul class="contacts-page__messengers">
+                                    <?php if ($telegramUrl !== null) { ?>
+                                        <li><a href="<?php echo htmlspecialchars($telegramUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">Telegram</a></li>
+                                    <?php } ?>
+                                    <?php if ($whatsappUrl !== null) { ?>
+                                        <li><a href="<?php echo htmlspecialchars($whatsappUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+                                    <?php } ?>
+                                    <?php if ($maxUrl !== '') { ?>
+                                        <li><a href="<?php echo htmlspecialchars($maxUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">MAX</a></li>
+                                    <?php } ?>
+                                </ul>
+                            </dd>
+                        </div>
+                    <?php } ?>
+                </dl>
+            </aside>
 
             <section class="contacts-page__map-section" aria-labelledby="contacts-map-heading">
                 <h2 class="contacts-page__map-heading" id="contacts-map-heading">Как нас найти</h2>
