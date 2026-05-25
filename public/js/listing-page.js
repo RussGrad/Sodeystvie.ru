@@ -9,9 +9,7 @@
       resolveCache[u] = u;
       return Promise.resolve(u);
     }
-    return fetch('/api/crm-resolve-photo.php?url=' + encodeURIComponent(u), {
-      credentials: 'same-origin',
-    })
+    return fetch('/api/crm-resolve-photo.php?url=' + encodeURIComponent(u), { credentials: 'same-origin' })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         const resolved = data && typeof data.url === 'string' ? data.url.trim() : '';
@@ -24,15 +22,16 @@
   function loadLazyGalleryImage(img) {
     if (!(img instanceof HTMLImageElement)) return;
     if (img.src && img.src.indexOf('/api/image.php') >= 0) return;
-    const raw = img.getAttribute('data-gallery-lazy-raw');
+    const raw = img.getAttribute('data-gallery-lazy-raw') || img.getAttribute('data-gallery-thumb-lazy-raw');
     if (!raw) return;
     resolvePhotoDisplayUrl(raw).then((url) => {
       if (url) img.src = url;
       img.removeAttribute('data-gallery-lazy-raw');
+      img.removeAttribute('data-gallery-thumb-lazy-raw');
     });
   }
 
-  document.querySelectorAll('[data-gallery-lazy-raw]').forEach((img) => {
+  document.querySelectorAll('[data-gallery-lazy-raw], [data-gallery-thumb-lazy-raw]').forEach((img) => {
     if (!(img instanceof HTMLImageElement)) return;
     if ('IntersectionObserver' in window) {
       const io = new IntersectionObserver(
@@ -43,7 +42,7 @@
             io.unobserve(entry.target);
           });
         },
-        { rootMargin: '120px' }
+        { rootMargin: '160px' }
       );
       io.observe(img);
     } else {
@@ -51,16 +50,14 @@
     }
   });
 
-  const galleries = document.querySelectorAll('[data-gallery]');
-  if (!galleries.length) return;
-
   const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 
-  galleries.forEach((root) => {
-    const track = root.querySelector('[data-gallery-track]');
-    if (!track) return;
+  document.querySelectorAll('[data-gallery]').forEach((root) => {
+    const stage = root.querySelector('[data-gallery-stage]');
+    if (!stage) return;
 
     const slides = Array.from(root.querySelectorAll('[data-gallery-slide]'));
+    const thumbs = Array.from(root.querySelectorAll('[data-gallery-thumb]'));
     const prev = root.querySelector('[data-gallery-prev]');
     const next = root.querySelector('[data-gallery-next]');
     const counter = root.querySelector('[data-gallery-counter]');
@@ -75,57 +72,81 @@
       if (lazy instanceof HTMLImageElement) loadLazyGalleryImage(lazy);
     };
 
-    const updateCounter = () => {
-      if (!counter) return;
-      if (!hasSlides) {
-        counter.textContent = '';
-        return;
-      }
-      counter.textContent = `${index + 1}/${slides.length}`;
+    const scrollThumbIntoView = (i) => {
+      const thumb = thumbs[i];
+      if (!thumb || !('scrollIntoView' in thumb)) return;
+      thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     };
 
-    const scrollToIndex = (i) => {
+    const setActive = (i) => {
       if (!hasSlides) return;
-      const w = track.clientWidth || 1;
       index = clamp(i, 0, slides.length - 1);
-      track.scrollTo({ left: index * w, behavior: 'smooth' });
-      preloadSlide(index);
-      preloadSlide(index + 1);
-      updateCounter();
-    };
 
-    const deriveIndexFromScroll = () => {
-      if (!hasSlides) return;
-      const w = track.clientWidth || 1;
-      const i = Math.round(track.scrollLeft / w);
-      index = clamp(i, 0, slides.length - 1);
+      slides.forEach((slide, si) => {
+        const on = si === index;
+        slide.classList.toggle('is-active', on);
+        slide.hidden = !on;
+      });
+
+      thumbs.forEach((thumb, ti) => {
+        const on = ti === index;
+        thumb.classList.toggle('is-active', on);
+        thumb.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+
+      if (counter) counter.textContent = `${index + 1}/${slides.length}`;
+
       preloadSlide(index);
       preloadSlide(index + 1);
-      updateCounter();
+      preloadSlide(index - 1);
+      scrollThumbIntoView(index);
     };
 
     prev?.addEventListener('click', (e) => {
       e.preventDefault();
-      scrollToIndex(index - 1);
+      setActive(index - 1);
     });
     next?.addEventListener('click', (e) => {
       e.preventDefault();
-      scrollToIndex(index + 1);
+      setActive(index + 1);
     });
 
-    track.addEventListener('scroll', () => {
-      window.requestAnimationFrame(deriveIndexFromScroll);
+    thumbs.forEach((thumb) => {
+      thumb.addEventListener('click', (e) => {
+        e.preventDefault();
+        const raw = thumb.getAttribute('data-gallery-thumb');
+        const i = raw !== null ? parseInt(raw, 10) : 0;
+        if (!Number.isNaN(i)) setActive(i);
+      });
     });
 
-    window.addEventListener('resize', () => {
-      scrollToIndex(index);
+    root.querySelectorAll('[data-gallery-thumb-lazy-raw]').forEach((img) => {
+      if (img instanceof HTMLImageElement) loadLazyGalleryImage(img);
     });
 
-    updateCounter();
-    preloadSlide(1);
+    setActive(0);
     if (!hasSlides) {
       prev?.setAttribute('disabled', 'disabled');
       next?.setAttribute('disabled', 'disabled');
     }
+  });
+
+  document.querySelectorAll('[data-listing-fav]').forEach((btn) => {
+    if (!(btn instanceof HTMLButtonElement)) return;
+    const card = btn.closest('[data-listing-card], [data-listing-object]');
+    const id = card?.getAttribute('data-listing-id') || '';
+    if (!id || !window.SodeystvieFavorites) return;
+
+    const sync = () => {
+      const on = window.SodeystvieFavorites.has(id);
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    };
+
+    sync();
+    btn.addEventListener('click', () => {
+      window.SodeystvieFavorites.toggle(id);
+      sync();
+    });
   });
 })();

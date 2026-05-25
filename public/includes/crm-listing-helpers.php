@@ -286,6 +286,96 @@ function site_listing_card_title(
 }
 
 /**
+ * Строки блока «Характеристики» на странице объекта.
+ *
+ * @param array<string, mixed> $row
+ * @return list<array{label: string, value: string}>
+ */
+function site_listing_object_param_rows(array $row): array
+{
+    $rows = [];
+    $add = static function (string $label, ?string $value) use (&$rows): void {
+        $v = trim((string) $value);
+        if ($v !== '') {
+            $rows[] = ['label' => $label, 'value' => $v];
+        }
+    };
+
+    $objectType = isset($row['objectTypeValue']) ? trim((string) $row['objectTypeValue']) : '';
+    $rooms = isset($row['rooms']) && is_numeric($row['rooms']) ? (int) $row['rooms'] : null;
+    if ($objectType === 'flat' || ($objectType === '' && $rooms !== null && $rooms > 0)) {
+        $typeLabel = site_flat_short_label($rooms);
+    } elseif ($objectType === 'house') {
+        $typeLabel = 'Дом';
+    } elseif ($objectType === 'plot' || $objectType === 'land') {
+        $typeLabel = 'Участок';
+    } elseif ($objectType === 'commercial') {
+        $typeLabel = 'Коммерческая недвижимость';
+    } else {
+        $typeLabel = 'Объект';
+    }
+    $add('Тип', $typeLabel);
+
+    $deal = site_deal_line_public_label(isset($row['dealLineValue']) ? (string) $row['dealLineValue'] : null);
+    $add('Сделка', $deal);
+
+    if ($rooms !== null && $rooms > 0) {
+        $add('Комнат', (string) $rooms);
+    }
+
+    $areaTotal = isset($row['areaTotal']) && is_numeric($row['areaTotal']) ? (float) $row['areaTotal'] : null;
+    $areaLiving = isset($row['areaLiving']) && is_numeric($row['areaLiving']) ? (float) $row['areaLiving'] : null;
+    $areaKitchen = isset($row['areaKitchen']) && is_numeric($row['areaKitchen']) ? (float) $row['areaKitchen'] : null;
+    $areaLand = isset($row['areaLand']) && is_numeric($row['areaLand']) ? (float) $row['areaLand'] : null;
+
+    $area = site_fmt_area_short($areaTotal);
+    if ($area !== null) {
+        $add('Общая площадь', $area . ' м²');
+    }
+    $living = site_fmt_area_short($areaLiving);
+    if ($living !== null) {
+        $add('Жилая площадь', $living . ' м²');
+    }
+    $kitchen = site_fmt_area_short($areaKitchen);
+    if ($kitchen !== null) {
+        $add('Кухня', $kitchen . ' м²');
+    }
+    $land = site_fmt_area_short($areaLand);
+    if ($land !== null && $areaLand !== null && $areaLand > 0) {
+        $add('Участок', $land . ' сот.');
+    }
+
+    $floor = isset($row['floor']) ? (string) $row['floor'] : null;
+    $floorTotal = isset($row['floorTotal']) && is_numeric($row['floorTotal']) ? (int) $row['floorTotal'] : null;
+    $floorText = site_listing_floor_label($floor, $floorTotal);
+    $add('Этаж', $floorText);
+
+    $yearBuilt = isset($row['yearBuilt']) && is_numeric($row['yearBuilt']) ? (int) $row['yearBuilt'] : null;
+    if ($yearBuilt !== null && $yearBuilt > 0) {
+        $add('Год постройки', (string) $yearBuilt);
+    }
+
+    $jk = isset($row['residentialComplex']) ? trim((string) $row['residentialComplex']) : '';
+    $add('Жилой комплекс', $jk);
+
+    $district = isset($row['districtValue']) ? trim((string) $row['districtValue']) : '';
+    $add('Район', $district);
+
+    $city = isset($row['city']) ? trim((string) $row['city']) : '';
+    $add('Город', $city);
+
+    $addressLine = site_listing_address_line($row);
+    $add('Адрес', $addressLine);
+
+    $priceRaw = isset($row['price']) ? (string) $row['price'] : null;
+    $add('Цена', site_fmt_rub($priceRaw));
+    $priceM2 = site_fmt_m2($areaTotal, $priceRaw);
+    $add('Цена за м²', $priceM2);
+
+    return $rows;
+}
+
+/**
  * Текст описания из CRM (кэш + fallback на полную карточку).
  *
  * @return non-empty-string|null

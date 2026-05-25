@@ -24,11 +24,18 @@ if (!$error && (!is_array($obj) || !isset($obj['id']))) {
     $error = 'Объект не найден';
 }
 
-$title = !$error && isset($obj['title']) ? (string) $obj['title'] : 'Объект';
-$pageTitle = site_format_page_title($title);
+$titleRaw = !$error && isset($obj['title']) ? (string) $obj['title'] : 'Объект';
+$rooms = !$error && isset($obj['rooms']) && is_numeric($obj['rooms']) ? (int) $obj['rooms'] : null;
+$areaTotal = !$error && isset($obj['areaTotal']) && is_numeric($obj['areaTotal']) ? (float) $obj['areaTotal'] : null;
+$objectTypeValue = !$error ? (isset($obj['objectTypeValue']) ? (string) $obj['objectTypeValue'] : null) : null;
+$headingTitle = site_listing_card_title($objectTypeValue, $rooms, $areaTotal, $titleRaw);
+
+$pageTitle = site_format_page_title($headingTitle);
 $currentNav = 'catalog';
 $galleryBundle = ['first' => '', 'raw' => [], 'total' => 0];
 $preloadLcpImage = '';
+$listingMapScripts = false;
+$yandexMapsKey = site_yandex_maps_api_key();
 
 if (!$error && is_array($obj)) {
     $galleryBundle = site_crm_listing_gallery_bundle($obj, 30);
@@ -37,190 +44,166 @@ if (!$error && is_array($obj)) {
 
 require __DIR__ . '/../../includes/header.php';
 
-function v_str(array $a, string $k): ?string
-{
-    if (!array_key_exists($k, $a)) {
-        return null;
-    }
-    if ($a[$k] === null) {
-        return null;
-    }
-
-    return is_string($a[$k]) ? $a[$k] : (string) $a[$k];
+if ($error) {
+    ?>
+    <main class="page-main page-main--inner" id="main">
+        <div class="container">
+            <nav class="listing__crumbs" aria-label="Хлебные крошки">
+                <a class="listing__crumb" href="/catalog/">Каталог</a>
+                <span class="listing__crumb-sep" aria-hidden="true">/</span>
+                <span class="listing__crumb listing__crumb--current">Объект</span>
+            </nav>
+            <h1 class="page-main__heading">Объект</h1>
+            <p class="page-main__lead"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></p>
+        </div>
+    </main>
+    <?php
+    require __DIR__ . '/../../includes/footer.php';
+    return;
 }
 
-function v_num(array $a, string $k): ?float
-{
-    if (!array_key_exists($k, $a)) {
-        return null;
-    }
-    if ($a[$k] === null) {
-        return null;
-    }
-    if (is_int($a[$k]) || is_float($a[$k])) {
-        return (float) $a[$k];
-    }
-    if (is_string($a[$k]) && is_numeric($a[$k])) {
-        return (float) $a[$k];
-    }
+$priceRaw = isset($obj['price']) ? (string) $obj['price'] : null;
+$priceText = site_fmt_rub($priceRaw);
+$priceM2 = site_fmt_m2($areaTotal, $priceRaw);
+$addressLine = site_listing_address_line($obj);
+$district = isset($obj['districtValue']) ? trim((string) $obj['districtValue']) : '';
+$dealLine = site_deal_line_public_label(isset($obj['dealLineValue']) ? (string) $obj['dealLineValue'] : null);
+$description = isset($obj['description']) ? trim((string) $obj['description']) : '';
+$contactPhone = isset($obj['contactPhone']) ? (string) $obj['contactPhone'] : null;
+$phoneDisplay = site_mask_phone_display($contactPhone);
+$phoneTel = site_mask_phone_tel($contactPhone);
+$paramRows = site_listing_object_param_rows($obj);
 
-    return null;
-}
+$lat = isset($obj['latitude']) && is_numeric($obj['latitude']) ? (float) $obj['latitude'] : null;
+$lng = isset($obj['longitude']) && is_numeric($obj['longitude']) ? (float) $obj['longitude'] : null;
+$hasMapCoords = $lat !== null && $lng !== null
+    && $lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180
+    && (abs($lat) > 0.0001 || abs($lng) > 0.0001);
 
-function fmt_rub(?string $raw): string
-{
-    if ($raw === null || $raw === '') {
-        return '—';
-    }
-    $n = (float) preg_replace('/[^\d.]/', '', str_replace(',', '.', $raw));
-    if ($n <= 0) {
-        return '—';
-    }
+$mapsExternalUrl = $hasMapCoords
+    ? ('https://yandex.ru/maps/?pt=' . $lng . ',' . $lat . '&z=16&l=map')
+    : ($addressLine !== '' ? 'https://yandex.ru/maps/?text=' . rawurlencode($addressLine) : '');
 
-    return number_format((int) round($n), 0, '.', ' ') . ' ₽';
-}
+$markerJson = json_encode([
+    'lat' => $hasMapCoords ? $lat : null,
+    'lng' => $hasMapCoords ? $lng : null,
+    'zoom' => 16,
+    'title' => $headingTitle,
+    'address' => $addressLine,
+    'price' => $priceText,
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}';
 
-function object_type_label(?string $objectType, ?int $rooms): string
-{
-    $t = $objectType ? trim($objectType) : '';
-    if ($t === 'flat') {
-        return site_flat_short_label($rooms);
-    }
-    if ($t === 'house') {
-        return 'Дом';
-    }
-    if ($t === 'plot' || $t === 'land') {
-        return 'Участок';
-    }
-    if ($t === 'commercial') {
-        return 'Коммерческая недвижимость';
-    }
+$metaParts = array_filter([$dealLine, $district], static fn (string $v): bool => $v !== '');
+$metaLine = implode(' · ', $metaParts);
 
-    return 'Объект';
-}
-
-$address = !$error ? (v_str($obj, 'address') ?? '') : '';
-$city = !$error ? (v_str($obj, 'city') ?? '') : '';
-$district = !$error ? (v_str($obj, 'districtValue') ?? '') : '';
-$resComplex = !$error ? (v_str($obj, 'residentialComplex') ?? '') : '';
-$rooms = !$error && isset($obj['rooms']) && is_numeric($obj['rooms']) ? (int) $obj['rooms'] : null;
-$areaTotal = !$error ? v_num($obj, 'areaTotal') : null;
-$areaLand = !$error ? v_num($obj, 'areaLand') : null;
-$floor = !$error ? (v_str($obj, 'floor') ?? '') : '';
-$floorTotal = !$error && isset($obj['floorTotal']) && is_numeric($obj['floorTotal']) ? (int) $obj['floorTotal'] : null;
-$priceRaw = !$error ? v_str($obj, 'price') : null;
-$objectTypeValue = !$error ? v_str($obj, 'objectTypeValue') : null;
-$description = !$error ? (v_str($obj, 'description') ?? '') : '';
-
-$typeLabel = object_type_label($objectTypeValue, $rooms);
-$priceText = fmt_rub($priceRaw);
-$subtitleParts = [];
-if ($typeLabel !== '') {
-    $subtitleParts[] = $typeLabel;
-}
-if ($city !== '') {
-    $subtitleParts[] = $city;
-}
-if ($district !== '') {
-    $subtitleParts[] = $district;
-}
-$subtitle = implode(' · ', $subtitleParts);
+$listingMapScripts = $hasMapCoords && $yandexMapsKey !== '';
+$listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-object-map.js') ?: time());
 ?>
 
-<main class="page-main page-main--inner" id="main">
+<main class="page-main page-main--inner listing-object-page" id="main">
     <div class="container">
         <nav class="listing__crumbs" aria-label="Хлебные крошки">
             <a class="listing__crumb" href="/catalog/">Каталог</a>
             <span class="listing__crumb-sep" aria-hidden="true">/</span>
-            <span class="listing__crumb listing__crumb--current"><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></span>
+            <span class="listing__crumb listing__crumb--current"><?php echo htmlspecialchars($headingTitle, ENT_QUOTES, 'UTF-8'); ?></span>
         </nav>
 
-        <?php if ($error) { ?>
-            <h1 class="page-main__heading">Объект</h1>
-            <p class="page-main__lead"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></p>
-        <?php } else { ?>
-            <header class="listing__header">
-                <h1 class="listing__title"><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></h1>
-                <?php if ($subtitle !== '') { ?>
-                    <p class="listing__subtitle"><?php echo htmlspecialchars($subtitle, ENT_QUOTES, 'UTF-8'); ?></p>
-                <?php } ?>
+        <article class="listing-object" data-listing-object data-listing-id="<?php echo htmlspecialchars($id, ENT_QUOTES, 'UTF-8'); ?>">
+            <header class="listing-object__top">
+                <div class="listing-object__intro">
+                    <h1 class="listing-object__title"><?php echo htmlspecialchars($headingTitle, ENT_QUOTES, 'UTF-8'); ?></h1>
+                    <?php if ($addressLine !== '') { ?>
+                        <?php if ($mapsExternalUrl !== '') { ?>
+                            <a class="listing-object__address" href="<?php echo htmlspecialchars($mapsExternalUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer"><?php echo htmlspecialchars($addressLine, ENT_QUOTES, 'UTF-8'); ?></a>
+                        <?php } else { ?>
+                            <p class="listing-object__address"><?php echo htmlspecialchars($addressLine, ENT_QUOTES, 'UTF-8'); ?></p>
+                        <?php } ?>
+                    <?php } ?>
+                    <?php if ($metaLine !== '') { ?>
+                        <p class="listing-object__meta"><?php echo htmlspecialchars($metaLine, ENT_QUOTES, 'UTF-8'); ?></p>
+                    <?php } ?>
+                </div>
+                <div class="listing-object__buy">
+                    <p class="listing-object__price"><?php echo htmlspecialchars($priceText, ENT_QUOTES, 'UTF-8'); ?></p>
+                    <?php if ($priceM2 !== null) { ?>
+                        <p class="listing-object__price-m2"><?php echo htmlspecialchars($priceM2, ENT_QUOTES, 'UTF-8'); ?></p>
+                    <?php } ?>
+                    <div class="listing-object__actions">
+                        <button class="btn btn--primary" type="button" data-lead-open>Оставить заявку</button>
+                        <?php if ($phoneTel !== '') { ?>
+                            <a class="btn btn--ghost listing-object__phone-btn" href="tel:<?php echo htmlspecialchars(preg_replace('/\s+/', '', $phoneTel) ?? $phoneTel, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($phoneDisplay, ENT_QUOTES, 'UTF-8'); ?></a>
+                        <?php } ?>
+                        <button type="button" class="listing-object__fav" data-listing-fav aria-pressed="false" aria-label="В избранное">
+                            <svg class="listing-object__fav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <path fill="none" stroke="currentColor" stroke-width="1.8" d="M12 21s-7-4.6-9.5-9C.5 7.5 3.4 4.5 7 4.5c2 0 3.7 1.1 5 2.7 1.3-1.6 3-2.7 5-2.7 3.6 0 6.5 3 4.5 7.5C19 16.4 12 21 12 21Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </header>
 
-            <section class="listing__layout">
-                <div class="listing__gallery" data-gallery>
-                    <?php site_render_listing_gallery($galleryBundle, $title); ?>
-                </div>
+            <div class="listing-object__gallery-wrap">
+                <?php site_render_listing_gallery($galleryBundle, $headingTitle); ?>
+            </div>
 
-                <aside class="listing__side">
-                    <div class="listing-side__card">
-                        <p class="listing-side__price"><?php echo htmlspecialchars($priceText, ENT_QUOTES, 'UTF-8'); ?></p>
-                        <?php if ($address !== '') { ?>
-                            <p class="listing-side__address"><?php echo htmlspecialchars($address, ENT_QUOTES, 'UTF-8'); ?></p>
-                        <?php } ?>
-                        <div class="listing-side__actions">
-                            <button class="btn btn--primary" type="button" data-lead-open>Оставить заявку</button>
-                            <a class="btn btn--ghost" href="/mortgage/#calculator">Рассчитать ипотеку</a>
-                        </div>
-                    </div>
-
-                    <section class="listing-side__section" aria-labelledby="listing-params-title">
-                        <h2 class="listing-side__section-title" id="listing-params-title">Характеристики</h2>
-                        <dl class="listing-params">
+            <?php if (count($paramRows) > 0) { ?>
+                <section class="listing-object__section" aria-labelledby="listing-params-title">
+                    <h2 class="listing-object__section-title" id="listing-params-title">Характеристики</h2>
+                    <dl class="listing-params listing-params--object">
+                        <?php foreach ($paramRows as $row) { ?>
                             <div class="listing-params__row">
-                                <dt>Тип</dt>
-                                <dd><?php echo htmlspecialchars($typeLabel, ENT_QUOTES, 'UTF-8'); ?></dd>
+                                <dt><?php echo htmlspecialchars($row['label'], ENT_QUOTES, 'UTF-8'); ?></dt>
+                                <dd><?php echo htmlspecialchars($row['value'], ENT_QUOTES, 'UTF-8'); ?></dd>
                             </div>
-                            <?php if ($rooms !== null) { ?>
-                                <div class="listing-params__row">
-                                    <dt>Комнат</dt>
-                                    <dd><?php echo (int) $rooms; ?></dd>
-                                </div>
-                            <?php } ?>
-                            <?php if ($areaTotal !== null) { ?>
-                                <div class="listing-params__row">
-                                    <dt>Площадь</dt>
-                                    <dd><?php echo htmlspecialchars(rtrim(rtrim(number_format($areaTotal, 2, '.', ''), '0'), '.'), ENT_QUOTES, 'UTF-8'); ?> м²</dd>
-                                </div>
-                            <?php } ?>
-                            <?php if ($areaLand !== null) { ?>
-                                <div class="listing-params__row">
-                                    <dt>Участок</dt>
-                                    <dd><?php echo htmlspecialchars(rtrim(rtrim(number_format($areaLand, 2, '.', ''), '0'), '.'), ENT_QUOTES, 'UTF-8'); ?> сот.</dd>
-                                </div>
-                            <?php } ?>
-                            <?php if ($floor !== '') { ?>
-                                <div class="listing-params__row">
-                                    <dt>Этаж</dt>
-                                    <dd>
-                                        <?php
-                                        $ft = $floorTotal ? (' / ' . $floorTotal) : '';
-                                        echo htmlspecialchars($floor . $ft, ENT_QUOTES, 'UTF-8');
-                                        ?>
-                                    </dd>
-                                </div>
-                            <?php } ?>
-                            <?php if ($resComplex !== '') { ?>
-                                <div class="listing-params__row">
-                                    <dt>Жилой комплекс</dt>
-                                    <dd><?php echo htmlspecialchars($resComplex, ENT_QUOTES, 'UTF-8'); ?></dd>
-                                </div>
-                            <?php } ?>
-                        </dl>
-                    </section>
-                </aside>
-            </section>
+                        <?php } ?>
+                    </dl>
+                </section>
+            <?php } ?>
 
             <?php if ($description !== '') { ?>
-                <section class="listing__section" aria-labelledby="listing-desc-title">
-                    <h2 class="listing__section-title" id="listing-desc-title">Описание</h2>
-                    <div class="listing__desc">
+                <section class="listing-object__section" aria-labelledby="listing-desc-title">
+                    <h2 class="listing-object__section-title" id="listing-desc-title">Описание</h2>
+                    <div class="listing-object__desc">
                         <?php echo nl2br(htmlspecialchars($description, ENT_QUOTES, 'UTF-8')); ?>
                     </div>
                 </section>
             <?php } ?>
-        <?php } ?>
+
+            <section class="listing-object__section" aria-labelledby="listing-map-title">
+                <h2 class="listing-object__section-title" id="listing-map-title">Расположение</h2>
+                <div class="listing-object__map-block">
+                    <?php if ($listingMapScripts) { ?>
+                        <div
+                            class="listing-object__map-canvas"
+                            id="listing-object-map"
+                            data-marker="<?php echo htmlspecialchars($markerJson, ENT_QUOTES, 'UTF-8'); ?>"
+                            role="img"
+                            aria-label="Карта расположения объекта"
+                        ></div>
+                    <?php } else { ?>
+                        <div class="listing-object__map-fallback">
+                            <?php if ($yandexMapsKey === '' && $hasMapCoords) { ?>
+                                <p>Интерактивная карта подключается ключом <code>YANDEX_MAPS_API_KEY</code> в <code>.env</code> на хостинге.</p>
+                            <?php } elseif ($addressLine !== '') { ?>
+                                <p>Точные координаты объекта пока не указаны в CRM. Адрес:</p>
+                                <p class="listing-object__map-address"><?php echo htmlspecialchars($addressLine, ENT_QUOTES, 'UTF-8'); ?></p>
+                            <?php } else { ?>
+                                <p>Адрес и координаты объекта не указаны.</p>
+                            <?php } ?>
+                        </div>
+                    <?php } ?>
+                    <?php if ($mapsExternalUrl !== '') { ?>
+                        <a class="listing-object__map-link" href="<?php echo htmlspecialchars($mapsExternalUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">Открыть в Яндекс.Картах</a>
+                    <?php } ?>
+                </div>
+            </section>
+        </article>
     </div>
 </main>
 
-<?php
-require __DIR__ . '/../../includes/footer.php';
+<?php if ($listingMapScripts) { ?>
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=<?php echo htmlspecialchars($yandexMapsKey, ENT_QUOTES, 'UTF-8'); ?>&amp;lang=ru_RU"></script>
+    <script src="/js/listing-object-map.js?v=<?php echo htmlspecialchars($listingObjectMapJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+<?php } ?>
+
+<?php require __DIR__ . '/../../includes/footer.php'; ?>

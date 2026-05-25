@@ -124,6 +124,9 @@ $leadModalJsVersion = (string) (@filemtime(__DIR__ . '/../js/lead-modal.js') ?: 
     $mortgageJsVersion = (string) (@filemtime(__DIR__ . '/../js/mortgage.js') ?: time());
     ?>
     <script src="/js/mortgage.js?v=<?php echo htmlspecialchars($mortgageJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
-    <script src="/js/listing-page.js" defer></script>
+    <?php
+    $listingPageJsVersion = (string) (@filemtime(__DIR__ . '/../js/listing-page.js') ?: time());
+    ?>
+    <script src="/js/listing-page.js?v=<?php echo htmlspecialchars($listingPageJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
 </body>
 </html>
