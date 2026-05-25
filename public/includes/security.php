@@ -68,6 +68,79 @@ if (!function_exists('site_sanitize_lead_phone')) {
     }
 }
 
+if (!function_exists('site_sanitize_lead_email')) {
+    function site_sanitize_lead_email(string $email): string
+    {
+        $email = trim(mb_strtolower($email));
+        if ($email === '' || strlen($email) > 160) {
+            return '';
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return '';
+        }
+
+        return $email;
+    }
+}
+
+if (!function_exists('site_sanitize_lead_message')) {
+    function site_sanitize_lead_message(string $message): string
+    {
+        $message = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $message) ?? '';
+        $message = trim($message);
+
+        return mb_substr($message, 0, 2000);
+    }
+}
+
+if (!function_exists('site_pick_contacts_form_option')) {
+    /**
+     * @param array<string, string> $allowed
+     */
+    function site_pick_contacts_form_option(string $value, array $allowed, string $default = ''): string
+    {
+        return array_key_exists($value, $allowed) ? $value : $default;
+    }
+}
+
+if (!function_exists('site_verify_recaptcha')) {
+    function site_verify_recaptcha(string $token): bool
+    {
+        $secret = trim(site_env('RECAPTCHA_SECRET_KEY', ''));
+        if ($secret === '') {
+            return true;
+        }
+        if ($token === '') {
+            return false;
+        }
+
+        $post = http_build_query([
+            'secret' => $secret,
+            'response' => $token,
+            'remoteip' => $_SERVER['REMOTE_ADDR'] ?? '',
+        ]);
+        $ctx = stream_context_create([
+            'http' => [
+                'method' => 'POST',
+                'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
+                'content' => $post,
+                'timeout' => 8,
+            ],
+        ]);
+        $raw = @file_get_contents('https://www.google.com/recaptcha/api/siteverify', false, $ctx);
+        if ($raw === false) {
+            return false;
+        }
+        try {
+            $data = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+        } catch (Throwable $e) {
+            return false;
+        }
+
+        return is_array($data) && !empty($data['success']);
+    }
+}
+
 if (!function_exists('site_sanitize_lead_page_url')) {
     function site_sanitize_lead_page_url(string $url): string
     {

@@ -15,6 +15,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 }
 
 require_once dirname(__DIR__) . '/includes/config.php';
+require_once dirname(__DIR__) . '/includes/contacts-form.php';
 
 site_send_security_headers();
 
@@ -59,12 +60,35 @@ if ($honeypot !== '') {
     exit;
 }
 
+$formKind = isset($data['form']) ? trim((string) $data['form']) : '';
+$isContactsForm = $formKind === 'contacts';
+
 $name = site_sanitize_lead_name(isset($data['name']) ? (string) $data['name'] : '');
 $phone = site_sanitize_lead_phone(isset($data['phone']) ? (string) $data['phone'] : '');
+$email = site_sanitize_lead_email(isset($data['email']) ? (string) $data['email'] : '');
 $pageUrl = site_sanitize_lead_page_url(isset($data['pageUrl']) ? (string) $data['pageUrl'] : '');
 $objectId = isset($data['objectId']) ? trim((string) $data['objectId']) : '';
 
-if ($name === '' || strlen($phone) < 11) {
+if ($isContactsForm) {
+    $recaptchaToken = isset($data['recaptchaToken']) ? trim((string) $data['recaptchaToken']) : '';
+    if (site_recaptcha_site_key() !== '' && !site_verify_recaptcha($recaptchaToken)) {
+        http_response_code(400);
+        echo json_encode(['ok' => false, 'error' => 'Подтвердите, что вы не робот'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    if ($name === '' || $email === '') {
+        http_response_code(400);
+        echo json_encode(['ok' => false, 'error' => 'Укажите имя и электронную почту'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    if ($phone !== '' && strlen($phone) < 11) {
+        http_response_code(400);
+        echo json_encode(['ok' => false, 'error' => 'Укажите телефон полностью или оставьте поле пустым'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+} elseif ($name === '' || strlen($phone) < 11) {
     http_response_code(400);
     echo json_encode(['ok' => false, 'error' => 'Укажите имя и корректный телефон'], JSON_UNESCAPED_UNICODE);
     exit;
@@ -85,11 +109,46 @@ if (site_public_site_api_key() === '') {
     exit;
 }
 
+$source = 'Сайт an-sodeystvie.ru';
+if ($isContactsForm) {
+    $regions = site_contacts_form_regions();
+    $subjects = site_contacts_form_subjects();
+    $regionKey = site_pick_contacts_form_option(
+        isset($data['region']) ? (string) $data['region'] : '',
+        $regions,
+        '',
+    );
+    $subjectKey = site_pick_contacts_form_option(
+        isset($data['subject']) ? (string) $data['subject'] : '',
+        $subjects,
+        'support',
+    );
+    $message = site_sanitize_lead_message(isset($data['message']) ? (string) $data['message'] : '');
+
+    $parts = ['Форма контактов'];
+    if ($subjectKey !== '' && isset($subjects[$subjectKey])) {
+        $parts[] = 'Тема: ' . $subjects[$subjectKey];
+    }
+    if ($regionKey !== '' && isset($regions[$regionKey])) {
+        $parts[] = 'Регион: ' . $regions[$regionKey];
+    }
+    if ($email !== '') {
+        $parts[] = 'Email: ' . $email;
+    }
+    if ($message !== '') {
+        $parts[] = 'Сообщение: ' . $message;
+    }
+    $source = implode(' · ', $parts);
+}
+
 $payload = [
     'name' => $name,
     'phone' => $phone,
-    'source' => 'Сайт an-sodeystvie.ru',
+    'source' => $source,
 ];
+if ($isContactsForm && $email !== '') {
+    $payload['email'] = $email;
+}
 if ($pageUrl !== '') {
     $payload['pageUrl'] = $pageUrl;
 }

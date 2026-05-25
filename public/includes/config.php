@@ -104,6 +104,12 @@ function site_office_location(): array
     ];
 }
 
+/** Ключ reCAPTCHA v2 для формы контактов (публичный). */
+function site_recaptcha_site_key(): string
+{
+    return trim(site_env('RECAPTCHA_SITE_KEY', ''));
+}
+
 /** Ссылка «Открыть в Яндекс.Картах» (без JS API). */
 function site_yandex_maps_external_url(?array $office = null): string
 {
