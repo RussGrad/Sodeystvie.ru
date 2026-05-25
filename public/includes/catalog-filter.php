@@ -69,32 +69,35 @@ function site_render_catalog_filter(array $filters, string $action = '/catalog/'
             </select>
         </label>
 
-        <div class="catalog-filter__row">
-            <label class="catalog-filter__field catalog-filter__field--half">
-                <span class="catalog-filter__label">Площадь от, м²</span>
-                <input
-                    type="number"
-                    class="catalog-filter__input"
-                    name="area_min"
-                    min="0"
-                    step="1"
-                    value="<?php echo htmlspecialchars($areaMin, ENT_QUOTES, 'UTF-8'); ?>"
-                    placeholder="—"
-                >
-            </label>
-            <label class="catalog-filter__field catalog-filter__field--half">
-                <span class="catalog-filter__label">до</span>
-                <input
-                    type="number"
-                    class="catalog-filter__input"
-                    name="area_max"
-                    min="0"
-                    step="1"
-                    value="<?php echo htmlspecialchars($areaMax, ENT_QUOTES, 'UTF-8'); ?>"
-                    placeholder="—"
-                >
-            </label>
-        </div>
+        <fieldset class="catalog-filter__range">
+            <legend class="catalog-filter__legend">Площадь, м²</legend>
+            <div class="catalog-filter__row">
+                <label class="catalog-filter__field catalog-filter__field--half">
+                    <span class="catalog-filter__label">От</span>
+                    <input
+                        type="number"
+                        class="catalog-filter__input"
+                        name="area_min"
+                        min="0"
+                        step="1"
+                        value="<?php echo htmlspecialchars($areaMin, ENT_QUOTES, 'UTF-8'); ?>"
+                        placeholder="—"
+                    >
+                </label>
+                <label class="catalog-filter__field catalog-filter__field--half">
+                    <span class="catalog-filter__label">До</span>
+                    <input
+                        type="number"
+                        class="catalog-filter__input"
+                        name="area_max"
+                        min="0"
+                        step="1"
+                        value="<?php echo htmlspecialchars($areaMax, ENT_QUOTES, 'UTF-8'); ?>"
+                        placeholder="—"
+                    >
+                </label>
+            </div>
+        </fieldset>
 
         <label class="catalog-filter__field">
             <span class="catalog-filter__label">Цена (диапазон)</span>
@@ -108,32 +111,35 @@ function site_render_catalog_filter(array $filters, string $action = '/catalog/'
             </select>
         </label>
 
-        <div class="catalog-filter__row">
-            <label class="catalog-filter__field catalog-filter__field--half">
-                <span class="catalog-filter__label">Цена от, ₽</span>
-                <input
-                    type="number"
-                    class="catalog-filter__input"
-                    name="price_min"
-                    min="0"
-                    step="100000"
-                    value="<?php echo htmlspecialchars($priceMin, ENT_QUOTES, 'UTF-8'); ?>"
-                    placeholder="—"
-                >
-            </label>
-            <label class="catalog-filter__field catalog-filter__field--half">
-                <span class="catalog-filter__label">до</span>
-                <input
-                    type="number"
-                    class="catalog-filter__input"
-                    name="price_max"
-                    min="0"
-                    step="100000"
-                    value="<?php echo htmlspecialchars($priceMax, ENT_QUOTES, 'UTF-8'); ?>"
-                    placeholder="—"
-                >
-            </label>
-        </div>
+        <fieldset class="catalog-filter__range">
+            <legend class="catalog-filter__legend">Цена, ₽ (точнее)</legend>
+            <div class="catalog-filter__row">
+                <label class="catalog-filter__field catalog-filter__field--half">
+                    <span class="catalog-filter__label">От</span>
+                    <input
+                        type="number"
+                        class="catalog-filter__input"
+                        name="price_min"
+                        min="0"
+                        step="100000"
+                        value="<?php echo htmlspecialchars($priceMin, ENT_QUOTES, 'UTF-8'); ?>"
+                        placeholder="—"
+                    >
+                </label>
+                <label class="catalog-filter__field catalog-filter__field--half">
+                    <span class="catalog-filter__label">До</span>
+                    <input
+                        type="number"
+                        class="catalog-filter__input"
+                        name="price_max"
+                        min="0"
+                        step="100000"
+                        value="<?php echo htmlspecialchars($priceMax, ENT_QUOTES, 'UTF-8'); ?>"
+                        placeholder="—"
+                    >
+                </label>
+            </div>
+        </fieldset>
 
         <div class="catalog-filter__actions">
             <button type="submit" class="catalog-filter__submit">Показать</button>
