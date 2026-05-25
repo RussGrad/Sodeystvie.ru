@@ -57,6 +57,19 @@ function site_telegram_url(): ?string
     return null;
 }
 
+/**
+ * Мессенджер MAX (max.ru): SITE_MAX_URL в .env.
+ */
+function site_max_url(): string
+{
+    $fromEnv = trim(site_env('SITE_MAX_URL', ''));
+    if ($fromEnv !== '' && preg_match('#^https?://#i', $fromEnv)) {
+        return $fromEnv;
+    }
+
+    return 'https://max.ru/';
+}
+
 /** Реквизиты — уточняются у заказчика */
 const SITE_LEGAL_NAME = 'ООО «Содействие»';
 const SITE_LEGAL_INN = '0000000000';

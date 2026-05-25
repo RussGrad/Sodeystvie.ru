@@ -581,6 +581,16 @@ $header-tool-size: 2rem; // 32px
   }
 }
 
+.site-header__messenger--max {
+  .site-header__messenger-img {
+    display: block;
+    width: 1.125rem;
+    height: 1.125rem;
+    object-fit: contain;
+    border-radius: 4px;
+  }
+}
+
 .site-header__fav {
   @include header-toolbar-interactive;
   position: relative;

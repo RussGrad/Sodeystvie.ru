@@ -58,6 +58,7 @@ CRM_API_BASE=https://an-realty-crm.ru
 CRM_PUBLIC_BASE=https://an-realty-crm.ru
 SITE_WHATSAPP_URL=https://wa.me/73952603808
 SITE_TELEGRAM_URL=https://t.me/your_channel
+SITE_MAX_URL=https://max.ru/your_profile
 ```
 
 ---

@@ -6,6 +6,7 @@
 |--------|-----|
 | WhatsApp | `https://wa.me/73952603808` |
 | Telegram | `https://t.me/...` |
+| MAX (max.ru) | `https://max.ru/...` → `SITE_MAX_URL` в `.env` |
 | ВКонтакте | `https://vk.com/...` |
 | Дзен | `https://dzen.ru/...` |
 | Яндекс.Карты (организация) | |

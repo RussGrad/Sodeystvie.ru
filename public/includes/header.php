@@ -15,6 +15,7 @@ site_send_security_headers();
 $nav = site_nav_items();
 $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());
 $telegramUrl = site_telegram_url();
+$maxUrl = site_max_url();
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -117,6 +118,22 @@ $telegramUrl = site_telegram_url();
                             <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
                         </a>
                     <?php } ?>
+                    <a
+                        class="site-header__messenger site-header__messenger--max"
+                        href="<?php echo htmlspecialchars($maxUrl, ENT_QUOTES, 'UTF-8'); ?>"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Написать в MAX"
+                    >
+                        <img
+                            class="site-header__messenger-img"
+                            src="/assets/icons/max-messenger.png"
+                            width="20"
+                            height="20"
+                            alt=""
+                            decoding="async"
+                        >
+                    </a>
                     <a class="site-header__fav" href="/catalog/" id="site-header-favorites" aria-label="Избранное">
                         <svg class="site-header__fav-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
                             <path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
