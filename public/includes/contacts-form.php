@@ -41,8 +41,8 @@ $subjects = site_contacts_form_subjects();
 $defaultSubject = 'support';
 
 ?>
-<section class="contacts-page__form-section" aria-labelledby="contacts-form-heading">
-    <h2 class="contacts-page__form-heading" id="contacts-form-heading">Написать нам</h2>
+<section class="contacts-page__panel contacts-page__panel--form" aria-labelledby="contacts-form-heading">
+    <h2 class="contacts-page__panel-title" id="contacts-form-heading">Написать нам</h2>
 
     <form class="contacts-form" id="contacts-form" novalidate>
         <div class="contacts-form__hp visually-hidden" aria-hidden="true">

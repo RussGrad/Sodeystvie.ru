@@ -34,7 +34,8 @@ require __DIR__ . '/../includes/header.php';
         <p class="page-main__lead">Свяжитесь с нами удобным способом или приезжайте в офис.</p>
 
         <div class="contacts-page">
-            <aside class="contacts-page__aside" aria-label="Контактная информация">
+            <aside class="contacts-page__panel contacts-page__panel--info" aria-label="Контактная информация">
+                <h2 class="contacts-page__panel-title">Контактные данные</h2>
                 <dl class="contacts-page__details">
                     <div class="contacts-page__row">
                         <dt class="contacts-page__label">Телефон</dt>
@@ -77,9 +78,9 @@ require __DIR__ . '/../includes/header.php';
                 </dl>
             </aside>
 
-            <div class="contacts-page__right">
-                <section class="contacts-page__map-section" aria-labelledby="contacts-map-heading">
-                    <h2 class="contacts-page__map-heading" id="contacts-map-heading">Как нас найти</h2>
+            <section class="contacts-page__panel contacts-page__panel--map" aria-labelledby="contacts-map-heading">
+                <h2 class="contacts-page__panel-title" id="contacts-map-heading">Как нас найти</h2>
+                <div class="contacts-page__map-body">
                     <div class="contacts-page__map-wrap">
                         <?php if ($yandexMapsKey === '') { ?>
                             <div class="contacts-page__map-message">
@@ -99,10 +100,10 @@ require __DIR__ . '/../includes/header.php';
                         <?php } ?>
                     </div>
                     <a class="contacts-page__map-link" href="<?php echo htmlspecialchars($mapsExternalUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">Открыть в Яндекс.Картах</a>
-                </section>
+                </div>
+            </section>
 
-                <?php require __DIR__ . '/../includes/contacts-form.php'; ?>
-            </div>
+            <?php require __DIR__ . '/../includes/contacts-form.php'; ?>
         </div>
     </div>
 </main>
