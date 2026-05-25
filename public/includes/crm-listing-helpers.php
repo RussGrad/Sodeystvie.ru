@@ -499,38 +499,6 @@ function site_listing_public_id(string $id): string
     return $id;
 }
 
-function site_mask_phone_display(?string $raw): string
-{
-    $digits = preg_replace('/\D+/', '', (string) $raw) ?? '';
-    if (strlen($digits) < 10) {
-        return SITE_PHONE_DISPLAY;
-    }
-    if (strlen($digits) === 11 && ($digits[0] === '7' || $digits[0] === '8')) {
-        $d = substr($digits, -10);
-
-        return '+7 (' . substr($d, 0, 3) . ') ' . substr($d, 3, 3) . '-' . substr($d, 6, 2) . '-' . substr($d, 8, 2);
-    }
-
-    return SITE_PHONE_DISPLAY;
-}
-
-function site_mask_phone_tel(?string $raw): string
-{
-    $digits = preg_replace('/\D+/', '', (string) $raw) ?? '';
-    if (strlen($digits) >= 10) {
-        if (strlen($digits) === 10) {
-            return '+7' . $digits;
-        }
-        if ($digits[0] === '8') {
-            return '+7' . substr($digits, 1);
-        }
-
-        return '+' . ltrim($digits, '+');
-    }
-
-    return SITE_PHONE_TEL;
-}
-
 /**
  * Догрузка карточки из GET /api/public/listings/:id (на проде список часто без photos[] и description).
  *
@@ -744,7 +712,6 @@ function site_render_catalog_listing_card(array $row): void
     $jk = isset($row['residentialComplex']) ? (string) $row['residentialComplex'] : null;
     $district = isset($row['districtValue']) ? trim((string) $row['districtValue']) : '';
     $priceRaw = isset($row['price']) ? (string) $row['price'] : null;
-    $contactPhone = isset($row['contactPhone']) ? (string) $row['contactPhone'] : null;
     $photosCount = isset($row['photosCount']) && is_numeric($row['photosCount']) ? (int) $row['photosCount'] : 0;
 
     $photoBundle = site_crm_listing_photo_bundle($row, 1);
@@ -757,8 +724,6 @@ function site_render_catalog_listing_card(array $row): void
     $floorText = site_listing_floor_label($floor, $floorTotal);
     $buildingText = site_listing_building_label($yearBuilt, $jk);
     $addressLine = site_listing_address_line($row);
-    $phoneDisplay = site_mask_phone_display($contactPhone);
-    $phoneTel = site_mask_phone_tel($contactPhone);
     $areaLand = isset($row['areaLand']) && is_numeric($row['areaLand']) ? (float) $row['areaLand'] : null;
     $tone = site_tone_from_id($id);
     $totalPhotos = max(count($photoUrls), $photosCount, 1);
@@ -835,10 +800,6 @@ function site_render_catalog_listing_card(array $row): void
             <div class="listing-card__side">
                 <div class="listing-card__actions">
                     <a class="listing-card__more" href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>">Подробнее</a>
-                    <a class="listing-card__phone" href="tel:<?php echo htmlspecialchars(preg_replace('/\s+/', '', $phoneTel) ?? $phoneTel, ENT_QUOTES, 'UTF-8'); ?>" title="<?php echo htmlspecialchars($phoneDisplay, ENT_QUOTES, 'UTF-8'); ?>">
-                        <span class="listing-card__phone-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden"><?php echo htmlspecialchars($phoneDisplay, ENT_QUOTES, 'UTF-8'); ?></span>
-                    </a>
                     <button type="button" class="listing-card__fav" data-listing-fav aria-pressed="false" aria-label="В избранное">
                         <svg class="listing-card__fav-icon" viewBox="0 0 24 24" aria-hidden="true">
                             <path fill="none" stroke="currentColor" stroke-width="1.8" d="M12 21s-7-4.6-9.5-9C.5 7.5 3.4 4.5 7 4.5c2 0 3.7 1.1 5 2.7 1.3-1.6 3-2.7 5-2.7 3.6 0 6.5 3 4.5 7.5C19 16.4 12 21 12 21Z"/>

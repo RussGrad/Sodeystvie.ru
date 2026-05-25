@@ -69,9 +69,6 @@ $addressLine = site_listing_address_line($obj);
 $district = isset($obj['districtValue']) ? trim((string) $obj['districtValue']) : '';
 $dealLine = site_deal_line_public_label(isset($obj['dealLineValue']) ? (string) $obj['dealLineValue'] : null);
 $description = isset($obj['description']) ? trim((string) $obj['description']) : '';
-$contactPhone = isset($obj['contactPhone']) ? (string) $obj['contactPhone'] : null;
-$phoneDisplay = site_mask_phone_display($contactPhone);
-$phoneTel = site_mask_phone_tel($contactPhone);
 $paramRows = site_listing_object_param_rows($obj);
 
 $lat = isset($obj['latitude']) && is_numeric($obj['latitude']) ? (float) $obj['latitude'] : null;
@@ -130,9 +127,6 @@ $listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-o
                     <?php } ?>
                     <div class="listing-object__actions">
                         <button class="btn btn--primary" type="button" data-lead-open>Оставить заявку</button>
-                        <?php if ($phoneTel !== '') { ?>
-                            <a class="btn btn--ghost listing-object__phone-btn" href="tel:<?php echo htmlspecialchars(preg_replace('/\s+/', '', $phoneTel) ?? $phoneTel, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($phoneDisplay, ENT_QUOTES, 'UTF-8'); ?></a>
-                        <?php } ?>
                         <button type="button" class="listing-object__fav" data-listing-fav aria-pressed="false" aria-label="В избранное">
                             <svg class="listing-object__fav-icon" viewBox="0 0 24 24" aria-hidden="true">
                                 <path fill="none" stroke="currentColor" stroke-width="1.8" d="M12 21s-7-4.6-9.5-9C.5 7.5 3.4 4.5 7 4.5c2 0 3.7 1.1 5 2.7 1.3-1.6 3-2.7 5-2.7 3.6 0 6.5 3 4.5 7.5C19 16.4 12 21 12 21Z"/>
