@@ -43,7 +43,6 @@ require __DIR__ . '/../includes/header.php';
     <div class="container">
         <header class="catalog__header">
             <h1 class="page-main__heading">Каталог</h1>
-            <p class="page-main__lead">Опубликованные объекты из CRM (стадия «Активный»). Уточните параметры в фильтре слева.</p>
         </header>
 
         <div class="catalog-layout">
