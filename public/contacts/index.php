@@ -11,7 +11,7 @@ $office = site_office_location();
 $yandexMapsKey = site_yandex_maps_api_key();
 $mapsExternalUrl = site_yandex_maps_external_url($office);
 $telegramUrl = site_telegram_url();
-$whatsappUrl = site_whatsapp_url();
+$vkUrl = site_vk_url();
 $maxUrl = site_max_url();
 
 $officeJson = json_encode([
@@ -57,7 +57,7 @@ require __DIR__ . '/../includes/header.php';
                         <dt class="contacts-page__label">Режим работы</dt>
                         <dd class="contacts-page__value"><?php echo htmlspecialchars(SITE_WORK_HOURS, ENT_QUOTES, 'UTF-8'); ?></dd>
                     </div>
-                    <?php if ($telegramUrl !== null || $whatsappUrl !== null || $maxUrl !== '') { ?>
+                    <?php if ($telegramUrl !== null || $vkUrl !== null || $maxUrl !== '') { ?>
                         <div class="contacts-page__messengers-block">
                             <p class="contacts-page__label contacts-page__label--block">Мессенджеры</p>
                             <p class="contacts-page__messengers-lead"><?php echo htmlspecialchars(site_contacts_messengers_lead(), ENT_QUOTES, 'UTF-8'); ?></p>

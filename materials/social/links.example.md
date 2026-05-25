@@ -4,10 +4,9 @@
 
 | Сервис | URL |
 |--------|-----|
-| WhatsApp | `https://wa.me/73952603808` |
+| ВКонтакте | `https://vk.com/...` → `SITE_VK_URL` в `.env` |
 | Telegram | `https://t.me/...` |
 | MAX (max.ru) | `https://max.ru/...` → `SITE_MAX_URL` в `.env` |
-| ВКонтакте | `https://vk.com/...` |
 | Дзен | `https://dzen.ru/...` |
 | Яндекс.Карты (организация) | |
 | 2ГИС | |

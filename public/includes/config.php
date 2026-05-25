@@ -23,6 +23,19 @@ const SITE_FOUNDED_YEAR = 2015;
 const SITE_WORK_HOURS = 'Пн–Пт 9:00–19:00';
 
 /**
+ * ВКонтакте: SITE_VK_URL в .env (например https://vk.com/your_group).
+ */
+function site_vk_url(): ?string
+{
+    $fromEnv = trim(site_env('SITE_VK_URL', ''));
+    if ($fromEnv !== '' && preg_match('#^https?://#i', $fromEnv)) {
+        return $fromEnv;
+    }
+
+    return null;
+}
+
+/**
  * WhatsApp: SITE_WHATSAPP_URL в .env или wa.me по номеру SITE_PHONE_TEL.
  */
 function site_whatsapp_url(): ?string
@@ -112,7 +125,7 @@ function site_contacts_messengers_lead(): string
         return $custom;
     }
 
-    return 'Напишите в удобный чат — ответим в ' . SITE_WORK_HOURS . '.';
+    return 'Свяжемся в течение 15 минут.';
 }
 
 /** Ключ reCAPTCHA v2 для формы контактов (публичный). */
