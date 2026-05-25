@@ -66,17 +66,19 @@ $maxUrl = site_max_url();
 <header class="site-header" id="site-header">
     <div class="site-header__inner container">
         <div class="site-header__cluster">
-        <div class="site-header__brand">
-            <a class="site-header__logo-link" href="/" aria-label="<?php echo htmlspecialchars(site_brand_full() . ' — на главную', ENT_QUOTES, 'UTF-8'); ?>">
-                <?php require __DIR__ . '/logo-markup.php'; ?>
-            </a>
-            <p class="site-header__tagline">
-                <span class="site-header__tagline-line"><?php echo htmlspecialchars(SITE_CITY_TAG . ' • с ' . SITE_FOUNDED_YEAR, ENT_QUOTES, 'UTF-8'); ?></span>
-                <span class="site-header__tagline-line site-header__tagline-line--accent"><?php echo htmlspecialchars(site_slogan_short(), ENT_QUOTES, 'UTF-8'); ?></span>
-            </p>
-        </div>
-        <nav class="site-header__nav" id="site-header-menu" aria-label="Основное меню">
-            <ul class="site-header__menu">
+            <div class="site-header__brand">
+                <a class="site-header__logo-link" href="/" aria-label="<?php echo htmlspecialchars(site_brand_full() . ' — на главную', ENT_QUOTES, 'UTF-8'); ?>">
+                    <?php require __DIR__ . '/logo-markup.php'; ?>
+                </a>
+                <p class="site-header__tagline">
+                    <span class="site-header__tagline-line"><?php echo htmlspecialchars(SITE_CITY_TAG . ' • с ' . SITE_FOUNDED_YEAR, ENT_QUOTES, 'UTF-8'); ?></span>
+                    <span class="site-header__tagline-line site-header__tagline-line--accent"><?php echo htmlspecialchars(site_slogan_short(), ENT_QUOTES, 'UTF-8'); ?></span>
+                </p>
+            </div>
+
+            <div class="site-header__bar" id="site-header-menu">
+            <nav class="site-header__nav" aria-label="Основное меню">
+                <ul class="site-header__menu">
                 <?php foreach ($nav as $slug => $item) { ?>
                     <?php if (site_nav_item_has_children($item)) { ?>
                         <?php
@@ -115,7 +117,8 @@ $maxUrl = site_max_url();
                         </li>
                     <?php } ?>
                 <?php } ?>
-            </ul>
+                </ul>
+            </nav>
             <div class="site-header__actions">
                 <div class="site-header__contact">
                     <p class="site-header__hours"><?php echo htmlspecialchars(SITE_WORK_HOURS, ENT_QUOTES, 'UTF-8'); ?></p>
@@ -178,7 +181,7 @@ $maxUrl = site_max_url();
                     </button>
                 </div>
             </div>
-        </nav>
+            </div>
         </div>
         <button type="button" class="site-header__burger" id="site-header-burger" aria-controls="site-header-menu" aria-expanded="false" aria-label="Открыть меню">
             <span class="site-header__burger-line"></span>
