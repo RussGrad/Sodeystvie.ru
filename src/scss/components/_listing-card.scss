@@ -16,10 +16,15 @@
   --listing-card-phone: var(--cta-bg);
 
   display: grid;
-  grid-template-columns: 148px minmax(0, 1fr) auto;
+  grid-template-columns: 148px minmax(140px, 210px) minmax(0, 1fr) auto;
   gap: 0.85rem 1rem;
-  align-items: center;
+  align-items: start;
   padding: 0.65rem 0.85rem;
+
+  &.listing-card--no-desc {
+    grid-template-columns: 148px minmax(0, 1fr) auto;
+    align-items: center;
+  }
   background: var(--listing-card-bg);
   border: 1px solid var(--listing-card-border);
   border-radius: 10px;
@@ -30,13 +35,40 @@
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
   }
 
+  @media (max-width: 960px) {
+    grid-template-columns: 120px minmax(0, 1fr) auto;
+
+    &.listing-card--no-desc {
+      grid-template-columns: 120px minmax(0, 1fr) auto;
+    }
+
+    .listing-card__desc {
+      grid-column: 1 / -1;
+      padding-left: 0;
+    }
+  }
+
   @media (max-width: 720px) {
     grid-template-columns: 120px minmax(0, 1fr);
-    grid-template-rows: auto auto;
+    grid-template-rows: auto auto auto;
+
+    &.listing-card--no-desc {
+      grid-template-rows: auto auto;
+    }
+
+    .listing-card__side {
+      grid-column: 1 / -1;
+    }
   }
 
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
+    grid-template-rows: auto;
+
+    .listing-card__desc,
+    .listing-card__side {
+      grid-column: auto;
+    }
   }
 }
 
@@ -181,21 +213,42 @@
   color: var(--header-muted);
 }
 
+.listing-card__desc {
+  min-width: 0;
+  align-self: center;
+  padding: 0 0.25rem;
+}
+
+.listing-card__desc-text {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--header-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .listing-card--compact .listing-card__side {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  justify-content: center;
   gap: 0.2rem;
   text-align: right;
   flex-shrink: 0;
+  align-self: center;
+  min-height: 100%;
 
   @media (max-width: 720px) {
-    grid-column: 1 / -1;
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     text-align: left;
+    align-self: auto;
+    min-height: 0;
   }
 }
 

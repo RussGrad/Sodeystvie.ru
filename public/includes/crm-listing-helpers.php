@@ -677,9 +677,12 @@ function site_render_catalog_listing_card(array $row): void
         $specParts[] = $buildingText;
     }
     $specLine = implode(' · ', $specParts);
+    $descRaw = isset($row['description']) ? trim((string) $row['description']) : '';
+    $descExcerpt = site_excerpt_text($descRaw, 280);
+    $hasDesc = $descExcerpt !== '';
     ?>
     <li class="catalog-list__item">
-        <article class="listing-card listing-card--compact" data-listing-card data-listing-id="<?php echo htmlspecialchars($id, ENT_QUOTES, 'UTF-8'); ?>">
+        <article class="listing-card listing-card--compact<?php echo $hasDesc ? '' : ' listing-card--no-desc'; ?>" data-listing-card data-listing-id="<?php echo htmlspecialchars($id, ENT_QUOTES, 'UTF-8'); ?>">
             <div
                 class="listing-card__media listing-card__media--tone-<?php echo (int) $tone; ?>"
                 data-listing-gallery
@@ -713,6 +716,11 @@ function site_render_catalog_listing_card(array $row): void
                     <p class="listing-card__district"><?php echo htmlspecialchars($district, ENT_QUOTES, 'UTF-8'); ?></p>
                 <?php } ?>
             </div>
+            <?php if ($hasDesc) { ?>
+                <div class="listing-card__desc">
+                    <p class="listing-card__desc-text"><?php echo htmlspecialchars($descExcerpt, ENT_QUOTES, 'UTF-8'); ?></p>
+                </div>
+            <?php } ?>
             <div class="listing-card__side">
                 <p class="listing-card__price"><?php echo htmlspecialchars($priceText, ENT_QUOTES, 'UTF-8'); ?></p>
                 <?php if ($priceM2 !== null) { ?>
