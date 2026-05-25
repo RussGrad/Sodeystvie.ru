@@ -103,7 +103,7 @@
   &:focus {
     outline: none;
     border-color: var(--focus-ring);
-    box-shadow: 0 0 0 2px rgba(201, 169, 97, 0.25);
+    box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb), 0.25);
   }
 }
 

@@ -174,11 +174,7 @@
 .resale-card__trend {
   display: inline-flex;
   align-items: center;
-  color: #1a936f;
-}
-
-:root[data-theme="dark"] .resale-card__trend {
-  color: #34d399;
+  color: var(--cta-bg);
 }
 
 .resale-card__price-m2 {

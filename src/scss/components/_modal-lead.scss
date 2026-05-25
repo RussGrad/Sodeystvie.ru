@@ -154,7 +154,7 @@
   }
 
   &:hover:not(:focus-visible) {
-    border-color: rgba(184, 148, 72, 0.35);
+    border-color: rgba(var(--color-accent-rgb), 0.35);
   }
 }
 

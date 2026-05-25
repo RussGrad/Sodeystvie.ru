@@ -35,11 +35,7 @@
 }
 
 .page-main__ok {
-  color: #2d7a4a;
-}
-
-:root[data-theme="dark"] .page-main__ok {
-  color: #7dcea0;
+  color: var(--cta-bg);
 }
 
 .page-main__err {

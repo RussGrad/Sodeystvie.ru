@@ -96,7 +96,7 @@
 
 // Светлая тема: перекрашиваем только .st26 в тёмный (градиенты АН и подпись не трогаем)
 :root[data-theme="light"] .site-header__logo-svg .st26 {
-  fill: #1a1f26;
+  fill: #161616;
 }
 
 :root[data-theme="dark"] .site-header__logo-svg .st26 {

@@ -1,151 +1,163 @@
 // Переменные Sass (брейкпоинты, шрифты). Цвета темы — через CSS custom properties ниже.
-$breakpoint-nav: 1024px; // от этой ширины — полное горизонтальное меню в шапке
-$breakpoint-header-comfort: 1200px; // комфортные отступы в шапке без переноса
-$container-max: 1280px; // максимальная ширина контентной области
+$breakpoint-nav: 1024px;
+$breakpoint-header-comfort: 1200px;
+$container-max: 1280px;
 $font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
-// Интерактив: плавность без «пружины» (см. prefers-reduced-motion в _base.scss)
+// Бренд: белый фон, графитовый текст, изумрудный акцент (#0D3E36)
+$brand-accent: #0d3e36;
+$brand-accent-hover: #145a4f;
+$brand-accent-muted: #1a6b5c;
+$brand-text: #161616;
+$brand-text-muted: #525252;
+$brand-surface: #ffffff;
+$brand-surface-subtle: #f5f7f7;
+$brand-accent-rgb: 13, 62, 54;
+
 $ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
 $duration-fast: 0.18s;
 $duration-normal: 0.28s;
 
-// Токены светлой темы (фон страницы, шапка, подвал, кнопки). См. docs/05-non-functional.md
+// Светлая тема (основная): ~80% белый, ~15% графит, ~5% акцент
 :root[data-theme="light"] {
   color-scheme: light;
   --ease-smooth: #{$ease-smooth};
   --duration-fast: #{$duration-fast};
   --duration-normal: #{$duration-normal};
-  --btn-primary-shadow: 0 2px 8px rgba(184, 148, 72, 0.28), 0 1px 2px rgba(26, 31, 38, 0.06);
-  --btn-primary-shadow-hover: 0 8px 24px rgba(184, 148, 72, 0.38), 0 2px 6px rgba(26, 31, 38, 0.08);
-  --page-bg: #f4f6f9;
-  --page-text: #1a1f26;
-  --header-bg: #ffffff;
-  --header-border: rgba(26, 31, 38, 0.08);
-  --header-text: #1a1f26;
-  --header-muted: #5c6570;
-  --nav-hover: rgba(184, 148, 72, 0.12);
-  --cta-bg: #b89448;
-  --cta-bg-hover: #a3823d;
-  --cta-text: #1a1f26;
-  --focus-ring: #b89448;
-  --header-tool-icon: #1a1a1a;
-  --header-tool-hover-bg: rgba(201, 169, 97, 0.2);
-  --footer-bg: #eef1f6;
-  --footer-border: rgba(26, 31, 38, 0.1);
-  --footer-text: #1a1f26;
-  --footer-muted: #5c6570;
-  --footer-link: #3d4a5c;
-  --footer-link-hover: #b89448;
-  --hero-border: rgba(26, 31, 38, 0.08);
+  --color-accent: #{$brand-accent};
+  --color-accent-hover: #{$brand-accent-hover};
+  --color-accent-rgb: #{$brand-accent-rgb};
+  --btn-primary-shadow: 0 2px 10px rgba(#{$brand-accent-rgb}, 0.22), 0 1px 2px rgba(22, 22, 22, 0.06);
+  --btn-primary-shadow-hover: 0 8px 24px rgba(#{$brand-accent-rgb}, 0.28), 0 2px 6px rgba(22, 22, 22, 0.08);
+  --page-bg: #{$brand-surface};
+  --page-text: #{$brand-text};
+  --header-bg: #{$brand-surface};
+  --header-border: rgba(22, 22, 22, 0.1);
+  --header-text: #{$brand-text};
+  --header-muted: #{$brand-text-muted};
+  --nav-hover: rgba(#{$brand-accent-rgb}, 0.08);
+  --cta-bg: #{$brand-accent};
+  --cta-bg-hover: #{$brand-accent-hover};
+  --cta-text: #ffffff;
+  --focus-ring: #{$brand-accent};
+  --header-tool-icon: #{$brand-text};
+  --header-tool-hover-bg: rgba(#{$brand-accent-rgb}, 0.1);
+  --footer-bg: #{$brand-surface-subtle};
+  --footer-border: rgba(22, 22, 22, 0.1);
+  --footer-text: #{$brand-text};
+  --footer-muted: #{$brand-text-muted};
+  --footer-link: #3a3a3a;
+  --footer-link-hover: #{$brand-accent};
+  --hero-border: rgba(22, 22, 22, 0.08);
   --hero-photo-overlay: linear-gradient(
     180deg,
-    rgba(225, 235, 250, 0.9) 0%,
-    rgba(236, 242, 252, 0.88) 45%,
-    rgba(242, 246, 252, 0.92) 100%
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(255, 255, 255, 0.88) 45%,
+    rgba(245, 247, 247, 0.94) 100%
   );
-  --hero-title: #2c3138;
-  --hero-panel-bg: #ffffff;
-  --hero-panel-border: rgba(26, 31, 38, 0.08);
-  --hero-panel-shadow: 0 8px 32px rgba(26, 31, 38, 0.1);
-  --hero-filter-divider: rgba(26, 31, 38, 0.12);
-  --hero-filter-hint: #6b7280;
-  --hero-tab-glass: rgba(255, 255, 255, 0.48);
-  --hero-tab-text: rgba(35, 42, 54, 0.9);
+  --hero-title: #{$brand-text};
+  --hero-panel-bg: #{$brand-surface};
+  --hero-panel-border: rgba(22, 22, 22, 0.1);
+  --hero-panel-shadow: 0 8px 32px rgba(22, 22, 22, 0.08);
+  --hero-filter-divider: rgba(22, 22, 22, 0.12);
+  --hero-filter-hint: #{$brand-text-muted};
+  --hero-tab-glass: rgba(255, 255, 255, 0.72);
+  --hero-tab-text: rgba(22, 22, 22, 0.88);
   --hero-btn-find-fg: #ffffff;
-  --hero-slider-bg: rgba(255, 255, 255, 0.92);
-  --hero-slider-text: #4a5568;
-  --services-card-bg: #ffffff;
-  --services-card-border: rgba(26, 31, 38, 0.08);
-  --services-card-shadow: 0 4px 24px rgba(26, 31, 38, 0.07);
-  --services-title: #1a1f26;
-  --services-text: #5c6570;
-  --services-icon-bg: rgba(184, 148, 72, 0.14);
-  --services-icon-color: #9a7b3c;
-  --featured-strip-bg: #eef1f6;
-  --featured-card-bg: #ffffff;
-  --featured-card-border: rgba(26, 31, 38, 0.08);
-  --featured-card-shadow: 0 4px 20px rgba(26, 31, 38, 0.08);
-  --featured-title: #1a1f26;
-  --featured-muted: #5c6570;
-  --featured-price: #9a7b3c;
-  --featured-badge-new: rgba(184, 148, 72, 0.18);
-  --featured-badge-resale: rgba(60, 100, 140, 0.12);
-  --featured-badge-sale: rgba(180, 60, 60, 0.1);
-  --resale-accent: #2563eb;
-  --resale-pill-bg: rgba(184, 148, 72, 0.16);
-  --resale-pill-text: #8a6a2f;
-  --resale-fav-bg: rgba(255, 255, 255, 0.9);
-  --resale-fav-border: rgba(26, 31, 38, 0.12);
+  --hero-slider-bg: rgba(255, 255, 255, 0.94);
+  --hero-slider-text: #{$brand-text-muted};
+  --services-card-bg: #{$brand-surface};
+  --services-card-border: rgba(22, 22, 22, 0.08);
+  --services-card-shadow: 0 4px 24px rgba(22, 22, 22, 0.06);
+  --services-title: #{$brand-text};
+  --services-text: #{$brand-text-muted};
+  --services-icon-bg: rgba(#{$brand-accent-rgb}, 0.1);
+  --services-icon-color: #{$brand-accent};
+  --featured-strip-bg: #{$brand-surface-subtle};
+  --featured-card-bg: #{$brand-surface};
+  --featured-card-border: rgba(22, 22, 22, 0.08);
+  --featured-card-shadow: 0 4px 20px rgba(22, 22, 22, 0.06);
+  --featured-title: #{$brand-text};
+  --featured-muted: #{$brand-text-muted};
+  --featured-price: #{$brand-accent};
+  --featured-badge-new: rgba(#{$brand-accent-rgb}, 0.12);
+  --featured-badge-resale: rgba(#{$brand-accent-rgb}, 0.08);
+  --featured-badge-sale: rgba(22, 22, 22, 0.06);
+  --resale-accent: #{$brand-accent};
+  --resale-pill-bg: rgba(#{$brand-accent-rgb}, 0.1);
+  --resale-pill-text: #{$brand-accent};
+  --resale-fav-bg: rgba(255, 255, 255, 0.95);
+  --resale-fav-border: rgba(22, 22, 22, 0.12);
 }
 
-// Токены тёмной темы (ТЗ: фон #1a1a1a, акцент #C9A961)
+// Тёмная тема: графитовый фон, светлый текст, тот же изумрудный акцент
 :root[data-theme="dark"] {
   color-scheme: dark;
   --ease-smooth: #{$ease-smooth};
   --duration-fast: #{$duration-fast};
   --duration-normal: #{$duration-normal};
-  --color-accent: #c9a961;
-  --color-muted: #9ca3af;
-  --color-subtitle: #d1d5db;
-  --btn-primary-shadow: 0 2px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(201, 169, 97, 0.15);
-  --btn-primary-shadow-hover: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(201, 169, 97, 0.28);
-  --page-bg: #1a1a1a;
-  --page-text: #e8eaef;
-  --header-bg: #1a1a1a;
+  --color-accent: #{$brand-accent-muted};
+  --color-accent-hover: #2a8a7a;
+  --color-accent-rgb: #{$brand-accent-rgb};
+  --btn-primary-shadow: 0 2px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(#{$brand-accent-rgb}, 0.25);
+  --btn-primary-shadow-hover: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(#{$brand-accent-rgb}, 0.35);
+  --page-bg: #141414;
+  --page-text: #f0f0f0;
+  --header-bg: #141414;
   --header-border: rgba(255, 255, 255, 0.1);
-  --header-text: #f3f4f6;
-  --header-muted: #9ca3af;
-  --nav-hover: rgba(201, 169, 97, 0.14);
-  --cta-bg: #c9a961;
-  --cta-bg-hover: #d4b56e;
-  --cta-text: #1a1a1a;
-  --focus-ring: #c9a961;
+  --header-text: #f5f5f5;
+  --header-muted: #a3a3a3;
+  --nav-hover: rgba(#{$brand-accent-rgb}, 0.18);
+  --cta-bg: #{$brand-accent-muted};
+  --cta-bg-hover: #2a8a7a;
+  --cta-text: #ffffff;
+  --focus-ring: #{$brand-accent-muted};
   --header-tool-icon: #ffffff;
-  --header-tool-hover-bg: rgba(201, 169, 97, 0.22);
-  --footer-bg: #141414;
+  --header-tool-hover-bg: rgba(#{$brand-accent-rgb}, 0.2);
+  --footer-bg: #0f0f0f;
   --footer-border: rgba(255, 255, 255, 0.08);
-  --footer-text: #e8eaef;
-  --footer-muted: #9aa3ae;
-  --footer-link: #c9d0d9;
-  --footer-link-hover: #d4b56e;
+  --footer-text: #f0f0f0;
+  --footer-muted: #a3a3a3;
+  --footer-link: #d4d4d4;
+  --footer-link-hover: #5eb8a8;
   --hero-border: rgba(255, 255, 255, 0.06);
   --hero-photo-overlay: linear-gradient(
     180deg,
-    rgba(22, 28, 36, 0.88) 0%,
-    rgba(26, 32, 42, 0.9) 50%,
-    rgba(20, 26, 34, 0.92) 100%
+    rgba(20, 20, 20, 0.9) 0%,
+    rgba(20, 20, 20, 0.92) 50%,
+    rgba(15, 15, 15, 0.94) 100%
   );
-  --hero-title: #f2f4f8;
-  --hero-panel-bg: #2a3340;
+  --hero-title: #f5f5f5;
+  --hero-panel-bg: #1e1e1e;
   --hero-panel-border: rgba(255, 255, 255, 0.1);
   --hero-panel-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
   --hero-filter-divider: rgba(255, 255, 255, 0.12);
-  --hero-filter-hint: #9aa3ae;
-  --hero-tab-glass: rgba(255, 255, 255, 0.12);
-  --hero-tab-text: rgba(232, 236, 242, 0.92);
-  --hero-btn-find-fg: #1a1f26;
-  --hero-slider-bg: rgba(42, 51, 64, 0.92);
-  --hero-slider-text: #c9d0d9;
-  --services-card-bg: #2a3340;
+  --hero-filter-hint: #a3a3a3;
+  --hero-tab-glass: rgba(255, 255, 255, 0.08);
+  --hero-tab-text: rgba(240, 240, 240, 0.92);
+  --hero-btn-find-fg: #ffffff;
+  --hero-slider-bg: rgba(30, 30, 30, 0.92);
+  --hero-slider-text: #c4c4c4;
+  --services-card-bg: #1e1e1e;
   --services-card-border: rgba(255, 255, 255, 0.1);
   --services-card-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
-  --services-title: #f2f4f8;
-  --services-text: #9aa3ae;
-  --services-icon-bg: rgba(201, 169, 97, 0.18);
-  --services-icon-color: #c9a961;
-  --featured-strip-bg: #141414;
-  --featured-card-bg: #242424;
+  --services-title: #f5f5f5;
+  --services-text: #a3a3a3;
+  --services-icon-bg: rgba(#{$brand-accent-rgb}, 0.2);
+  --services-icon-color: #5eb8a8;
+  --featured-strip-bg: #0f0f0f;
+  --featured-card-bg: #1c1c1c;
   --featured-card-border: rgba(255, 255, 255, 0.1);
   --featured-card-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
-  --featured-title: #f2f4f8;
-  --featured-muted: #9aa3ae;
-  --featured-price: #c9a961;
-  --featured-badge-new: rgba(201, 168, 90, 0.22);
-  --featured-badge-resale: rgba(120, 160, 200, 0.2);
-  --featured-badge-sale: rgba(220, 100, 100, 0.18);
-  --resale-accent: #60a5fa;
-  --resale-pill-bg: rgba(201, 168, 90, 0.22);
-  --resale-pill-text: #e7d3a1;
-  --resale-fav-bg: rgba(42, 51, 64, 0.92);
+  --featured-title: #f5f5f5;
+  --featured-muted: #a3a3a3;
+  --featured-price: #5eb8a8;
+  --featured-badge-new: rgba(#{$brand-accent-rgb}, 0.25);
+  --featured-badge-resale: rgba(#{$brand-accent-rgb}, 0.15);
+  --featured-badge-sale: rgba(255, 255, 255, 0.08);
+  --resale-accent: #5eb8a8;
+  --resale-pill-bg: rgba(#{$brand-accent-rgb}, 0.22);
+  --resale-pill-text: #8fd4c8;
+  --resale-fav-bg: rgba(30, 30, 30, 0.92);
   --resale-fav-border: rgba(255, 255, 255, 0.12);
 }
