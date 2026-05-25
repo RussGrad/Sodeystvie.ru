@@ -17,7 +17,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column; // main растягивается, footer прижимается вниз
-  font-family: $font-sans;
+  font-family: var(--font-sans, #{$font-sans});
   line-height: 1.5;
   background: var(--page-bg);
   color: var(--page-text);

@@ -2,7 +2,7 @@
 $breakpoint-nav: 1024px;
 $breakpoint-header-comfort: 1200px;
 $container-max: 1280px;
-$font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+$font-sans: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
 
 // Бренд: белый фон, графитовый текст, изумрудный акцент (#0D3E36)
 $brand-accent: #0d3e36;
@@ -21,6 +21,7 @@ $duration-normal: 0.28s;
 // Светлая тема (основная): ~80% белый, ~15% графит, ~5% акцент
 :root[data-theme="light"] {
   color-scheme: light;
+  --font-sans: #{$font-sans};
   --ease-smooth: #{$ease-smooth};
   --duration-fast: #{$duration-fast};
   --duration-normal: #{$duration-normal};
@@ -93,6 +94,7 @@ $duration-normal: 0.28s;
 // Тёмная тема: графитовый фон, светлый текст, тот же изумрудный акцент
 :root[data-theme="dark"] {
   color-scheme: dark;
+  --font-sans: #{$font-sans};
   --ease-smooth: #{$ease-smooth};
   --duration-fast: #{$duration-fast};
   --duration-normal: #{$duration-normal};
