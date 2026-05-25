@@ -6,12 +6,12 @@ declare(strict_types=1);
 /** @var string $currentNav Активный пункт меню: home | catalog | services | mortgage | about | reviews | contacts | vacancies */
 /** @var string $preloadLcpImage URL первого кадра hero (preload LCP) */
 
+require_once __DIR__ . '/config.php';
+
 $pageTitle = $pageTitle ?? site_format_page_title();
 $pageDescription = $pageDescription ?? null;
 $currentNav = $currentNav ?? '';
 $preloadLcpImage = $preloadLcpImage ?? '';
-
-require_once __DIR__ . '/config.php';
 
 site_send_security_headers();
 

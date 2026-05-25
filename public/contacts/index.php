@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../includes/config.php';
+
 $pageTitle = site_format_page_title('Контакты');
 $currentNav = 'contacts';
 
