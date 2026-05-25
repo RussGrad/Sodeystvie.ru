@@ -67,15 +67,9 @@ $maxUrl = site_max_url();
     <div class="site-header__inner container">
         <div class="site-header__cluster">
             <div class="site-header__brand">
-                <div class="site-header__brand-logo">
-                    <a class="site-header__logo-link" href="/" aria-label="<?php echo htmlspecialchars(site_brand_full() . ' — на главную', ENT_QUOTES, 'UTF-8'); ?>">
-                        <?php require __DIR__ . '/logo-markup.php'; ?>
-                    </a>
-                </div>
-                <p class="site-header__tagline">
-                    <span class="site-header__tagline-line site-header__tagline-line--geo"><?php echo htmlspecialchars(site_header_tagline_geo(), ENT_QUOTES, 'UTF-8'); ?></span>
-                    <span class="site-header__tagline-line site-header__tagline-line--accent"><?php echo htmlspecialchars(site_slogan_short(), ENT_QUOTES, 'UTF-8'); ?></span>
-                </p>
+                <a class="site-header__logo-link" href="/" aria-label="<?php echo htmlspecialchars(site_brand_full() . ' — на главную', ENT_QUOTES, 'UTF-8'); ?>">
+                    <?php require __DIR__ . '/logo-markup.php'; ?>
+                </a>
             </div>
 
             <div class="site-header__bar" id="site-header-menu">
