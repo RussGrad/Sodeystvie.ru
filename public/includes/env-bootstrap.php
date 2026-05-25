@@ -64,21 +64,26 @@ if (!function_exists('site_load_dotenv_file')) {
         if (!is_readable($path)) {
             return;
         }
-        $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        if ($lines === false) {
+        $raw = file_get_contents($path);
+        if ($raw === false || $raw === '') {
             return;
         }
+        $raw = preg_replace('/^\xEF\xBB\xBF/', '', $raw) ?? $raw;
+        $lines = preg_split('/\r\n|\r|\n/', $raw) ?: [];
         foreach ($lines as $line) {
             $line = trim($line);
             if ($line === '' || str_starts_with($line, '#')) {
                 continue;
             }
+            if (str_starts_with($line, 'export ')) {
+                $line = trim(substr($line, 7));
+            }
             if (!str_contains($line, '=')) {
                 continue;
             }
             [$k, $v] = explode('=', $line, 2);
-            $k = trim($k);
-            $v = trim($v);
+            $k = trim($k, " \t\r\n\0\x0B");
+            $v = trim($v, " \t\r\n\0\x0B");
             if ($k === '') {
                 continue;
             }

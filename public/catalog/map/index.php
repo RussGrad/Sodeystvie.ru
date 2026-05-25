@@ -59,8 +59,14 @@ require __DIR__ . '/../../includes/header.php';
         </div>
     <?php } elseif ($yandexMapsKey === '') { ?>
         <div class="container catalog-map-page__message">
-            <p>Для карты укажите ключ <code>YANDEX_MAPS_API_KEY</code> в <code>.env</code> на хостинге (JavaScript API Яндекс.Карт).</p>
-            <p><a href="https://developer.tech.yandex.ru/">Получить ключ</a> → сервис «JavaScript API и HTTP Геокодер».</p>
+            <p>Для карты укажите ключ <code>YANDEX_MAPS_API_KEY</code> на хостинге (JavaScript API Яндекс.Карт).</p>
+            <p>Файл в корне сайта (рядом с <code>index.php</code>), один из вариантов:</p>
+            <ul>
+                <li><code>crm-config.env</code> — удобнее на REG.RU (без точки в имени);</li>
+                <li><code>.env</code> — та же папка;</li>
+                <li><code>includes/crm-config.local.php</code> — массив с ключом (см. пример в репозитории).</li>
+            </ul>
+            <p><a href="https://developer.tech.yandex.ru/">Получить ключ</a> → «JavaScript API».</p>
         </div>
     <?php } elseif (count($mapMarkers) === 0) { ?>
         <div class="container catalog-map-page__message">

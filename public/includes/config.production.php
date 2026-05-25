@@ -32,6 +32,7 @@ $force('CRM_LEADS_PATH', '/api/public/leads');
  * Ключ заявок с витрины (тот же — PUBLIC_SITE_API_KEY в apps/api/.env на CRM).
  * Подставляется на an-sodeystvie.ru, если .env на хостинге не прочитался (часто отключён putenv).
  * Для смены ключа: public/.env, crm-config.env или includes/crm-config.local.php.
+ * Карта: YANDEX_MAPS_API_KEY — лучше в crm-config.env (без точки в имени, удобно на REG.RU).
  */
 $siteApiKey = site_read_env_var('PUBLIC_SITE_API_KEY');
 if ($siteApiKey === '') {
