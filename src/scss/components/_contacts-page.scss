@@ -102,8 +102,39 @@
   }
 }
 
-.contacts-page__row--messengers .contacts-page__value {
-  padding-top: 0.2rem;
+.contacts-page__messengers-block {
+  padding: 0.75rem 0 0;
+  margin-top: 0.15rem;
+  border-top: 1px solid var(--header-border);
+}
+
+.contacts-page__label--block {
+  margin: 0 0 0.35rem;
+}
+
+.contacts-page__messengers-lead {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--header-muted);
+}
+
+.contacts-page__messengers-note {
+  margin: 0.85rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--header-muted);
+
+  a {
+    color: var(--cta-bg);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 
 // —— Карта (центр)

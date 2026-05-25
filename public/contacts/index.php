@@ -58,14 +58,17 @@ require __DIR__ . '/../includes/header.php';
                         <dd class="contacts-page__value"><?php echo htmlspecialchars(SITE_WORK_HOURS, ENT_QUOTES, 'UTF-8'); ?></dd>
                     </div>
                     <?php if ($telegramUrl !== null || $whatsappUrl !== null || $maxUrl !== '') { ?>
-                        <div class="contacts-page__row contacts-page__row--messengers">
-                            <dt class="contacts-page__label">Мессенджеры</dt>
-                            <dd class="contacts-page__value">
-                                <?php
-                                require_once __DIR__ . '/../includes/messenger-links.php';
-                                site_render_messenger_links('contacts-page__messengers', 'contacts-page__messenger');
-                                ?>
-                            </dd>
+                        <div class="contacts-page__messengers-block">
+                            <p class="contacts-page__label contacts-page__label--block">Мессенджеры</p>
+                            <p class="contacts-page__messengers-lead"><?php echo htmlspecialchars(site_contacts_messengers_lead(), ENT_QUOTES, 'UTF-8'); ?></p>
+                            <?php
+                            require_once __DIR__ . '/../includes/messenger-links.php';
+                            site_render_messenger_links('contacts-page__messengers', 'contacts-page__messenger', true);
+                            ?>
+                            <p class="contacts-page__messengers-note">
+                                Или позвоните:
+                                <a href="tel:<?php echo htmlspecialchars(SITE_PHONE_TEL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_PHONE_DISPLAY, ENT_QUOTES, 'UTF-8'); ?></a>
+                            </p>
                         </div>
                     <?php } ?>
                 </dl>

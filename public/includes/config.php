@@ -104,6 +104,17 @@ function site_office_location(): array
     ];
 }
 
+/** Текст под заголовком «Мессенджеры» на странице контактов. */
+function site_contacts_messengers_lead(): string
+{
+    $custom = trim(site_env('SITE_CONTACTS_MESSENGERS_LEAD', ''));
+    if ($custom !== '') {
+        return $custom;
+    }
+
+    return 'Напишите в удобный чат — ответим в ' . SITE_WORK_HOURS . '.';
+}
+
 /** Ключ reCAPTCHA v2 для формы контактов (публичный). */
 function site_recaptcha_site_key(): string
 {
