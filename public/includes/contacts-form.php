@@ -123,7 +123,7 @@ $defaultSubject = 'support';
                 class="contacts-form__input contacts-form__textarea"
                 id="contacts-message"
                 name="message"
-                rows="5"
+                rows="3"
                 maxlength="2000"
             ></textarea>
         </div>

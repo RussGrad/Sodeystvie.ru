@@ -77,31 +77,33 @@ require __DIR__ . '/../includes/header.php';
                 </dl>
             </aside>
 
-            <section class="contacts-page__map-section" aria-labelledby="contacts-map-heading">
-                <h2 class="contacts-page__map-heading" id="contacts-map-heading">Как нас найти</h2>
-                <div class="contacts-page__map-wrap">
-                    <?php if ($yandexMapsKey === '') { ?>
-                        <div class="contacts-page__map-message">
-                            <p>Интерактивная карта подключается ключом <code>YANDEX_MAPS_API_KEY</code> в <code>.env</code> на хостинге (тот же ключ, что для карты каталога).</p>
-                            <p><a href="https://developer.tech.yandex.ru/">Получить ключ</a> → «JavaScript API и HTTP Геокодер».</p>
-                        </div>
-                    <?php } else { ?>
-                        <div
-                            class="contacts-page__map-canvas"
-                            id="contacts-map"
-                            data-office="<?php echo htmlspecialchars($officeJson, ENT_QUOTES, 'UTF-8'); ?>"
-                            role="application"
-                            aria-label="Карта: офис <?php echo htmlspecialchars(SITE_BRAND_FULL, ENT_QUOTES, 'UTF-8'); ?>"
-                        ></div>
-                        <script src="https://api-maps.yandex.ru/2.1/?apikey=<?php echo htmlspecialchars($yandexMapsKey, ENT_QUOTES, 'UTF-8'); ?>&amp;lang=ru_RU"></script>
-                        <script src="/js/contacts-map.js?v=<?php echo htmlspecialchars($contactsMapJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
-                    <?php } ?>
-                </div>
-                <a class="contacts-page__map-link" href="<?php echo htmlspecialchars($mapsExternalUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">Открыть в Яндекс.Картах</a>
-            </section>
-        </div>
+            <div class="contacts-page__right">
+                <section class="contacts-page__map-section" aria-labelledby="contacts-map-heading">
+                    <h2 class="contacts-page__map-heading" id="contacts-map-heading">Как нас найти</h2>
+                    <div class="contacts-page__map-wrap">
+                        <?php if ($yandexMapsKey === '') { ?>
+                            <div class="contacts-page__map-message">
+                                <p>Интерактивная карта подключается ключом <code>YANDEX_MAPS_API_KEY</code> в <code>.env</code> на хостинге.</p>
+                                <p><a href="https://developer.tech.yandex.ru/">Получить ключ</a> → «JavaScript API».</p>
+                            </div>
+                        <?php } else { ?>
+                            <div
+                                class="contacts-page__map-canvas"
+                                id="contacts-map"
+                                data-office="<?php echo htmlspecialchars($officeJson, ENT_QUOTES, 'UTF-8'); ?>"
+                                role="application"
+                                aria-label="Карта: офис <?php echo htmlspecialchars(SITE_BRAND_FULL, ENT_QUOTES, 'UTF-8'); ?>"
+                            ></div>
+                            <script src="https://api-maps.yandex.ru/2.1/?apikey=<?php echo htmlspecialchars($yandexMapsKey, ENT_QUOTES, 'UTF-8'); ?>&amp;lang=ru_RU"></script>
+                            <script src="/js/contacts-map.js?v=<?php echo htmlspecialchars($contactsMapJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+                        <?php } ?>
+                    </div>
+                    <a class="contacts-page__map-link" href="<?php echo htmlspecialchars($mapsExternalUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">Открыть в Яндекс.Картах</a>
+                </section>
 
-        <?php require __DIR__ . '/../includes/contacts-form.php'; ?>
+                <?php require __DIR__ . '/../includes/contacts-form.php'; ?>
+            </div>
+        </div>
     </div>
 </main>
 <?php if ($recaptchaSiteKey !== '') { ?>
