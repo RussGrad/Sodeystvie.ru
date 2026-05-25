@@ -100,6 +100,13 @@
   object-fit: contain;
   object-position: center;
   display: block;
+  background: #1c222c;
+}
+
+.listing-gallery__img:not([src]),
+.listing-gallery__img[src=""] {
+  min-height: 12rem;
+  opacity: 0.35;
 }
 
 .listing-gallery__placeholder {

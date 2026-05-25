@@ -540,23 +540,43 @@ function site_crm_listing_photo_bundle(array $row, int $resolveOnServer = 2): ar
 }
 
 /**
- * Все фото для страницы объекта (кэш URL в рамках запроса).
+ * Галерея объекта: на сервере только 1-е фото (LCP), остальные — lazy в браузере.
+ *
+ * @param array<string, mixed> $row
+ * @return array{first: string, raw: list<string>, total: int}
+ */
+function site_crm_listing_gallery_bundle(array $row, int $max = 30): array
+{
+    $raw = site_crm_listing_raw_photo_urls($row, $max);
+    $first = '';
+    if (count($raw) > 0) {
+        $resolved = site_crm_photo_src($raw[0]);
+        if ($resolved !== '') {
+            $first = site_crm_photo_display_src($resolved, 'gallery');
+        }
+    }
+
+    return [
+        'first' => $first,
+        'raw' => $raw,
+        'total' => count($raw),
+    ];
+}
+
+/**
+ * @deprecated Используйте site_crm_listing_gallery_bundle — не резолвить все фото на сервере.
  *
  * @param array<string, mixed> $row
  * @return list<string>
  */
 function site_crm_listing_resolved_photos(array $row, int $max = 12): array
 {
-    $max = max(1, min(30, $max));
-    $urls = [];
-    foreach (site_crm_listing_raw_photo_urls($row, $max) as $u) {
-        $src = site_crm_photo_src($u);
-        if ($src !== '') {
-            $urls[] = site_crm_photo_display_src($src, 'gallery');
-        }
+    $bundle = site_crm_listing_gallery_bundle($row, $max);
+    if ($bundle['first'] === '') {
+        return [];
     }
 
-    return $urls;
+    return [$bundle['first']];
 }
 
 function site_excerpt_text(?string $text, int $maxLen = 280): string

@@ -36,7 +36,7 @@ function site_image_width_preset(string $preset): int
         'card', 'catalog' => 640,
         'featured' => 720,
         'hero' => 1400,
-        'object', 'gallery' => 1200,
+        'object', 'gallery' => 960,
         'thumb' => 420,
         default => 800,
     };

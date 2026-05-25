@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../includes/crm-listing-helpers.php';
+require_once __DIR__ . '/../../includes/listing-gallery.php';
 
 $id = isset($_GET['id']) && is_string($_GET['id']) ? trim($_GET['id']) : '';
 if ($id === '' || !site_validate_crm_object_id($id)) {
@@ -26,30 +27,56 @@ if (!$error && (!is_array($obj) || !isset($obj['id']))) {
 $title = !$error && isset($obj['title']) ? (string) $obj['title'] : 'Объект';
 $pageTitle = site_format_page_title($title);
 $currentNav = 'catalog';
+$galleryBundle = ['first' => '', 'raw' => [], 'total' => 0];
+$preloadLcpImage = '';
+
+if (!$error && is_array($obj)) {
+    $galleryBundle = site_crm_listing_gallery_bundle($obj, 30);
+    $preloadLcpImage = $galleryBundle['first'];
+}
 
 require __DIR__ . '/../../includes/header.php';
 
 function v_str(array $a, string $k): ?string
 {
-    if (!array_key_exists($k, $a)) return null;
-    if ($a[$k] === null) return null;
+    if (!array_key_exists($k, $a)) {
+        return null;
+    }
+    if ($a[$k] === null) {
+        return null;
+    }
+
     return is_string($a[$k]) ? $a[$k] : (string) $a[$k];
 }
 
 function v_num(array $a, string $k): ?float
 {
-    if (!array_key_exists($k, $a)) return null;
-    if ($a[$k] === null) return null;
-    if (is_int($a[$k]) || is_float($a[$k])) return (float) $a[$k];
-    if (is_string($a[$k]) && is_numeric($a[$k])) return (float) $a[$k];
+    if (!array_key_exists($k, $a)) {
+        return null;
+    }
+    if ($a[$k] === null) {
+        return null;
+    }
+    if (is_int($a[$k]) || is_float($a[$k])) {
+        return (float) $a[$k];
+    }
+    if (is_string($a[$k]) && is_numeric($a[$k])) {
+        return (float) $a[$k];
+    }
+
     return null;
 }
 
 function fmt_rub(?string $raw): string
 {
-    if ($raw === null || $raw === '') return '—';
+    if ($raw === null || $raw === '') {
+        return '—';
+    }
     $n = (float) preg_replace('/[^\d.]/', '', str_replace(',', '.', $raw));
-    if ($n <= 0) return '—';
+    if ($n <= 0) {
+        return '—';
+    }
+
     return number_format((int) round($n), 0, '.', ' ') . ' ₽';
 }
 
@@ -57,12 +84,22 @@ function object_type_label(?string $objectType, ?int $rooms): string
 {
     $t = $objectType ? trim($objectType) : '';
     if ($t === 'flat') {
-        if ($rooms !== null && $rooms > 0) return $rooms . '-комнатная квартира';
+        if ($rooms !== null && $rooms > 0) {
+            return $rooms . '-комнатная квартира';
+        }
+
         return 'Квартира';
     }
-    if ($t === 'house') return 'Дом';
-    if ($t === 'plot' || $t === 'land') return 'Участок';
-    if ($t === 'commercial') return 'Коммерческая недвижимость';
+    if ($t === 'house') {
+        return 'Дом';
+    }
+    if ($t === 'plot' || $t === 'land') {
+        return 'Участок';
+    }
+    if ($t === 'commercial') {
+        return 'Коммерческая недвижимость';
+    }
+
     return 'Объект';
 }
 
@@ -78,23 +115,19 @@ $floorTotal = !$error && isset($obj['floorTotal']) && is_numeric($obj['floorTota
 $priceRaw = !$error ? v_str($obj, 'price') : null;
 $objectTypeValue = !$error ? v_str($obj, 'objectTypeValue') : null;
 $description = !$error ? (v_str($obj, 'description') ?? '') : '';
-if (!$error && trim($description) === '' && is_array($obj) && isset($obj['id'])) {
-    $fromApi = site_crm_fetch_listing_description((string) $obj['id']);
-    if ($fromApi !== null) {
-        $description = $fromApi;
-    }
-}
 
-$photos = [];
-if (!$error && is_array($obj)) {
-    $photos = site_crm_listing_resolved_photos($obj, 30);
-}
 $typeLabel = object_type_label($objectTypeValue, $rooms);
 $priceText = fmt_rub($priceRaw);
 $subtitleParts = [];
-if ($typeLabel !== '') $subtitleParts[] = $typeLabel;
-if ($city !== '') $subtitleParts[] = $city;
-if ($district !== '') $subtitleParts[] = $district;
+if ($typeLabel !== '') {
+    $subtitleParts[] = $typeLabel;
+}
+if ($city !== '') {
+    $subtitleParts[] = $city;
+}
+if ($district !== '') {
+    $subtitleParts[] = $district;
+}
 $subtitle = implode(' · ', $subtitleParts);
 ?>
 
@@ -119,28 +152,7 @@ $subtitle = implode(' · ', $subtitleParts);
 
             <section class="listing__layout">
                 <div class="listing__gallery" data-gallery>
-                    <div class="listing-gallery">
-                        <div class="listing-gallery__track" data-gallery-track>
-                            <?php if (count($photos) > 0) { ?>
-                                <?php foreach ($photos as $idx => $src) { ?>
-                                    <figure class="listing-gallery__slide" data-gallery-slide>
-                                        <?php echo site_crm_photo_img($src, $title, 'listing-gallery__img', '', 'gallery'); ?>
-                                    </figure>
-                                <?php } ?>
-                            <?php } else { ?>
-                                <div class="listing-gallery__placeholder" aria-label="Фото отсутствует"></div>
-                            <?php } ?>
-                        </div>
-
-                        <button class="listing-gallery__nav listing-gallery__nav--prev" type="button" data-gallery-prev aria-label="Предыдущее фото">
-                            <span aria-hidden="true">‹</span>
-                        </button>
-                        <button class="listing-gallery__nav listing-gallery__nav--next" type="button" data-gallery-next aria-label="Следующее фото">
-                            <span aria-hidden="true">›</span>
-                        </button>
-
-                        <div class="listing-gallery__counter" data-gallery-counter aria-live="polite"></div>
-                    </div>
+                    <?php site_render_listing_gallery($galleryBundle, $title); ?>
                 </div>
 
                 <aside class="listing__side">
@@ -216,4 +228,3 @@ $subtitle = implode(' · ', $subtitleParts);
 
 <?php
 require __DIR__ . '/../../includes/footer.php';
-
