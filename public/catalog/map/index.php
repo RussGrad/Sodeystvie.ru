@@ -53,12 +53,12 @@ require __DIR__ . '/../../includes/header.php';
         </div>
     </div>
 
-    <div class="catalog-map-page__body">
-        <aside class="catalog-map-page__aside" aria-label="Фильтр каталога">
+    <div class="catalog-map-page__body catalog-layout">
+        <aside class="catalog-layout__aside catalog-map-page__aside" aria-label="Фильтр каталога">
             <?php site_render_catalog_filter($catalogFilters, '/catalog/map/'); ?>
         </aside>
 
-        <div class="catalog-map-page__map-wrap">
+        <div class="catalog-map-page__map-wrap catalog-layout__main">
             <?php if ($mapError) { ?>
                 <div class="catalog-map-page__message">
                     <p><?php echo htmlspecialchars($mapError, ENT_QUOTES, 'UTF-8'); ?></p>
