@@ -743,10 +743,6 @@ function site_render_catalog_listing_card(array $row): void
                 </div>
             <?php } ?>
             <div class="listing-card__side">
-                <p class="listing-card__price"><?php echo htmlspecialchars($priceText, ENT_QUOTES, 'UTF-8'); ?></p>
-                <?php if ($priceM2 !== null) { ?>
-                    <p class="listing-card__price-m2"><?php echo htmlspecialchars($priceM2, ENT_QUOTES, 'UTF-8'); ?></p>
-                <?php } ?>
                 <div class="listing-card__actions">
                     <a class="listing-card__more" href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>">Подробнее</a>
                     <a class="listing-card__phone" href="tel:<?php echo htmlspecialchars(preg_replace('/\s+/', '', $phoneTel) ?? $phoneTel, ENT_QUOTES, 'UTF-8'); ?>" title="<?php echo htmlspecialchars($phoneDisplay, ENT_QUOTES, 'UTF-8'); ?>">
@@ -758,6 +754,12 @@ function site_render_catalog_listing_card(array $row): void
                             <path fill="none" stroke="currentColor" stroke-width="1.8" d="M12 21s-7-4.6-9.5-9C.5 7.5 3.4 4.5 7 4.5c2 0 3.7 1.1 5 2.7 1.3-1.6 3-2.7 5-2.7 3.6 0 6.5 3 4.5 7.5C19 16.4 12 21 12 21Z"/>
                         </svg>
                     </button>
+                </div>
+                <div class="listing-card__pricing">
+                    <p class="listing-card__price"><?php echo htmlspecialchars($priceText, ENT_QUOTES, 'UTF-8'); ?></p>
+                    <?php if ($priceM2 !== null) { ?>
+                        <p class="listing-card__price-m2"><?php echo htmlspecialchars($priceM2, ENT_QUOTES, 'UTF-8'); ?></p>
+                    <?php } ?>
                 </div>
             </div>
         </article>
