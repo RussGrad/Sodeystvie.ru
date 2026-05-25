@@ -70,6 +70,22 @@ function site_max_url(): string
     return 'https://max.ru/';
 }
 
+/** API-ключ JavaScript API Яндекс.Карт (https://developer.tech.yandex.ru/) */
+function site_yandex_maps_api_key(): string
+{
+    return trim(site_env('YANDEX_MAPS_API_KEY', ''));
+}
+
+/** Центр карты по умолчанию (Иркутск) */
+function site_map_default_center(): array
+{
+    $lat = (float) site_env('SITE_MAP_CENTER_LAT', '52.2896');
+    $lng = (float) site_env('SITE_MAP_CENTER_LNG', '104.2806');
+    $zoom = (int) site_env('SITE_MAP_DEFAULT_ZOOM', '11');
+
+    return ['lat' => $lat, 'lng' => $lng, 'zoom' => max(4, min(17, $zoom))];
+}
+
 /** Реквизиты — уточняются у заказчика */
 const SITE_LEGAL_NAME = 'ООО «Содействие»';
 const SITE_LEGAL_INN = '0000000000';

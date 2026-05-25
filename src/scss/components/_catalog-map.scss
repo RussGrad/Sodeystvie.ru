@@ -1,0 +1,110 @@
+// Полноэкранная карта каталога
+@use "../variables" as *;
+
+.catalog-map-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: calc(100vh - 4.5rem);
+  min-height: calc(100dvh - 4.5rem);
+  padding: 0;
+  background: var(--page-bg);
+}
+
+.catalog-map-page__toolbar {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--header-border);
+  background: var(--header-bg);
+}
+
+.catalog-map-page__toolbar-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding-block: 0.65rem 0.75rem;
+}
+
+.catalog-map-page__nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+}
+
+.catalog-map-page__back {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--cta-bg);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.catalog-map-page__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--page-text);
+}
+
+.catalog-map-page__stat {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--header-muted);
+}
+
+.catalog-map-page__stat-muted {
+  color: var(--header-muted);
+  opacity: 0.85;
+}
+
+.catalog-map-page__canvas {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 420px;
+}
+
+.catalog-map-page__message {
+  padding: 2rem 0;
+  line-height: 1.6;
+  color: var(--page-text);
+}
+
+.catalog-map-page__filters {
+  flex-shrink: 0;
+  margin: 0 auto;
+  padding: 0 1rem 1rem;
+  max-width: $container-max;
+  width: 100%;
+}
+
+.catalog-map-page__filters-toggle {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--page-text);
+  padding: 0.75rem 0;
+}
+
+.catalog-map-balloon {
+  max-width: 220px;
+  line-height: 1.4;
+
+  strong {
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  p {
+    margin: 0 0 0.5rem;
+    color: var(--header-muted, #525252);
+  }
+
+  a {
+    font-weight: 600;
+    color: var(--cta-bg, #0d3e36);
+  }
+}

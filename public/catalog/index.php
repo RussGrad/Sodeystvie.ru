@@ -7,6 +7,14 @@ require_once __DIR__ . '/../includes/config.php';
 $pageTitle = 'Каталог — Содействие';
 $currentNav = 'catalog';
 
+if (isset($_GET['view']) && $_GET['view'] === 'map') {
+    $params = $_GET;
+    unset($params['view']);
+    $query = http_build_query($params);
+    header('Location: /catalog/map/' . ($query !== '' ? '?' . $query : ''), true, 302);
+    exit;
+}
+
 if (isset($_GET['id']) && is_string($_GET['id'])) {
     $id = trim($_GET['id']);
     if ($id !== '' && site_validate_crm_object_id($id)) {
@@ -26,6 +34,7 @@ $crmError = $crmFetched['error'];
 $crmFiltered = $crmFetched['filtered'];
 
 $catalogCardJsVersion = (string) (@filemtime(__DIR__ . '/../js/catalog-listing-card.js') ?: time());
+$filterQuery = http_build_query(array_filter($catalogFilters, static fn ($v) => $v !== ''));
 
 require __DIR__ . '/../includes/header.php';
 
@@ -45,6 +54,7 @@ require __DIR__ . '/../includes/header.php';
             <section class="catalog-layout__main" aria-labelledby="cat-published-title">
                 <div class="catalog__results-head">
                     <h2 class="catalog__title" id="cat-published-title">Объекты</h2>
+                    <a class="catalog__map-link" href="/catalog/map/<?php echo $filterQuery !== '' ? '?' . htmlspecialchars($filterQuery, ENT_QUOTES, 'UTF-8') : ''; ?>">На карте</a>
                     <?php if (!$crmError && $crmTotal !== null) { ?>
                         <p class="catalog__count">
                             <?php

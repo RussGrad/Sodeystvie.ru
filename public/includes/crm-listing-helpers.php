@@ -884,3 +884,85 @@ function site_crm_fetch_listings(int $limit = 24, int $offset = 0, array $apiQue
 
     return ['items' => $items, 'total' => $total, 'error' => $error];
 }
+
+/**
+ * Объекты для карты: те же фильтры, что в каталоге, до 100 шт.
+ *
+ * @param array<string, string> $filters
+ * @return array{items: list<array<string, mixed>>, total: ?int, error: ?string, withCoords: int}
+ */
+function site_crm_fetch_listings_for_map(array $filters): array
+{
+    $result = site_crm_fetch_listings_catalog($filters, 100);
+    if ($result['error'] !== null) {
+        return ['items' => [], 'total' => null, 'error' => $result['error'], 'withCoords' => 0];
+    }
+
+    $withCoords = 0;
+    foreach ($result['items'] as $row) {
+        if (!is_array($row)) {
+            continue;
+        }
+        $lat = $row['latitude'] ?? null;
+        $lng = $row['longitude'] ?? null;
+        if (is_numeric($lat) && is_numeric($lng) && (abs((float) $lat) > 0.0001 || abs((float) $lng) > 0.0001)) {
+            $withCoords++;
+        }
+    }
+
+    return [
+        'items' => $result['items'],
+        'total' => $result['total'],
+        'error' => null,
+        'withCoords' => $withCoords,
+    ];
+}
+
+/**
+ * @param list<array<string, mixed>> $items
+ * @return list<array{id: string, lat: float, lng: float, title: string, price: string, href: string}>
+ */
+function site_catalog_map_markers_from_items(array $items): array
+{
+    $markers = [];
+    foreach ($items as $row) {
+        if (!is_array($row)) {
+            continue;
+        }
+        $id = isset($row['id']) ? trim((string) $row['id']) : '';
+        if ($id === '') {
+            continue;
+        }
+        $lat = $row['latitude'] ?? null;
+        $lng = $row['longitude'] ?? null;
+        if (!is_numeric($lat) || !is_numeric($lng)) {
+            continue;
+        }
+        $latF = (float) $lat;
+        $lngF = (float) $lng;
+        if ($latF < -90 || $latF > 90 || $lngF < -180 || $lngF > 180) {
+            continue;
+        }
+        if (abs($latF) < 0.0001 && abs($lngF) < 0.0001) {
+            continue;
+        }
+
+        $rooms = isset($row['rooms']) && is_numeric($row['rooms']) ? (int) $row['rooms'] : null;
+        $areaTotal = isset($row['areaTotal']) && is_numeric($row['areaTotal']) ? (float) $row['areaTotal'] : null;
+        $objectType = isset($row['objectTypeValue']) ? (string) $row['objectTypeValue'] : null;
+        $titleRaw = isset($row['title']) ? (string) $row['title'] : 'Объект';
+        $title = site_listing_card_title($objectType, $rooms, $areaTotal, $titleRaw);
+        $priceRaw = isset($row['price']) ? (string) $row['price'] : null;
+
+        $markers[] = [
+            'id' => $id,
+            'lat' => $latF,
+            'lng' => $lngF,
+            'title' => $title,
+            'price' => site_fmt_rub($priceRaw),
+            'href' => '/catalog/object/?id=' . rawurlencode($id),
+        ];
+    }
+
+    return $markers;
+}

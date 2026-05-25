@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @param array<string, string> $filters
  */
-function site_render_catalog_filter(array $filters): void
+function site_render_catalog_filter(array $filters, string $action = '/catalog/'): void
 {
     $type = $filters['objectType'] ?? '';
     $rooms = $filters['rooms'] ?? '';
@@ -20,7 +20,7 @@ function site_render_catalog_filter(array $filters): void
     $priceMin = $filters['price_min'] ?? '';
     $priceMax = $filters['price_max'] ?? '';
     ?>
-    <form class="catalog-filter" method="get" action="/catalog/">
+    <form class="catalog-filter" method="get" action="<?php echo htmlspecialchars($action, ENT_QUOTES, 'UTF-8'); ?>">
         <h2 class="catalog-filter__title">Фильтр</h2>
 
         <label class="catalog-filter__field">

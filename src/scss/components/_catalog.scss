@@ -46,6 +46,18 @@
   color: var(--header-muted);
 }
 
+.catalog__map-link {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--cta-bg);
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 // Боковой фильтр
 .catalog-filter {
   padding: 1.1rem 1.15rem;

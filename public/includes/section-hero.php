@@ -143,7 +143,7 @@ $heroSliderEnabled = $heroSlideCount > 1;
 
             <div class="hero__actions">
                 <button id="hero-primary-action" type="submit" class="hero__btn hero__btn--find" form="hero-search-form">Найти</button>
-                <a class="hero__btn hero__btn--map" href="/catalog/?view=map">На карте</a>
+                <a class="hero__btn hero__btn--map" href="/catalog/map/">На карте</a>
             </div>
         </div>
     </div>
