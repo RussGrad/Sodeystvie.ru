@@ -85,6 +85,40 @@ function site_map_default_center(): array
     return ['lat' => $lat, 'lng' => $lng, 'zoom' => max(4, min(17, $zoom))];
 }
 
+/**
+ * Офис на странице «Контакты» (ул. Карла Либкнехта 107а).
+ * Координаты можно переопределить в .env: SITE_OFFICE_LAT, SITE_OFFICE_LNG, SITE_OFFICE_ZOOM.
+ */
+function site_office_location(): array
+{
+    $lat = (float) site_env('SITE_OFFICE_LAT', '52.2796');
+    $lng = (float) site_env('SITE_OFFICE_LNG', '104.312');
+    $zoom = (int) site_env('SITE_OFFICE_ZOOM', '16');
+
+    return [
+        'lat' => $lat,
+        'lng' => $lng,
+        'zoom' => max(10, min(18, $zoom)),
+        'address' => SITE_ADDRESS,
+        'title' => SITE_BRAND_FULL,
+    ];
+}
+
+/** Ссылка «Открыть в Яндекс.Картах» (без JS API). */
+function site_yandex_maps_external_url(?array $office = null): string
+{
+    $office ??= site_office_location();
+
+    return 'https://yandex.ru/maps/?pt='
+        . $office['lng']
+        . ','
+        . $office['lat']
+        . '&z='
+        . (int) ($office['zoom'] ?? 16)
+        . '&text='
+        . rawurlencode((string) ($office['address'] ?? SITE_ADDRESS));
+}
+
 /** Реквизиты — уточняются у заказчика */
 const SITE_LEGAL_NAME = 'ООО «Содействие»';
 const SITE_LEGAL_INN = '0000000000';

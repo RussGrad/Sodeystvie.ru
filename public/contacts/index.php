@@ -7,18 +7,98 @@ require_once __DIR__ . '/../includes/config.php';
 $pageTitle = site_format_page_title('Контакты');
 $currentNav = 'contacts';
 
+$office = site_office_location();
+$yandexMapsKey = site_yandex_maps_api_key();
+$mapsExternalUrl = site_yandex_maps_external_url($office);
+$telegramUrl = site_telegram_url();
+$whatsappUrl = site_whatsapp_url();
+$maxUrl = site_max_url();
+
+$officeJson = json_encode([
+    'lat' => $office['lat'],
+    'lng' => $office['lng'],
+    'zoom' => $office['zoom'],
+    'address' => $office['address'],
+    'title' => $office['title'],
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}';
+
+$contactsMapJsVersion = (string) (@filemtime(__DIR__ . '/../js/contacts-map.js') ?: time());
+
 require __DIR__ . '/../includes/header.php';
 ?>
-<main class="page-main page-main--inner" id="main">
+<main class="page-main page-main--inner page-main--contacts" id="main">
     <div class="container">
         <h1 class="page-main__heading">Контакты</h1>
-        <p class="page-main__lead">
-            Телефон: <a href="tel:<?php echo htmlspecialchars(SITE_PHONE_TEL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_PHONE_DISPLAY, ENT_QUOTES, 'UTF-8'); ?></a><br>
-            Email: <a href="mailto:<?php echo htmlspecialchars(SITE_EMAIL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_EMAIL, ENT_QUOTES, 'UTF-8'); ?></a><br>
-            Адрес: <?php echo htmlspecialchars(SITE_ADDRESS, ENT_QUOTES, 'UTF-8'); ?>
-        </p>
+        <p class="page-main__lead">Свяжитесь с нами удобным способом или приезжайте в офис.</p>
+
+        <div class="contacts-page">
+            <div class="contacts-page__info">
+                <article class="contacts-page__card">
+                    <h2 class="contacts-page__card-title">Телефон</h2>
+                    <p class="contacts-page__card-value">
+                        <a href="tel:<?php echo htmlspecialchars(SITE_PHONE_TEL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_PHONE_DISPLAY, ENT_QUOTES, 'UTF-8'); ?></a>
+                    </p>
+                </article>
+
+                <article class="contacts-page__card">
+                    <h2 class="contacts-page__card-title">Email</h2>
+                    <p class="contacts-page__card-value">
+                        <a href="mailto:<?php echo htmlspecialchars(SITE_EMAIL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_EMAIL, ENT_QUOTES, 'UTF-8'); ?></a>
+                    </p>
+                </article>
+
+                <article class="contacts-page__card">
+                    <h2 class="contacts-page__card-title">Адрес</h2>
+                    <p class="contacts-page__card-value"><?php echo htmlspecialchars(SITE_ADDRESS, ENT_QUOTES, 'UTF-8'); ?></p>
+                </article>
+
+                <article class="contacts-page__card">
+                    <h2 class="contacts-page__card-title">Режим работы</h2>
+                    <p class="contacts-page__card-value"><?php echo htmlspecialchars(SITE_WORK_HOURS, ENT_QUOTES, 'UTF-8'); ?></p>
+                </article>
+
+                <?php if ($telegramUrl !== null || $whatsappUrl !== null || $maxUrl !== '') { ?>
+                    <article class="contacts-page__card">
+                        <h2 class="contacts-page__card-title">Мессенджеры</h2>
+                        <ul class="contacts-page__messengers">
+                            <?php if ($telegramUrl !== null) { ?>
+                                <li><a href="<?php echo htmlspecialchars($telegramUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">Telegram</a></li>
+                            <?php } ?>
+                            <?php if ($whatsappUrl !== null) { ?>
+                                <li><a href="<?php echo htmlspecialchars($whatsappUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+                            <?php } ?>
+                            <?php if ($maxUrl !== '') { ?>
+                                <li><a href="<?php echo htmlspecialchars($maxUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">MAX</a></li>
+                            <?php } ?>
+                        </ul>
+                    </article>
+                <?php } ?>
+            </div>
+
+            <section class="contacts-page__map-section" aria-labelledby="contacts-map-heading">
+                <h2 class="contacts-page__map-heading" id="contacts-map-heading">Как нас найти</h2>
+                <div class="contacts-page__map-wrap">
+                    <?php if ($yandexMapsKey === '') { ?>
+                        <div class="contacts-page__map-message">
+                            <p>Интерактивная карта подключается ключом <code>YANDEX_MAPS_API_KEY</code> в <code>.env</code> на хостинге (тот же ключ, что для карты каталога).</p>
+                            <p><a href="https://developer.tech.yandex.ru/">Получить ключ</a> → «JavaScript API и HTTP Геокодер».</p>
+                        </div>
+                    <?php } else { ?>
+                        <div
+                            class="contacts-page__map-canvas"
+                            id="contacts-map"
+                            data-office="<?php echo htmlspecialchars($officeJson, ENT_QUOTES, 'UTF-8'); ?>"
+                            role="application"
+                            aria-label="Карта: офис <?php echo htmlspecialchars(SITE_BRAND_FULL, ENT_QUOTES, 'UTF-8'); ?>"
+                        ></div>
+                        <script src="https://api-maps.yandex.ru/2.1/?apikey=<?php echo htmlspecialchars($yandexMapsKey, ENT_QUOTES, 'UTF-8'); ?>&amp;lang=ru_RU"></script>
+                        <script src="/js/contacts-map.js?v=<?php echo htmlspecialchars($contactsMapJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+                    <?php } ?>
+                </div>
+                <a class="contacts-page__map-link" href="<?php echo htmlspecialchars($mapsExternalUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">Открыть в Яндекс.Картах</a>
+            </section>
+        </div>
     </div>
 </main>
 <?php
 require __DIR__ . '/../includes/footer.php';
-

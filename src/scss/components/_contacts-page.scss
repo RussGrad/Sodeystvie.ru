@@ -1,0 +1,158 @@
+// Страница «Контакты»: блок данных и карта офиса
+@use "../variables" as *;
+
+.page-main--contacts {
+  .page-main__lead {
+    max-width: none;
+  }
+}
+
+.contacts-page {
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 2.5rem);
+  margin-top: 1.25rem;
+
+  @media (min-width: 900px) {
+    grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.contacts-page__info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.contacts-page__card {
+  margin: 0;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--header-border);
+  border-radius: 10px;
+  background: var(--page-bg);
+}
+
+.contacts-page__card-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--header-muted);
+}
+
+.contacts-page__card-value {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.45;
+  color: var(--page-text);
+
+  a {
+    color: var(--cta-bg);
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.contacts-page__messengers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contacts-page__map-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.contacts-page__map-heading {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--page-text);
+}
+
+.contacts-page__map-wrap {
+  position: relative;
+  min-height: 280px;
+  border: 1px solid var(--header-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(128, 128, 128, 0.08);
+
+  @media (min-width: 600px) {
+    min-height: 360px;
+  }
+
+  @media (min-width: 900px) {
+    min-height: 420px;
+  }
+}
+
+.contacts-page__map-canvas {
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+}
+
+.contacts-page__map-message {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-height: inherit;
+  padding: 1.25rem 1.5rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--header-muted);
+
+  p {
+    margin: 0;
+    max-width: 36rem;
+  }
+
+  code {
+    font-size: 0.85em;
+  }
+
+  a {
+    color: var(--cta-bg);
+    font-weight: 600;
+  }
+}
+
+.contacts-page__map-link {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--cta-bg);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.contacts-map-balloon {
+  max-width: 16rem;
+  line-height: 1.4;
+
+  strong {
+    display: block;
+    margin-bottom: 0.35rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+}
