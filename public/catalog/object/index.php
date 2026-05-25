@@ -146,57 +146,65 @@ $listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-o
                 <?php site_render_listing_gallery($galleryBundle, $headingTitle); ?>
             </div>
 
-            <?php if (count($paramRows) > 0) { ?>
-                <section class="listing-object__section" aria-labelledby="listing-params-title">
-                    <h2 class="listing-object__section-title" id="listing-params-title">Характеристики</h2>
-                    <dl class="listing-params listing-params--object">
-                        <?php foreach ($paramRows as $row) { ?>
-                            <div class="listing-params__row">
-                                <dt><?php echo htmlspecialchars($row['label'], ENT_QUOTES, 'UTF-8'); ?></dt>
-                                <dd><?php echo htmlspecialchars($row['value'], ENT_QUOTES, 'UTF-8'); ?></dd>
-                            </div>
-                        <?php } ?>
-                    </dl>
-                </section>
-            <?php } ?>
+            <?php
+            $hasParams = count($paramRows) > 0;
+            $panelClass = 'listing-object__panel' . ($hasParams ? '' : ' listing-object__panel--map-only');
+            ?>
+            <section class="<?php echo $panelClass; ?>" aria-labelledby="listing-details-title">
+                <h2 class="listing-object__panel-title" id="listing-details-title">Об объекте</h2>
+                <div class="listing-object__panel-grid">
+                    <?php if ($hasParams) { ?>
+                        <div class="listing-object__panel-col listing-object__panel-col--params">
+                            <h3 class="listing-object__panel-subtitle" id="listing-params-title">Характеристики</h3>
+                            <dl class="listing-params listing-params--panel">
+                                <?php foreach ($paramRows as $row) { ?>
+                                    <div class="listing-params__row">
+                                        <dt><?php echo htmlspecialchars($row['label'], ENT_QUOTES, 'UTF-8'); ?></dt>
+                                        <dd><?php echo htmlspecialchars($row['value'], ENT_QUOTES, 'UTF-8'); ?></dd>
+                                    </div>
+                                <?php } ?>
+                            </dl>
+                        </div>
+                    <?php } ?>
+                    <div class="listing-object__panel-col listing-object__panel-col--map">
+                        <h3 class="listing-object__panel-subtitle" id="listing-map-title">Расположение</h3>
+                        <div class="listing-object__map-block">
+                            <?php if ($listingMapScripts) { ?>
+                                <div
+                                    class="listing-object__map-canvas"
+                                    id="listing-object-map"
+                                    data-marker="<?php echo htmlspecialchars($markerJson, ENT_QUOTES, 'UTF-8'); ?>"
+                                    role="img"
+                                    aria-label="Карта расположения объекта"
+                                ></div>
+                            <?php } else { ?>
+                                <div class="listing-object__map-fallback">
+                                    <?php if ($yandexMapsKey === '' && $hasMapCoords) { ?>
+                                        <p>Интерактивная карта подключается ключом <code>YANDEX_MAPS_API_KEY</code> в <code>.env</code> на хостинге.</p>
+                                    <?php } elseif ($addressLine !== '') { ?>
+                                        <p>Точные координаты объекта пока не указаны в CRM. Адрес:</p>
+                                        <p class="listing-object__map-address"><?php echo htmlspecialchars($addressLine, ENT_QUOTES, 'UTF-8'); ?></p>
+                                    <?php } else { ?>
+                                        <p>Адрес и координаты объекта не указаны.</p>
+                                    <?php } ?>
+                                </div>
+                            <?php } ?>
+                            <?php if ($mapsExternalUrl !== '') { ?>
+                                <a class="listing-object__map-link" href="<?php echo htmlspecialchars($mapsExternalUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">Открыть в Яндекс.Картах</a>
+                            <?php } ?>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
             <?php if ($description !== '') { ?>
-                <section class="listing-object__section" aria-labelledby="listing-desc-title">
+                <section class="listing-object__section listing-object__section--desc" aria-labelledby="listing-desc-title">
                     <h2 class="listing-object__section-title" id="listing-desc-title">Описание</h2>
-                    <div class="listing-object__desc">
+                    <div class="listing-object__desc listing-object__desc--compact">
                         <?php echo nl2br(htmlspecialchars($description, ENT_QUOTES, 'UTF-8')); ?>
                     </div>
                 </section>
             <?php } ?>
-
-            <section class="listing-object__section" aria-labelledby="listing-map-title">
-                <h2 class="listing-object__section-title" id="listing-map-title">Расположение</h2>
-                <div class="listing-object__map-block">
-                    <?php if ($listingMapScripts) { ?>
-                        <div
-                            class="listing-object__map-canvas"
-                            id="listing-object-map"
-                            data-marker="<?php echo htmlspecialchars($markerJson, ENT_QUOTES, 'UTF-8'); ?>"
-                            role="img"
-                            aria-label="Карта расположения объекта"
-                        ></div>
-                    <?php } else { ?>
-                        <div class="listing-object__map-fallback">
-                            <?php if ($yandexMapsKey === '' && $hasMapCoords) { ?>
-                                <p>Интерактивная карта подключается ключом <code>YANDEX_MAPS_API_KEY</code> в <code>.env</code> на хостинге.</p>
-                            <?php } elseif ($addressLine !== '') { ?>
-                                <p>Точные координаты объекта пока не указаны в CRM. Адрес:</p>
-                                <p class="listing-object__map-address"><?php echo htmlspecialchars($addressLine, ENT_QUOTES, 'UTF-8'); ?></p>
-                            <?php } else { ?>
-                                <p>Адрес и координаты объекта не указаны.</p>
-                            <?php } ?>
-                        </div>
-                    <?php } ?>
-                    <?php if ($mapsExternalUrl !== '') { ?>
-                        <a class="listing-object__map-link" href="<?php echo htmlspecialchars($mapsExternalUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">Открыть в Яндекс.Картах</a>
-                    <?php } ?>
-                </div>
-            </section>
         </article>
     </div>
 </main>

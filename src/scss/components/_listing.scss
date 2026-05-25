@@ -322,97 +322,172 @@ p.listing-object__address {
   display: block;
 }
 
-// ——— Секции внизу ———
+// ——— Объект: характеристики + карта в одном блоке ———
 
-.listing-object__section {
-  margin-bottom: clamp(1.5rem, 4vw, 2.25rem);
+.listing-object__panel {
+  margin-bottom: clamp(1rem, 3vw, 1.35rem);
+  padding: 1rem 1.1rem 1.1rem;
+  background: var(--featured-card-bg);
+  border: 1px solid var(--featured-card-border);
+  border-radius: 14px;
+  box-shadow: var(--featured-card-shadow);
 }
 
-.listing-object__section-title {
-  margin: 0 0 0.9rem;
+.listing-object__panel-title {
+  margin: 0 0 0.85rem;
   font-size: 1.25rem;
   font-weight: 900;
   letter-spacing: -0.02em;
   color: var(--page-text);
 }
 
+.listing-object__panel-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr);
+  gap: 1.15rem 1.35rem;
+  align-items: stretch;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.listing-object__panel--map-only .listing-object__panel-grid {
+  grid-template-columns: 1fr;
+}
+
+.listing-object__panel-col {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.listing-object__panel-col--map {
+  min-height: 280px;
+}
+
+.listing-object__panel-subtitle {
+  margin: 0 0 0.55rem;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--header-muted);
+}
+
 .listing-params {
   margin: 0;
   display: grid;
-  gap: 0.55rem;
-  background: var(--featured-card-bg);
-  border: 1px solid var(--featured-card-border);
-  border-radius: 14px;
-  padding: 1rem 1.1rem;
-  box-shadow: var(--featured-card-shadow);
+  gap: 0.4rem;
 }
 
-.listing-params--object {
-  grid-template-columns: 1fr;
+.listing-params--panel {
+  flex: 1;
 }
 
 .listing-params__row {
   display: grid;
-  grid-template-columns: minmax(140px, 220px) minmax(0, 1fr);
-  gap: 0.75rem;
+  grid-template-columns: minmax(108px, 42%) minmax(0, 1fr);
+  gap: 0.45rem 0.65rem;
   align-items: baseline;
 
   @media (max-width: 520px) {
     grid-template-columns: 1fr;
-    gap: 0.15rem;
+    gap: 0.1rem;
   }
 
   dt {
     margin: 0;
-    font-weight: 800;
+    font-size: 0.8125rem;
+    font-weight: 700;
     color: var(--header-muted);
   }
 
   dd {
     margin: 0;
+    font-size: 0.875rem;
     font-weight: 800;
     color: var(--page-text);
   }
 }
 
-.listing-object__desc {
-  background: var(--featured-card-bg);
-  border: 1px solid var(--featured-card-border);
-  border-radius: 14px;
-  padding: 1rem 1.1rem;
-  color: var(--page-text);
-  line-height: 1.65;
-  font-weight: 650;
-  box-shadow: var(--featured-card-shadow);
-}
-
 .listing-object__map-block {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.5rem;
+  flex: 1;
+  min-height: 0;
 }
 
 .listing-object__map-canvas {
   width: 100%;
-  height: min(420px, 55vh);
+  flex: 1;
   min-height: 280px;
-  border-radius: 14px;
+  height: 100%;
+  border-radius: 10px;
   overflow: hidden;
   border: 1px solid var(--featured-card-border);
-  background: var(--featured-card-bg);
+  background: var(--page-bg);
 }
 
 .listing-object__map-fallback {
-  padding: 1rem 1.1rem;
-  border-radius: 14px;
+  flex: 1;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
   border: 1px solid var(--featured-card-border);
-  background: var(--featured-card-bg);
+  background: var(--page-bg);
   color: var(--header-muted);
+  font-size: 0.875rem;
   font-weight: 650;
-  line-height: 1.5;
+  line-height: 1.45;
 
   code {
     font-size: 0.85em;
+  }
+}
+
+// ——— Описание (компактно внизу) ———
+
+.listing-object__section {
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
+}
+
+.listing-object__section--desc {
+  margin-bottom: 0;
+}
+
+.listing-object__section-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--page-text);
+}
+
+.listing-object__desc {
+  background: var(--featured-card-bg);
+  border: 1px solid var(--featured-card-border);
+  border-radius: 12px;
+  padding: 0.75rem 0.95rem;
+  color: var(--page-text);
+  line-height: 1.5;
+  font-weight: 600;
+  box-shadow: var(--featured-card-shadow);
+}
+
+.listing-object__desc--compact {
+  font-size: 0.875rem;
+  color: var(--header-muted);
+
+  p {
+    margin: 0 0 0.5rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
 }
 
