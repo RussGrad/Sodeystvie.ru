@@ -1,4 +1,4 @@
-// Полноэкранная карта каталога
+// Полноэкранная карта каталога + фильтр слева
 @use "../variables" as *;
 
 .catalog-map-page {
@@ -62,6 +62,61 @@
   opacity: 0.85;
 }
 
+.catalog-map-page__body {
+  display: grid;
+  grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+  flex: 1 1 auto;
+  min-height: 0;
+  align-items: stretch;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+}
+
+.catalog-map-page__aside {
+  flex-shrink: 0;
+  padding: 1rem;
+  border-right: 1px solid var(--header-border);
+  background: var(--header-bg);
+  overflow-y: auto;
+  max-height: calc(100dvh - 8.5rem);
+
+  @media (min-width: 901px) {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    max-height: calc(100dvh - 7rem);
+  }
+
+  @media (max-width: 900px) {
+    border-right: none;
+    border-bottom: 1px solid var(--header-border);
+    max-height: none;
+  }
+
+  .catalog-filter {
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    background: transparent;
+  }
+}
+
+.catalog-map-page__map-wrap {
+  position: relative;
+  min-height: 420px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+
+  @media (max-width: 900px) {
+    min-height: 55vh;
+  }
+}
+
 .catalog-map-page__canvas {
   flex: 1 1 auto;
   width: 100%;
@@ -69,24 +124,9 @@
 }
 
 .catalog-map-page__message {
-  padding: 2rem 0;
+  padding: 2rem 1.25rem;
   line-height: 1.6;
   color: var(--page-text);
-}
-
-.catalog-map-page__filters {
-  flex-shrink: 0;
-  margin: 0 auto;
-  padding: 0 1rem 1rem;
-  max-width: $container-max;
-  width: 100%;
-}
-
-.catalog-map-page__filters-toggle {
-  cursor: pointer;
-  font-weight: 700;
-  color: var(--page-text);
-  padding: 0.75rem 0;
 }
 
 .catalog-map-balloon {

@@ -53,43 +53,41 @@ require __DIR__ . '/../../includes/header.php';
         </div>
     </div>
 
-    <?php if ($mapError) { ?>
-        <div class="container catalog-map-page__message">
-            <p><?php echo htmlspecialchars($mapError, ENT_QUOTES, 'UTF-8'); ?></p>
-        </div>
-    <?php } elseif ($yandexMapsKey === '') { ?>
-        <div class="container catalog-map-page__message">
-            <p>Для карты укажите ключ <code>YANDEX_MAPS_API_KEY</code> на хостинге (JavaScript API Яндекс.Карт).</p>
-            <p>Файл в корне сайта (рядом с <code>index.php</code>), один из вариантов:</p>
-            <ul>
-                <li><code>crm-config.env</code> — удобнее на REG.RU (без точки в имени);</li>
-                <li><code>.env</code> — та же папка;</li>
-                <li><code>includes/crm-config.local.php</code> — массив с ключом (см. пример в репозитории).</li>
-            </ul>
-            <p><a href="https://developer.tech.yandex.ru/">Получить ключ</a> → «JavaScript API».</p>
-        </div>
-    <?php } elseif (count($mapMarkers) === 0) { ?>
-        <div class="container catalog-map-page__message">
-            <p>Нет объектов с координатами для отображения. В CRM у активных объектов заполните адрес и нажмите геокодирование в карточке.</p>
-            <p><a href="<?php echo htmlspecialchars($listHref, ENT_QUOTES, 'UTF-8'); ?>">Вернуться к списку</a></p>
-        </div>
-    <?php } else { ?>
-        <div
-            class="catalog-map-page__canvas"
-            id="catalog-map"
-            data-markers="<?php echo htmlspecialchars($markersJson, ENT_QUOTES, 'UTF-8'); ?>"
-            data-center="<?php echo htmlspecialchars($centerJson, ENT_QUOTES, 'UTF-8'); ?>"
-            role="application"
-            aria-label="Карта объектов недвижимости"
-        ></div>
-        <script src="https://api-maps.yandex.ru/2.1/?apikey=<?php echo htmlspecialchars($yandexMapsKey, ENT_QUOTES, 'UTF-8'); ?>&amp;lang=ru_RU"></script>
-        <script src="/js/catalog-map.js?v=<?php echo htmlspecialchars($catalogMapJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
-    <?php } ?>
+    <div class="catalog-map-page__body">
+        <aside class="catalog-map-page__aside" aria-label="Фильтр каталога">
+            <?php site_render_catalog_filter($catalogFilters, '/catalog/map/'); ?>
+        </aside>
 
-    <details class="catalog-map-page__filters container">
-        <summary class="catalog-map-page__filters-toggle">Фильтр</summary>
-        <?php site_render_catalog_filter($catalogFilters, '/catalog/map/'); ?>
-    </details>
+        <div class="catalog-map-page__map-wrap">
+            <?php if ($mapError) { ?>
+                <div class="catalog-map-page__message">
+                    <p><?php echo htmlspecialchars($mapError, ENT_QUOTES, 'UTF-8'); ?></p>
+                </div>
+            <?php } elseif ($yandexMapsKey === '') { ?>
+                <div class="catalog-map-page__message">
+                    <p>Для карты укажите ключ <code>YANDEX_MAPS_API_KEY</code> на хостинге (JavaScript API Яндекс.Карт).</p>
+                    <p>Файл в корне сайта (рядом с <code>index.php</code>) или <code>includes/crm-config.local.php</code>.</p>
+                    <p><a href="https://developer.tech.yandex.ru/">Получить ключ</a> → «JavaScript API».</p>
+                </div>
+            <?php } elseif (count($mapMarkers) === 0) { ?>
+                <div class="catalog-map-page__message">
+                    <p>Нет объектов с координатами для отображения. В CRM у активных объектов заполните адрес и выполните геокодирование.</p>
+                    <p><a href="<?php echo htmlspecialchars($listHref, ENT_QUOTES, 'UTF-8'); ?>">Вернуться к списку</a></p>
+                </div>
+            <?php } else { ?>
+                <div
+                    class="catalog-map-page__canvas"
+                    id="catalog-map"
+                    data-markers="<?php echo htmlspecialchars($markersJson, ENT_QUOTES, 'UTF-8'); ?>"
+                    data-center="<?php echo htmlspecialchars($centerJson, ENT_QUOTES, 'UTF-8'); ?>"
+                    role="application"
+                    aria-label="Карта объектов недвижимости"
+                ></div>
+                <script src="https://api-maps.yandex.ru/2.1/?apikey=<?php echo htmlspecialchars($yandexMapsKey, ENT_QUOTES, 'UTF-8'); ?>&amp;lang=ru_RU"></script>
+                <script src="/js/catalog-map.js?v=<?php echo htmlspecialchars($catalogMapJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+            <?php } ?>
+        </div>
+    </div>
 </main>
 <?php
 require __DIR__ . '/../../includes/footer.php';
