@@ -32,10 +32,10 @@ jobs:
           node-version: '20'
           cache: npm
 
-      - name: Установка зависимостей и сборка CSS
+      - name: Установка зависимостей и сборка CSS + WebP
         run: |
           npm ci
-          npm run build:css
+          npm run build
 
       - name: Выгрузка public/ на хостинг (FTP)
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0

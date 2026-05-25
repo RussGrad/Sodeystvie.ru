@@ -12,6 +12,8 @@ public/.env
 public/crm-config.env
 public/includes/crm-config.local.php
 public/var/crm-cache/
+public/cache/img/*
+!public/cache/img/.gitkeep
 
 # Логи
 *.log

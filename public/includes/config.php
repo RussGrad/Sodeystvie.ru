@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/env-bootstrap.php';
 require_once __DIR__ . '/site-brand.php';
+require_once __DIR__ . '/site-image.php';
 require_once __DIR__ . '/security.php';
 
 site_redirect_aliases_to_canonical();
@@ -383,16 +384,22 @@ function site_crm_photo_src(string $urlFromApi): string
  *
  * @param non-empty-string $src
  */
-function site_crm_photo_img(string $src, string $alt = '', string $class = '', string $extraAttrs = ''): string
+function site_crm_photo_img(string $src, string $alt = '', string $class = '', string $extraAttrs = '', int $maxWidth = 1200): string
 {
     $src = trim($src);
     if ($src === '') {
         return '';
     }
+    if (str_starts_with($src, '/assets/')) {
+        return site_render_static_picture($src, $alt, $class, $extraAttrs);
+    }
+    $display = str_contains($src, '/api/image.php')
+        ? $src
+        : site_crm_photo_display_src($src, $maxWidth);
     $classAttr = $class !== '' ? ' class="' . htmlspecialchars($class, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '"' : '';
     $extra = trim($extraAttrs);
 
-    return '<img src="' . htmlspecialchars($src, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '"'
+    return '<img src="' . htmlspecialchars($display, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '"'
         . ' alt="' . htmlspecialchars($alt, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '"'
         . ' loading="lazy" decoding="async" referrerpolicy="no-referrer"'
         . $classAttr

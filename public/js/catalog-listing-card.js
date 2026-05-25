@@ -50,9 +50,25 @@
     var u = String(rawUrl || '').trim();
     if (!u) return Promise.resolve('');
     if (resolveCache[u]) return Promise.resolve(resolveCache[u]);
-    if (/^https?:\/\//i.test(u) && u.indexOf('downloader.disk.yandex.ru') >= 0) {
+    if (u.indexOf('/api/image.php') >= 0) {
       resolveCache[u] = u;
       return Promise.resolve(u);
+    }
+    if (/^https?:\/\//i.test(u) && u.indexOf('downloader.disk.yandex.ru') >= 0) {
+      return fetch('/api/crm-resolve-photo.php?url=' + encodeURIComponent(u), {
+        credentials: 'same-origin',
+      })
+        .then(function (r) {
+          return r.ok ? r.json() : null;
+        })
+        .then(function (data) {
+          var resolved = data && typeof data.url === 'string' ? data.url.trim() : u;
+          if (resolved) resolveCache[u] = resolved;
+          return resolved;
+        })
+        .catch(function () {
+          return u;
+        });
     }
     return fetch('/api/crm-resolve-photo.php?url=' + encodeURIComponent(u), {
       credentials: 'same-origin',

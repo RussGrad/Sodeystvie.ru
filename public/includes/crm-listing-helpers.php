@@ -82,7 +82,7 @@ function site_hero_slides_static(): array
         ['base' => 'hero-bg-2', 'alt' => 'Недвижимость'],
         ['base' => 'hero-bg-3', 'alt' => 'Недвижимость'],
     ];
-    $exts = ['jpg', 'jpeg', 'webp', 'JPG', 'JPEG', 'WEBP'];
+    $exts = ['webp', 'WEBP', 'jpg', 'jpeg', 'JPG', 'JPEG'];
 
     $slides = [];
     foreach ($bases as $item) {
@@ -152,7 +152,7 @@ function site_hero_slides_from_crm(int $max = 5): array
         if ($coverRaw === '') {
             continue;
         }
-        $src = site_crm_photo_src($coverRaw);
+        $src = site_crm_photo_display_src(site_crm_photo_src($coverRaw), 1920);
         if ($src === '' || isset($seen[$src])) {
             continue;
         }
@@ -177,7 +177,7 @@ function site_hero_slides_from_crm(int $max = 5): array
                 if (!is_string($p)) {
                     continue;
                 }
-                $src = site_crm_photo_src(trim($p));
+                $src = site_crm_photo_display_src(site_crm_photo_src(trim($p)), 1920);
                 if ($src === '' || isset($seen[$src])) {
                     continue;
                 }
@@ -493,13 +493,13 @@ function site_crm_listing_photo_bundle(array $row, int $resolveOnServer = 2): ar
         }
         $src = site_crm_photo_src($u);
         if ($src !== '') {
-            $resolved[] = $src;
+            $resolved[] = site_crm_photo_display_src($src, 1200);
         }
     }
     if (count($resolved) === 0 && count($raw) > 0) {
         $src = site_crm_photo_src($raw[0]);
         if ($src !== '') {
-            $resolved[] = $src;
+            $resolved[] = site_crm_photo_display_src($src, 1200);
         }
     }
 
@@ -519,7 +519,7 @@ function site_crm_listing_resolved_photos(array $row, int $max = 12): array
     foreach (site_crm_listing_raw_photo_urls($row, $max) as $u) {
         $src = site_crm_photo_src($u);
         if ($src !== '') {
-            $urls[] = $src;
+            $urls[] = site_crm_photo_display_src($src, 1600);
         }
     }
 

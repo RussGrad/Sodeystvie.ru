@@ -35,8 +35,16 @@ $heroSliderEnabled = $heroSlideCount > 1;
             $alt = trim((string) ($slide['alt'] ?? ''));
             $active = $i === 0 ? ' is-active' : '';
             ?>
+            <?php
+            $heroImgClass = 'hero__slide' . $active;
+            $heroImgExtra = 'width="1920" height="1080" decoding="async" '
+                . ($i === 0 ? 'fetchpriority="high"' : 'loading="lazy"');
+            if (str_starts_with($src, '/assets/')) {
+                echo site_render_static_picture($src, $alt, $heroImgClass, $heroImgExtra);
+            } else {
+                ?>
             <img
-                class="hero__slide<?php echo $active; ?>"
+                class="<?php echo htmlspecialchars($heroImgClass, ENT_QUOTES, 'UTF-8'); ?>"
                 src="<?php echo htmlspecialchars($src, ENT_QUOTES, 'UTF-8'); ?>"
                 alt="<?php echo htmlspecialchars($alt, ENT_QUOTES, 'UTF-8'); ?>"
                 width="1920"
@@ -45,6 +53,9 @@ $heroSliderEnabled = $heroSlideCount > 1;
                 <?php echo $i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'; ?>
                 referrerpolicy="no-referrer"
             >
+                <?php
+            }
+            ?>
         <?php } ?>
     </div>
 
