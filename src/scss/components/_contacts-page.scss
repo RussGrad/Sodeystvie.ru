@@ -102,13 +102,12 @@
   }
 }
 
+.contacts-page__row--messengers .contacts-page__value {
+  padding-top: 0.15rem;
+}
+
 .contacts-page__messengers {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 0.85rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  gap: 0.55rem;
 }
 
 // —— Карта (центр)

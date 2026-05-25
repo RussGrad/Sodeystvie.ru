@@ -1,0 +1,70 @@
+// Иконки мессенджеров (контакты, при необходимости — другие блоки)
+@use "../variables" as *;
+
+.messenger-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.messenger-links__item,
+.contacts-page__messenger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  text-decoration: none;
+  transition:
+    transform var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) ease,
+    filter 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+.messenger-links__item--tg,
+.contacts-page__messenger--tg {
+  color: #fff;
+  background: #2aabee;
+}
+
+.messenger-links__item--wa,
+.contacts-page__messenger--wa {
+  color: #fff;
+  background: #25d366;
+}
+
+.messenger-links__item--max,
+.contacts-page__messenger--max {
+  overflow: hidden;
+  background: linear-gradient(135deg, #7b2ff7 0%, #5e5ce6 45%, #3d5afe 100%);
+}
+
+.messenger-links__svg {
+  display: block;
+  width: 1.375rem;
+  height: 1.375rem;
+}
+
+.messenger-links__img {
+  display: block;
+  width: 1.375rem;
+  height: 1.375rem;
+  object-fit: contain;
+  border-radius: 4px;
+}
