@@ -358,20 +358,6 @@ function site_listing_object_param_rows(array $row): array
     $jk = isset($row['residentialComplex']) ? trim((string) $row['residentialComplex']) : '';
     $add('Жилой комплекс', $jk);
 
-    $district = isset($row['districtValue']) ? trim((string) $row['districtValue']) : '';
-    $add('Район', $district);
-
-    $city = isset($row['city']) ? trim((string) $row['city']) : '';
-    $add('Город', $city);
-
-    $addressLine = site_listing_address_line($row);
-    $add('Адрес', $addressLine);
-
-    $priceRaw = isset($row['price']) ? (string) $row['price'] : null;
-    $add('Цена', site_fmt_rub($priceRaw));
-    $priceM2 = site_fmt_m2($areaTotal, $priceRaw);
-    $add('Цена за м²', $priceM2);
-
     return $rows;
 }
 
