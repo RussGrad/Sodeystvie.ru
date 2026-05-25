@@ -71,7 +71,7 @@ $maxUrl = site_max_url();
                     <?php require __DIR__ . '/logo-markup.php'; ?>
                 </a>
                 <p class="site-header__tagline">
-                    <span class="site-header__tagline-line"><?php echo htmlspecialchars(SITE_CITY_TAG . ' • с ' . SITE_FOUNDED_YEAR, ENT_QUOTES, 'UTF-8'); ?></span>
+                    <span class="site-header__tagline-line site-header__tagline-line--geo"><?php echo htmlspecialchars(site_header_tagline_geo(), ENT_QUOTES, 'UTF-8'); ?></span>
                     <span class="site-header__tagline-line site-header__tagline-line--accent"><?php echo htmlspecialchars(site_slogan_short(), ENT_QUOTES, 'UTF-8'); ?></span>
                 </p>
             </div>

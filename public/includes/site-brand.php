@@ -40,9 +40,15 @@ function site_hero_headline(): string
     ));
 }
 
+/** Подпись у логотипа в шапке: «в Иркутске с 2015 года». */
+function site_header_tagline_geo(): string
+{
+    return 'в Иркутске с ' . SITE_FOUNDED_YEAR . ' года';
+}
+
 function site_header_tagline(): string
 {
-    return SITE_CITY_TAG . ' • с ' . SITE_FOUNDED_YEAR . ' • ' . site_slogan_short();
+    return site_header_tagline_geo() . ' • ' . site_slogan_short();
 }
 
 /**

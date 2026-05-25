@@ -19,7 +19,7 @@ const SITE_ADDRESS = 'г. Иркутск, ул. Карла Либкнехта 10
 
 /** Подпись в шапке */
 const SITE_CITY_TAG = 'Иркутск';
-const SITE_FOUNDED_YEAR = 2010;
+const SITE_FOUNDED_YEAR = 2015;
 const SITE_WORK_HOURS = 'Пн–Пт 9:00–19:00';
 
 /**
