@@ -15,16 +15,51 @@ function site_image_webp_enabled(): bool
 
 function site_image_webp_quality(): int
 {
-    $q = (int) site_env('SITE_IMAGE_WEBP_QUALITY', '82');
+    $q = (int) site_env('SITE_IMAGE_WEBP_QUALITY', '78');
 
     return max(50, min(95, $q));
 }
 
 function site_image_webp_max_width(): int
 {
-    $w = (int) site_env('SITE_IMAGE_WEBP_MAX_WIDTH', '1920');
+    $w = (int) site_env('SITE_IMAGE_WEBP_MAX_WIDTH', '1600');
 
     return max(320, min(2560, $w));
+}
+
+/**
+ * Ширина WebP под контекст (меньше файл → быстрее LCP и каталог).
+ */
+function site_image_width_preset(string $preset): int
+{
+    return match ($preset) {
+        'card', 'catalog' => 640,
+        'featured' => 720,
+        'hero' => 1400,
+        'object', 'gallery' => 1200,
+        'thumb' => 420,
+        default => 800,
+    };
+}
+
+function site_image_resolve_width(int|string $widthOrPreset): int
+{
+    if (is_int($widthOrPreset)) {
+        return max(320, min(site_image_webp_max_width(), $widthOrPreset));
+    }
+
+    return site_image_width_preset($widthOrPreset);
+}
+
+function site_image_sizes_attr(string $preset): string
+{
+    return match ($preset) {
+        'card', 'catalog' => '(max-width: 520px) 92vw, 300px',
+        'featured' => '(max-width: 640px) 90vw, 340px',
+        'hero' => '100vw',
+        'object', 'gallery' => '(max-width: 900px) 95vw, 720px',
+        default => '100vw',
+    };
 }
 
 function site_image_can_convert(): bool
@@ -144,28 +179,28 @@ function site_image_public_web_path(string $webPath, int $maxWidth = 0): string
 /**
  * Для CRM: исходный резолв → отображение (WebP-прокси при возможности).
  */
-function site_crm_photo_display_src(string $resolvedUrl, int $maxWidth = 1200): string
+function site_crm_photo_display_src(string $resolvedUrl, int|string $widthOrPreset = 'card'): string
 {
     $resolvedUrl = trim($resolvedUrl);
     if ($resolvedUrl === '') {
         return '';
     }
 
-    return site_image_proxy_url($resolvedUrl, $maxWidth);
+    return site_image_proxy_url($resolvedUrl, site_image_resolve_width($widthOrPreset));
 }
 
 /**
  * @param list<string> $urls
  * @return list<string>
  */
-function site_crm_photo_display_src_list(array $urls, int $maxWidth = 1200): array
+function site_crm_photo_display_src_list(array $urls, int|string $widthOrPreset = 'card'): array
 {
     $out = [];
     foreach ($urls as $u) {
         if (!is_string($u)) {
             continue;
         }
-        $d = site_crm_photo_display_src($u, $maxWidth);
+        $d = site_crm_photo_display_src($u, $widthOrPreset);
         if ($d !== '') {
             $out[] = $d;
         }

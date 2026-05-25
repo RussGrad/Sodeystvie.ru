@@ -384,8 +384,13 @@ function site_crm_photo_src(string $urlFromApi): string
  *
  * @param non-empty-string $src
  */
-function site_crm_photo_img(string $src, string $alt = '', string $class = '', string $extraAttrs = '', int $maxWidth = 1200): string
-{
+function site_crm_photo_img(
+    string $src,
+    string $alt = '',
+    string $class = '',
+    string $extraAttrs = '',
+    int|string $widthOrPreset = 'card'
+): string {
     $src = trim($src);
     if ($src === '') {
         return '';
@@ -393,15 +398,20 @@ function site_crm_photo_img(string $src, string $alt = '', string $class = '', s
     if (str_starts_with($src, '/assets/')) {
         return site_render_static_picture($src, $alt, $class, $extraAttrs);
     }
+    $preset = is_string($widthOrPreset) ? $widthOrPreset : 'card';
     $display = str_contains($src, '/api/image.php')
         ? $src
-        : site_crm_photo_display_src($src, $maxWidth);
+        : site_crm_photo_display_src($src, $widthOrPreset);
     $classAttr = $class !== '' ? ' class="' . htmlspecialchars($class, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '"' : '';
     $extra = trim($extraAttrs);
+    $sizes = site_image_sizes_attr($preset);
+    $loading = str_contains($extra, 'fetchpriority="high"') ? '' : ' loading="lazy"';
 
     return '<img src="' . htmlspecialchars($display, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '"'
         . ' alt="' . htmlspecialchars($alt, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '"'
-        . ' loading="lazy" decoding="async" referrerpolicy="no-referrer"'
+        . ' decoding="async" referrerpolicy="no-referrer"'
+        . ' sizes="' . htmlspecialchars($sizes, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '"'
+        . $loading
         . $classAttr
         . ($extra !== '' ? ' ' . $extra : '')
         . '>';

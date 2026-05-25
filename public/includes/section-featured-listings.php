@@ -55,7 +55,7 @@ $useCrm = $featuredError === null && count($featuredItems) > 0;
                         <a class="featured-card__link" href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>">
                             <div class="featured-card__media featured-card__media--tone-<?php echo (int) $tone; ?>" aria-hidden="true">
                                 <?php if ($coverPhoto !== '') {
-                                    echo site_crm_photo_img($coverPhoto, $title, 'featured-card__photo');
+                                    echo site_crm_photo_img($coverPhoto, $title, 'featured-card__photo', '', 'featured');
                                 } ?>
                                 <span class="featured-card__badge featured-card__badge--new">CRM</span>
                             </div>

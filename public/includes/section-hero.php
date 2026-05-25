@@ -16,7 +16,7 @@ $heroTabsMain = [
     'new' => 'Новостройки',
 ];
 
-$heroSlides = site_hero_slides_resolve(5);
+$heroSlides = site_hero_slides_cached(5);
 $heroSlides = array_values(array_filter(
     $heroSlides,
     static function (array $slide): bool {

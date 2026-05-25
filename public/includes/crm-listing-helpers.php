@@ -107,6 +107,39 @@ function site_hero_slides_static(): array
  *
  * @return list<array{src: string, alt: string}>
  */
+/**
+ * Кэш слайдов hero в рамках одного HTTP-запроса (главная + preload).
+ *
+ * @return list<array{src: string, alt: string}>
+ */
+function site_hero_slides_cached(int $max = 5): array
+{
+    static $cache = [];
+    $max = max(1, min(8, $max));
+    if (!isset($cache[$max])) {
+        $cache[$max] = site_hero_slides_resolve($max);
+    }
+
+    return $cache[$max];
+}
+
+function site_hero_lcp_preload_href(): string
+{
+    $slides = site_hero_slides_cached(5);
+    if (count($slides) === 0) {
+        return '';
+    }
+    $src = trim((string) ($slides[0]['src'] ?? ''));
+    if ($src === '') {
+        return '';
+    }
+    if (str_starts_with($src, '/')) {
+        return $src;
+    }
+
+    return $src;
+}
+
 function site_hero_slides_resolve(int $max = 5): array
 {
     $mode = strtolower(trim(site_env('HERO_SLIDES_SOURCE', 'auto')));
@@ -152,7 +185,7 @@ function site_hero_slides_from_crm(int $max = 5): array
         if ($coverRaw === '') {
             continue;
         }
-        $src = site_crm_photo_display_src(site_crm_photo_src($coverRaw), 1920);
+        $src = site_crm_photo_display_src(site_crm_photo_src($coverRaw), 'hero');
         if ($src === '' || isset($seen[$src])) {
             continue;
         }
@@ -177,7 +210,7 @@ function site_hero_slides_from_crm(int $max = 5): array
                 if (!is_string($p)) {
                     continue;
                 }
-                $src = site_crm_photo_display_src(site_crm_photo_src(trim($p)), 1920);
+                $src = site_crm_photo_display_src(site_crm_photo_src(trim($p)), 'hero');
                 if ($src === '' || isset($seen[$src])) {
                     continue;
                 }
@@ -493,13 +526,13 @@ function site_crm_listing_photo_bundle(array $row, int $resolveOnServer = 2): ar
         }
         $src = site_crm_photo_src($u);
         if ($src !== '') {
-            $resolved[] = site_crm_photo_display_src($src, 1200);
+            $resolved[] = site_crm_photo_display_src($src, 'card');
         }
     }
     if (count($resolved) === 0 && count($raw) > 0) {
         $src = site_crm_photo_src($raw[0]);
         if ($src !== '') {
-            $resolved[] = site_crm_photo_display_src($src, 1200);
+            $resolved[] = site_crm_photo_display_src($src, 'card');
         }
     }
 
@@ -519,7 +552,7 @@ function site_crm_listing_resolved_photos(array $row, int $max = 12): array
     foreach (site_crm_listing_raw_photo_urls($row, $max) as $u) {
         $src = site_crm_photo_src($u);
         if ($src !== '') {
-            $urls[] = site_crm_photo_display_src($src, 1600);
+            $urls[] = site_crm_photo_display_src($src, 'gallery');
         }
     }
 
@@ -583,7 +616,7 @@ function site_render_catalog_listing_card(array $row): void
     $contactPhone = isset($row['contactPhone']) ? (string) $row['contactPhone'] : null;
     $photosCount = isset($row['photosCount']) && is_numeric($row['photosCount']) ? (int) $row['photosCount'] : 0;
 
-    $photoBundle = site_crm_listing_photo_bundle($row, 2);
+    $photoBundle = site_crm_listing_photo_bundle($row, 1);
     $photoUrls = $photoBundle['resolved'];
     $photosB64 = base64_encode(json_encode($photoUrls, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '[]');
     $photosRawB64 = base64_encode(json_encode($photoBundle['raw'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '[]');
@@ -634,7 +667,7 @@ function site_render_catalog_listing_card(array $row): void
                 data-photos-raw-b64="<?php echo htmlspecialchars($photosRawB64, ENT_QUOTES, 'UTF-8'); ?>"
             >
                 <?php if (count($photoUrls) > 0) {
-                    echo site_crm_photo_img($photoUrls[0], $cardTitle, 'listing-card__photo', 'data-listing-gallery-img');
+                    echo site_crm_photo_img($photoUrls[0], $cardTitle, 'listing-card__photo', 'data-listing-gallery-img', 'card');
                 } ?>
                 <?php if ($totalPhotos > 1) { ?>
                     <span class="listing-card__count" data-listing-gallery-count>1/<?php echo (int) $totalPhotos; ?></span>

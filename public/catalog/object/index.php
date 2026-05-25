@@ -124,7 +124,7 @@ $subtitle = implode(' · ', $subtitleParts);
                             <?php if (count($photos) > 0) { ?>
                                 <?php foreach ($photos as $idx => $src) { ?>
                                     <figure class="listing-gallery__slide" data-gallery-slide>
-                                        <?php echo site_crm_photo_img($src, $title, 'listing-gallery__img'); ?>
+                                        <?php echo site_crm_photo_img($src, $title, 'listing-gallery__img', '', 'gallery'); ?>
                                     </figure>
                                 <?php } ?>
                             <?php } else { ?>

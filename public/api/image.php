@@ -56,7 +56,7 @@ if ($path !== '' && site_image_public_path_is_allowed($path)) {
 
 $cacheFile = $cacheDir . '/' . hash('sha256', $cacheKey) . '.webp';
 
-if (is_file($cacheFile) && filemtime($cacheFile) > time() - 86400 * 14) {
+if (is_file($cacheFile) && filemtime($cacheFile) > time() - 86400 * 30) {
     site_image_send_webp_file($cacheFile);
     exit;
 }
@@ -148,7 +148,7 @@ function site_image_convert_to_webp(string $binary, int $maxWidth, int $quality)
 function site_image_send_webp_file(string $path): void
 {
     header('Content-Type: image/webp');
-    header('Cache-Control: public, max-age=604800, immutable');
+    header('Cache-Control: public, max-age=2592000, immutable');
     header('Content-Length: ' . (string) filesize($path));
     readfile($path);
 }

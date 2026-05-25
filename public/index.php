@@ -43,6 +43,8 @@ if ($showDbTest) {
 
 $pageTitle = site_format_page_title();
 $currentNav = 'home';
+require_once __DIR__ . '/includes/crm-listing-helpers.php';
+$preloadLcpImage = site_hero_lcp_preload_href();
 
 require __DIR__ . '/includes/header.php';
 ?>

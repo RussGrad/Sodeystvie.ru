@@ -35,6 +35,6 @@ if ($resolved === '') {
 }
 
 echo json_encode(
-    ['url' => site_crm_photo_display_src($resolved, 1200)],
+    ['url' => site_crm_photo_display_src($resolved, 'card')],
     JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
 );
