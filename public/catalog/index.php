@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/config.php';
 
-$pageTitle = 'Каталог — Содействие';
+$pageTitle = site_format_page_title('Каталог');
 $currentNav = 'catalog';
 
 if (isset($_GET['view']) && $_GET['view'] === 'map') {

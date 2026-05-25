@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-$pageTitle = 'Ипотека в Иркутске — Содействие';
+$pageTitle = site_format_page_title('Ипотека в Иркутске');
 $currentNav = 'mortgage';
 
 require_once __DIR__ . '/../includes/mortgage-banks.php';

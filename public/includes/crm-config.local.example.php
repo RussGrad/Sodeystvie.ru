@@ -7,6 +7,6 @@ declare(strict_types=1);
  * Альтернатива .env на REG.RU, если dot-файлы неудобны в панели.
  */
 return [
-    'PUBLIC_SITE_API_KEY' => 'тот-же-ключ-что-в-apps-api-env-на-CRM',
-    'YANDEX_MAPS_API_KEY' => 'ключ_JavaScript_API_Яндекс_Карт',
+    'PUBLIC_SITE_API_KEY' => 'f950274c-273d-466f-9161-8b404571380e',
+    'YANDEX_MAPS_API_KEY' => 'd69107b3-0dc7-4224-bdf8-4233ba1c7fdf',
 ];

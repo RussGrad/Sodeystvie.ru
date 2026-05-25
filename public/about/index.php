@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-$pageTitle = 'О компании — Содействие';
+$pageTitle = site_format_page_title('О компании');
 $currentNav = 'about';
 
 require __DIR__ . '/../includes/header.php';

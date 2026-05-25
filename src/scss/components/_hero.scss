@@ -52,15 +52,33 @@
   padding-bottom: clamp(4.5rem, 11vw, 7.5rem);
 }
 
-.hero__title {
-  margin: 0 0 clamp(1.5rem, 3.5vw, 2.25rem);
-  max-width: 28rem;
-  font-size: clamp(1.5rem, 3.8vw, 2.125rem);
+.hero__eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
   font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cta-bg);
+}
+
+.hero__title {
+  margin: 0 0 0.65rem;
+  max-width: 32rem;
+  font-size: clamp(1.5rem, 3.8vw, 2.125rem);
+  font-weight: 800;
   line-height: 1.22;
   letter-spacing: -0.02em;
   color: var(--hero-title);
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.35);
+}
+
+.hero__lead {
+  margin: 0 0 clamp(1.25rem, 3vw, 1.75rem);
+  max-width: 34rem;
+  font-size: clamp(0.9375rem, 2vw, 1.0625rem);
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--hero-filter-hint);
 }
 
 :root[data-theme="dark"] .hero__title {

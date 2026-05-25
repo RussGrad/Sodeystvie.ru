@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../../includes/config.php';
 
-$pageTitle = 'Каталог на карте — Содействие';
+$pageTitle = site_format_page_title('Объекты на карте');
 $currentNav = 'catalog';
 
 require_once __DIR__ . '/../../includes/crm-listing-helpers.php';

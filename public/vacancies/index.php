@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-$pageTitle = 'Вакансии — Содействие';
+$pageTitle = site_format_page_title('Вакансии');
 $currentNav = 'vacancies';
 
 require __DIR__ . '/../includes/header.php';

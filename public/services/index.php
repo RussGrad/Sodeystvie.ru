@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-$pageTitle = 'Услуги — Содействие';
+$pageTitle = site_format_page_title('Услуги');
 $currentNav = 'services';
 
 require_once __DIR__ . '/../includes/services-catalog.php';

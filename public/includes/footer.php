@@ -19,13 +19,14 @@ $leadModalJsVersion = (string) (@filemtime(__DIR__ . '/../js/lead-modal.js') ?: 
     <div class="site-footer__inner container">
         <div class="site-footer__grid">
             <div class="site-footer__brand">
-                <a class="site-footer__logo-link" href="/" aria-label="Содействие — на главную">
+                <a class="site-footer__logo-link" href="/" aria-label="<?php echo htmlspecialchars(site_brand_full() . ' — на главную', ENT_QUOTES, 'UTF-8'); ?>">
                     <?php
                     $logoSvgClass = 'site-footer__logo-svg';
                     $logoFallbackClass = 'site-footer__logo site-footer__logo--fallback';
                     require __DIR__ . '/logo-markup.php';
                     ?>
                 </a>
+                <p class="site-footer__tagline"><?php echo htmlspecialchars(site_header_tagline(), ENT_QUOTES, 'UTF-8'); ?></p>
             </div>
 
             <div class="site-footer__col site-footer__col--nav">

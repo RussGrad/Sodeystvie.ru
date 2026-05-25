@@ -25,7 +25,7 @@ $logoSvg = preg_replace('/<\?xml[^>]*\?>\s*/u', '', $logoSvg);
 $logoSvg = preg_replace('/<svg\b/', '<svg class="' . htmlspecialchars($logoSvgClass, ENT_QUOTES, 'UTF-8') . '" role="img" aria-hidden="true"', $logoSvg, 1);
 $logoSvg = preg_replace(
     '/(<svg[^>]*>)/',
-    '$1<title>Агентство недвижимости</title>',
+    '$1<title>' . htmlspecialchars(function_exists('site_brand_full') ? site_brand_full() : 'АН «Содействие»', ENT_QUOTES, 'UTF-8') . '</title>',
     $logoSvg,
     1
 );

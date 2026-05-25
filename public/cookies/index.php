@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-$pageTitle = 'Cookies — Содействие';
+$pageTitle = site_format_page_title('Cookies');
 $currentNav = '';
 
 require __DIR__ . '/../includes/header.php';

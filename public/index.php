@@ -41,7 +41,7 @@ if ($showDbTest) {
     }
 }
 
-$pageTitle = 'Содействие — агентство недвижимости';
+$pageTitle = site_format_page_title();
 $currentNav = 'home';
 
 require __DIR__ . '/includes/header.php';

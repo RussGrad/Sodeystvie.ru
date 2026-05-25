@@ -24,7 +24,7 @@ if (!$error && (!is_array($obj) || !isset($obj['id']))) {
 }
 
 $title = !$error && isset($obj['title']) ? (string) $obj['title'] : 'Объект';
-$pageTitle = $title . ' — Каталог — Содействие';
+$pageTitle = site_format_page_title($title);
 $currentNav = 'catalog';
 
 require __DIR__ . '/../../includes/header.php';

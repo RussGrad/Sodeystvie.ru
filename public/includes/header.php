@@ -5,7 +5,8 @@ declare(strict_types=1);
 /** @var string $pageTitle Заголовок вкладки (<title>) */
 /** @var string $currentNav Активный пункт меню: home | catalog | services | mortgage | about | reviews | contacts | vacancies */
 
-$pageTitle = $pageTitle ?? 'Содействие — агентство недвижимости';
+$pageTitle = $pageTitle ?? site_format_page_title();
+$pageDescription = $pageDescription ?? null;
 $currentNav = $currentNav ?? '';
 
 require_once __DIR__ . '/config.php';
@@ -23,6 +24,7 @@ $maxUrl = site_max_url();
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
+    <?php site_render_head_meta($pageDescription); ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap">
@@ -59,9 +61,13 @@ $maxUrl = site_max_url();
     <div class="site-header__inner container">
         <div class="site-header__cluster">
         <div class="site-header__brand">
-            <a class="site-header__logo-link" href="/" aria-label="Содействие — на главную">
+            <a class="site-header__logo-link" href="/" aria-label="<?php echo htmlspecialchars(site_brand_full() . ' — на главную', ENT_QUOTES, 'UTF-8'); ?>">
                 <?php require __DIR__ . '/logo-markup.php'; ?>
             </a>
+            <p class="site-header__tagline">
+                <span class="site-header__tagline-line"><?php echo htmlspecialchars(SITE_CITY_TAG . ' • с ' . SITE_FOUNDED_YEAR, ENT_QUOTES, 'UTF-8'); ?></span>
+                <span class="site-header__tagline-line site-header__tagline-line--accent"><?php echo htmlspecialchars(site_slogan_short(), ENT_QUOTES, 'UTF-8'); ?></span>
+            </p>
         </div>
         <nav class="site-header__nav" id="site-header-menu" aria-label="Основное меню">
             <ul class="site-header__menu">

@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/env-bootstrap.php';
+require_once __DIR__ . '/site-brand.php';
 require_once __DIR__ . '/security.php';
+
+site_redirect_aliases_to_canonical();
 
 /** Телефон (подставьте реальный номер заказчика) */
 const SITE_PHONE_TEL = '+7(3952) 60-38-08';
@@ -17,11 +20,6 @@ const SITE_ADDRESS = 'г. Иркутск, ул. Карла Либкнехта 10
 const SITE_CITY_TAG = 'Иркутск';
 const SITE_FOUNDED_YEAR = 2010;
 const SITE_WORK_HOURS = 'Пн–Пт 9:00–19:00';
-
-function site_header_tagline(): string
-{
-    return SITE_CITY_TAG . ' • с ' . SITE_FOUNDED_YEAR . ' года';
-}
 
 /**
  * WhatsApp: SITE_WHATSAPP_URL в .env или wa.me по номеру SITE_PHONE_TEL.

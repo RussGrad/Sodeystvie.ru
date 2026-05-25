@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-$pageTitle = 'Контакты — Содействие';
+$pageTitle = site_format_page_title('Контакты');
 $currentNav = 'contacts';
 
 require __DIR__ . '/../includes/header.php';

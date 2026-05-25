@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-$pageTitle = 'Политика конфиденциальности — Содействие';
+$pageTitle = site_format_page_title('Политика конфиденциальности');
 $currentNav = '';
 
 require __DIR__ . '/../includes/header.php';

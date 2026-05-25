@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-$pageTitle = 'Отзывы — Содействие';
+$pageTitle = site_format_page_title('Отзывы');
 $currentNav = 'reviews';
 
 require __DIR__ . '/../includes/header.php';
