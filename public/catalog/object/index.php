@@ -84,11 +84,7 @@ function object_type_label(?string $objectType, ?int $rooms): string
 {
     $t = $objectType ? trim($objectType) : '';
     if ($t === 'flat') {
-        if ($rooms !== null && $rooms > 0) {
-            return $rooms . '-комнатная квартира';
-        }
-
-        return 'Квартира';
+        return site_flat_short_label($rooms);
     }
     if ($t === 'house') {
         return 'Дом';

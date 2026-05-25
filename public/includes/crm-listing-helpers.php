@@ -34,15 +34,31 @@ function site_fmt_m2(?float $areaTotal, ?string $priceRaw): ?string
     return number_format($v, 0, '.', ' ') . ' ₽/м²';
 }
 
+/** Краткая подпись комнат: «1-к», «2-к» … */
+function site_rooms_short_label(?int $rooms): ?string
+{
+    if ($rooms === null || $rooms <= 0) {
+        return null;
+    }
+
+    return $rooms . '-к';
+}
+
+/** «1-к квартира», «2-к квартира» или «Квартира». */
+function site_flat_short_label(?int $rooms): string
+{
+    $short = site_rooms_short_label($rooms);
+
+    return $short !== null ? $short . ' квартира' : 'Квартира';
+}
+
 function site_object_meta_label(?string $objectType, ?int $rooms): string
 {
     $t = $objectType ? trim($objectType) : '';
     if ($t === 'flat') {
-        if ($rooms !== null && $rooms > 0) {
-            return $rooms . '-комн. кв.';
-        }
+        $short = site_rooms_short_label($rooms);
 
-        return 'Квартира';
+        return $short !== null ? $short . ' кв.' : 'Квартира';
     }
     if ($t === 'house') {
         return 'Дом';
@@ -254,8 +270,13 @@ function site_listing_card_title(
     if ($t === 'commercial') {
         return 'Коммерческая недвижимость' . $areaSuffix;
     }
-    if ($rooms !== null && $rooms > 0 && $area !== null) {
-        return $rooms . '-комнатная квартира ' . $area . ' м²';
+    if ($t === 'flat' || ($rooms !== null && $rooms > 0)) {
+        $flatLabel = site_flat_short_label($rooms);
+        if ($area !== null) {
+            return $flatLabel . ' ' . $area . ' м²';
+        }
+
+        return $flatLabel;
     }
     if ($area !== null) {
         return 'Квартира ' . $area . ' м²';
