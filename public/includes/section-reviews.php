@@ -30,6 +30,8 @@ if (count($reviewsHome) === 0 && count($platforms) === 0) {
             </div>
         </header>
 
+        <?php site_render_reviews_demo_notice(); ?>
+
         <?php
         $reviewPlatformsCompact = true;
         $reviewPlatformsWidgets = false;

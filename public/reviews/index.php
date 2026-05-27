@@ -28,6 +28,8 @@ require __DIR__ . '/../includes/header.php';
             </div>
         </section>
 
+        <?php site_render_reviews_demo_notice(); ?>
+
         <?php
         $reviewPlatformsCompact = false;
         $reviewPlatformsWidgets = true;

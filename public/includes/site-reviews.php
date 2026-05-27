@@ -57,6 +57,7 @@ function site_reviews_all(): array
         $rating = max(1, min(5, $rating));
         $date = isset($row['date']) ? trim((string) $row['date']) : '';
         $source = isset($row['source']) ? trim((string) $row['source']) : 'yandex';
+        $demo = !empty($row['demo']);
 
         $out[] = [
             'id' => $id,
@@ -65,6 +66,7 @@ function site_reviews_all(): array
             'rating' => $rating,
             'text' => $text,
             'source' => $source,
+            'demo' => $demo,
         ];
     }
 
@@ -89,13 +91,55 @@ function site_reviews_summary(): array
     $countLabel = $count > 0
         ? number_format($count, 0, '.', ' ') . '+ отзывов'
         : 'отзывы клиентов';
+    if (site_reviews_all_demo()) {
+        $countLabel = 'проверочные карточки';
+    }
 
     return [
         'rating' => $rating,
         'count' => $count,
         'countLabel' => $countLabel,
         'yandexUrl' => trim(site_env('SITE_YANDEX_ORG_URL', '')),
+        'isDemo' => site_reviews_all_demo(),
     ];
+}
+
+function site_reviews_all_demo(): bool
+{
+    $all = site_reviews_all();
+    if (count($all) === 0) {
+        return false;
+    }
+    foreach ($all as $review) {
+        if (empty($review['demo'])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function site_reviews_has_demo(): bool
+{
+    foreach (site_reviews_all() as $review) {
+        if (!empty($review['demo'])) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function site_render_reviews_demo_notice(): void
+{
+    if (!site_reviews_has_demo()) {
+        return;
+    }
+    ?>
+    <p class="reviews-demo-notice" role="status">
+        Показаны <strong>проверочные</strong> карточки. Замените содержимое в <code>public/data/reviews.json</code> на реальные отзывы.
+    </p>
+    <?php
 }
 
 function site_reviews_source_label(string $source): string
@@ -363,9 +407,15 @@ function site_reviews_render_stars(int $rating, string $class = 'review-stars'):
  */
 function site_render_review_card(array $review, bool $compact = false): void
 {
-    $cardClass = 'review-card' . ($compact ? ' review-card--compact' : '');
+    $isDemo = !empty($review['demo']);
+    $cardClass = 'review-card'
+        . ($compact ? ' review-card--compact' : '')
+        . ($isDemo ? ' review-card--demo' : '');
     ?>
     <article class="<?php echo $cardClass; ?>">
+        <?php if ($isDemo) { ?>
+            <span class="review-card__demo-badge">Демо</span>
+        <?php } ?>
         <?php echo site_reviews_render_stars($review['rating']); ?>
         <blockquote class="review-card__text">
             <p><?php echo htmlspecialchars($review['text'], ENT_QUOTES, 'UTF-8'); ?></p>
