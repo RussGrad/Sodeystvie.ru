@@ -62,12 +62,40 @@
     return img.currentSrc || img.src || '';
   }
 
+  function bindSwipe(el, onLeft, onRight) {
+    if (!(el instanceof HTMLElement)) return;
+    let startX = 0;
+    let startY = 0;
+    el.addEventListener(
+      'touchstart',
+      (e) => {
+        const t = e.changedTouches[0];
+        startX = t.clientX;
+        startY = t.clientY;
+      },
+      { passive: true }
+    );
+    el.addEventListener(
+      'touchend',
+      (e) => {
+        const t = e.changedTouches[0];
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+        if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+        if (dx < 0) onLeft();
+        else onRight();
+      },
+      { passive: true }
+    );
+  }
+
   document.querySelectorAll('[data-gallery]').forEach((root) => {
     const stage = root.querySelector('[data-gallery-stage]');
     if (!stage) return;
 
     const slides = Array.from(root.querySelectorAll('[data-gallery-slide]'));
     const thumbs = Array.from(root.querySelectorAll('[data-gallery-thumb]'));
+    const lbThumbs = Array.from(root.querySelectorAll('[data-gallery-lightbox-thumb]'));
     const prev = root.querySelector('[data-gallery-prev]');
     const next = root.querySelector('[data-gallery-next]');
     const counter = root.querySelector('[data-gallery-counter]');
@@ -94,10 +122,23 @@
       if (img instanceof HTMLImageElement) loadLazyGalleryImage(img);
     };
 
-    const scrollThumbIntoView = (i) => {
-      const thumb = thumbs[i];
+    const scrollThumbIntoView = (list, i) => {
+      const thumb = list[i];
       if (!thumb || !('scrollIntoView' in thumb)) return;
       thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    };
+
+    const syncThumbStates = () => {
+      thumbs.forEach((thumb, ti) => {
+        const on = ti === index;
+        thumb.classList.toggle('is-active', on);
+        thumb.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      lbThumbs.forEach((thumb, ti) => {
+        const on = ti === index;
+        thumb.classList.toggle('is-active', on);
+        thumb.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
     };
 
     const setActive = (i) => {
@@ -110,18 +151,15 @@
         slide.hidden = !on;
       });
 
-      thumbs.forEach((thumb, ti) => {
-        const on = ti === index;
-        thumb.classList.toggle('is-active', on);
-        thumb.setAttribute('aria-selected', on ? 'true' : 'false');
-      });
+      syncThumbStates();
 
-      if (counter) counter.textContent = `${index + 1}/${slides.length}`;
+      if (counter) counter.textContent = `${index + 1} / ${slides.length}`;
 
       preloadSlide(index);
       preloadSlide(index + 1);
       preloadSlide(index - 1);
-      scrollThumbIntoView(index);
+      scrollThumbIntoView(thumbs, index);
+      scrollThumbIntoView(lbThumbs, index);
 
       if (lightboxOpen) syncLightboxImage();
     };
@@ -151,15 +189,14 @@
       if (lightboxHint) {
         lightboxHint.textContent = on
           ? 'Клик по фото — уменьшить · Esc — закрыть'
-          : 'Клик по фото — увеличить · Esc — закрыть';
+          : 'Клик по фото — приблизить · Esc — закрыть';
       }
     };
 
     const openLightbox = () => {
       if (!lightbox || !(lightboxImg instanceof HTMLImageElement) || !hasSlides) return;
       syncLightboxImage();
-      // Первый клик по фото сразу открывает увеличенный режим.
-      setLightboxZoom(true);
+      setLightboxZoom(false);
       lightbox.hidden = false;
       lightbox.setAttribute('aria-hidden', 'false');
       document.body.classList.add('has-modal');
@@ -180,30 +217,43 @@
       setLightboxZoom(!lightboxZoomed);
     };
 
+    const goPrev = () => setActive(index - 1);
+    const goNext = () => setActive(index + 1);
+
     prev?.addEventListener('click', (e) => {
       e.preventDefault();
-      setActive(index - 1);
+      goPrev();
     });
     next?.addEventListener('click', (e) => {
       e.preventDefault();
-      setActive(index + 1);
+      goNext();
     });
 
     lightboxPrev?.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      setActive(index - 1);
+      goPrev();
     });
     lightboxNext?.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      setActive(index + 1);
+      goNext();
     });
 
     thumbs.forEach((thumb) => {
       thumb.addEventListener('click', (e) => {
         e.preventDefault();
         const raw = thumb.getAttribute('data-gallery-thumb');
+        const i = raw !== null ? parseInt(raw, 10) : 0;
+        if (!Number.isNaN(i)) setActive(i);
+      });
+    });
+
+    lbThumbs.forEach((thumb) => {
+      thumb.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const raw = thumb.getAttribute('data-gallery-lightbox-thumb');
         const i = raw !== null ? parseInt(raw, 10) : 0;
         if (!Number.isNaN(i)) setActive(i);
       });
@@ -229,6 +279,9 @@
       toggleLightboxZoom();
     });
 
+    bindSwipe(stage, goNext, goPrev);
+    bindSwipe(lightboxStage, goNext, goPrev);
+
     document.addEventListener('keydown', (e) => {
       if (!lightboxOpen) return;
       if (e.key === 'Escape') {
@@ -238,12 +291,12 @@
       }
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        setActive(index - 1);
+        goPrev();
         return;
       }
       if (e.key === 'ArrowRight') {
         e.preventDefault();
-        setActive(index + 1);
+        goNext();
       }
     });
 

@@ -90,9 +90,41 @@ function site_render_listing_gallery(array $bundle, string $title): void
                     <img class="listing-gallery__lightbox-img" data-gallery-lightbox-img alt="<?php echo $alt; ?>" decoding="async" referrerpolicy="no-referrer">
                 </div>
                 <div class="listing-gallery__lightbox-bar">
-                    <p class="listing-gallery__lightbox-hint" data-gallery-lightbox-hint>Клик по фото — увеличить · Esc — закрыть</p>
+                    <p class="listing-gallery__lightbox-hint" data-gallery-lightbox-hint>Клик по фото — приблизить · Esc — закрыть</p>
                     <span class="listing-gallery__lightbox-counter" data-gallery-lightbox-counter></span>
                 </div>
+                <?php if ($total > 1) { ?>
+                    <div class="listing-gallery__lightbox-thumbs" data-gallery-lightbox-thumbs role="tablist" aria-label="Миниатюры в просмотре">
+                        <?php foreach ($raw as $idx => $rawUrl) {
+                            if (!is_string($rawUrl) || trim($rawUrl) === '') {
+                                continue;
+                            }
+                            $thumbActive = $idx === 0 ? ' is-active' : '';
+                            $thumbSrc = '';
+                            if ($idx === 0 && $firstDisplay !== '') {
+                                $resolved = site_crm_photo_src($rawUrl);
+                                if ($resolved !== '') {
+                                    $thumbSrc = site_crm_photo_display_src($resolved, 'thumb');
+                                }
+                            }
+                            ?>
+                            <button
+                                type="button"
+                                class="listing-gallery__lightbox-thumb<?php echo $thumbActive; ?>"
+                                data-gallery-lightbox-thumb="<?php echo (int) $idx; ?>"
+                                role="tab"
+                                aria-selected="<?php echo $idx === 0 ? 'true' : 'false'; ?>"
+                                aria-label="Фото <?php echo (int) ($idx + 1); ?>"
+                            >
+                                <?php if ($thumbSrc !== '') { ?>
+                                    <img class="listing-gallery__lightbox-thumb-img" src="<?php echo htmlspecialchars($thumbSrc, ENT_QUOTES, 'UTF-8'); ?>" alt="" width="72" height="54" decoding="async" loading="lazy" referrerpolicy="no-referrer">
+                                <?php } else { ?>
+                                    <img class="listing-gallery__lightbox-thumb-img" alt="" width="72" height="54" decoding="async" loading="lazy" referrerpolicy="no-referrer" data-gallery-thumb-lazy-raw="<?php echo htmlspecialchars(trim($rawUrl), ENT_QUOTES, 'UTF-8'); ?>">
+                                <?php } ?>
+                            </button>
+                        <?php } ?>
+                    </div>
+                <?php } ?>
             </div>
         </div>
 
