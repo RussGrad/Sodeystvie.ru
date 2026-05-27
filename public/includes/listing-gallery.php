@@ -30,7 +30,6 @@ function site_render_listing_gallery(array $bundle, string $title): void
                             data-gallery-index="<?php echo (int) $idx; ?>"
                             <?php echo $idx === 0 ? '' : ' hidden'; ?>
                         >
-                            <button type="button" class="listing-gallery__zoom-hit" data-gallery-open aria-label="Открыть фото на весь экран">
                             <?php if ($idx === 0 && $firstDisplay !== '') {
                                 echo site_crm_photo_img(
                                     $firstDisplay,
@@ -44,18 +43,13 @@ function site_render_listing_gallery(array $bundle, string $title): void
                                 <img
                                     class="listing-gallery__img"
                                     alt="<?php echo $alt; ?>"
-                                    width="960"
-                                    height="600"
                                     decoding="async"
                                     loading="lazy"
                                     referrerpolicy="no-referrer"
                                     data-gallery-lazy-raw="<?php echo htmlspecialchars(trim($rawUrl), ENT_QUOTES, 'UTF-8'); ?>"
                                 >
                             <?php } ?>
-                            </button>
-                            <span class="listing-gallery__zoom-hint" aria-hidden="true">
-                                <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM13 10h-2v2H9v-2H7V8h2V6h2v2h2v2z"/></svg>
-                            </span>
+                            <button type="button" class="listing-gallery__open-hit" data-gallery-open aria-label="Открыть фото на весь экран"></button>
                         </figure>
                     <?php } ?>
                 <?php } else { ?>
@@ -71,14 +65,16 @@ function site_render_listing_gallery(array $bundle, string $title): void
                     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M10 6l6 6-6 6"/></svg>
                 </button>
                 <div class="listing-gallery__counter" data-gallery-counter aria-live="polite">1/<?php echo (int) $total; ?></div>
+                <span class="listing-gallery__expand" aria-hidden="true">На весь экран</span>
             <?php } elseif ($total === 1) { ?>
                 <div class="listing-gallery__counter" data-gallery-counter aria-live="polite">1/1</div>
+                <span class="listing-gallery__expand" aria-hidden="true">На весь экран</span>
             <?php } ?>
         </div>
 
         <div class="listing-gallery__lightbox" data-gallery-lightbox hidden aria-hidden="true">
-            <div class="listing-gallery__lightbox-backdrop" data-gallery-lightbox-close></div>
-            <div class="listing-gallery__lightbox-inner" role="dialog" aria-modal="true" aria-label="Просмотр фото">
+            <div class="listing-gallery__lightbox-backdrop" data-gallery-lightbox-close tabindex="-1" aria-hidden="true"></div>
+            <div class="listing-gallery__lightbox-panel" role="dialog" aria-modal="true" aria-label="Просмотр фото">
                 <button type="button" class="listing-gallery__lightbox-close" data-gallery-lightbox-close aria-label="Закрыть">
                     <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
                 </button>
@@ -93,8 +89,10 @@ function site_render_listing_gallery(array $bundle, string $title): void
                 <div class="listing-gallery__lightbox-stage" data-gallery-lightbox-stage>
                     <img class="listing-gallery__lightbox-img" data-gallery-lightbox-img alt="<?php echo $alt; ?>" decoding="async" referrerpolicy="no-referrer">
                 </div>
-                <p class="listing-gallery__lightbox-hint" data-gallery-lightbox-hint>Нажмите на фото, чтобы увеличить · Esc — закрыть</p>
-                <div class="listing-gallery__lightbox-counter" data-gallery-lightbox-counter></div>
+                <div class="listing-gallery__lightbox-bar">
+                    <p class="listing-gallery__lightbox-hint" data-gallery-lightbox-hint>Клик по фото — увеличить · Esc — закрыть</p>
+                    <span class="listing-gallery__lightbox-counter" data-gallery-lightbox-counter></span>
+                </div>
             </div>
         </div>
 

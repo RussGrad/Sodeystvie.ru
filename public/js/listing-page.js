@@ -78,7 +78,11 @@
     const lightboxHint = root.querySelector('[data-gallery-lightbox-hint]');
     const lightboxPrev = root.querySelector('[data-gallery-lightbox-prev]');
     const lightboxNext = root.querySelector('[data-gallery-lightbox-next]');
-    const openBtns = Array.from(root.querySelectorAll('[data-gallery-open]'));
+    const openHits = Array.from(root.querySelectorAll('[data-gallery-open]'));
+
+    if (lightbox && lightbox.parentElement !== document.body) {
+      document.body.appendChild(lightbox);
+    }
 
     const hasSlides = slides.length > 0;
     let index = 0;
@@ -132,6 +136,9 @@
         if (src) lightboxImg.src = src;
         lightboxImg.alt = img.alt || '';
         if (lightboxCounter) lightboxCounter.textContent = `${index + 1} / ${slides.length}`;
+        lightboxImg.onload = () => {
+          if (lightboxZoomed) centerLightboxScroll();
+        };
       };
 
       if (img.getAttribute('data-gallery-lazy-raw')) {
@@ -141,13 +148,22 @@
       }
     };
 
+    const centerLightboxScroll = () => {
+      if (!(lightboxStage instanceof HTMLElement)) return;
+      requestAnimationFrame(() => {
+        lightboxStage.scrollLeft = Math.max(0, (lightboxStage.scrollWidth - lightboxStage.clientWidth) / 2);
+        lightboxStage.scrollTop = Math.max(0, (lightboxStage.scrollHeight - lightboxStage.clientHeight) / 2);
+      });
+    };
+
     const setLightboxZoom = (on) => {
       lightboxZoomed = on;
       if (lightboxStage) lightboxStage.classList.toggle('is-zoomed', on);
+      if (on) centerLightboxScroll();
       if (lightboxHint) {
         lightboxHint.textContent = on
-          ? 'Нажмите на фото, чтобы уменьшить · Esc — закрыть'
-          : 'Нажмите на фото, чтобы увеличить · Esc — закрыть';
+          ? 'Клик по фото — уменьшить · Esc — закрыть'
+          : 'Клик по фото — увеличить · Esc — закрыть';
       }
     };
 
@@ -204,8 +220,8 @@
       });
     });
 
-    openBtns.forEach((btn) => {
-      btn.addEventListener('click', (e) => {
+    openHits.forEach((hit) => {
+      hit.addEventListener('click', (e) => {
         e.preventDefault();
         openLightbox();
       });
