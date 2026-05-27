@@ -124,6 +124,23 @@ p.listing-object__address {
   }
 }
 
+.listing-object__lead-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 0.68rem 1.05rem;
+  font-size: 0.875rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--cta-text);
+  background: linear-gradient(180deg, var(--cta-bg-hover) 0%, var(--cta-bg) 100%);
+  box-shadow: var(--btn-primary-shadow);
+
+  &:hover {
+    background: linear-gradient(180deg, var(--cta-bg) 0%, var(--cta-bg-hover) 100%);
+    box-shadow: var(--btn-primary-shadow-hover);
+  }
+}
+
 .listing-object__fav {
   display: inline-flex;
   align-items: center;
@@ -176,9 +193,9 @@ p.listing-object__address {
 
 .listing-gallery__stage {
   position: relative;
-  aspect-ratio: 16 / 10;
-  max-height: min(68vh, 640px);
-  background: #1c222c;
+  aspect-ratio: 4 / 3;
+  max-height: min(72vh, 680px);
+  background: #0d1117;
 }
 
 .listing-gallery__slide {
@@ -202,7 +219,7 @@ p.listing-object__address {
   object-fit: contain;
   object-position: center;
   display: block;
-  background: #1c222c;
+  background: #0d1117;
 }
 
 .listing-gallery__img:not([src]),
@@ -222,16 +239,16 @@ p.listing-object__address {
   top: 50%;
   transform: translateY(-50%);
   z-index: 4;
-  width: 46px;
-  height: 46px;
+  width: 36px;
+  height: 36px;
   border-radius: 999px;
-  border: 1px solid var(--featured-card-border);
-  background: rgba(255, 255, 255, 0.88);
-  color: #111;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(5, 7, 10, 0.78);
+  color: #fff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
+  font-size: 20px;
   line-height: 1;
   cursor: pointer;
   transition: transform var(--duration-fast) var(--ease-smooth), background var(--duration-fast) var(--ease-smooth);
@@ -251,16 +268,16 @@ p.listing-object__address {
 }
 
 :root[data-theme="dark"] .listing-gallery__nav {
-  background: rgba(20, 20, 20, 0.78);
+  background: rgba(5, 7, 10, 0.86);
   color: #fff;
 }
 
 .listing-gallery__nav--prev {
-  left: 0.85rem;
+  left: 0.45rem;
 }
 
 .listing-gallery__nav--next {
-  right: 0.85rem;
+  right: 0.45rem;
 }
 
 .listing-gallery__counter {

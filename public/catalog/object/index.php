@@ -126,7 +126,7 @@ $listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-o
                         <p class="listing-object__price-m2"><?php echo htmlspecialchars($priceM2, ENT_QUOTES, 'UTF-8'); ?></p>
                     <?php } ?>
                     <div class="listing-object__actions">
-                        <button class="btn btn--primary" type="button" data-lead-open>Оставить заявку</button>
+                        <button class="btn btn--primary listing-object__lead-btn" type="button" data-lead-open>Оставить заявку</button>
                         <button type="button" class="listing-object__fav" data-listing-fav aria-pressed="false" aria-label="В избранное">
                             <svg class="listing-object__fav-icon" viewBox="0 0 24 24" aria-hidden="true">
                                 <path fill="none" stroke="currentColor" stroke-width="1.8" d="M12 21s-7-4.6-9.5-9C.5 7.5 3.4 4.5 7 4.5c2 0 3.7 1.1 5 2.7 1.3-1.6 3-2.7 5-2.7 3.6 0 6.5 3 4.5 7.5C19 16.4 12 21 12 21Z"/>
