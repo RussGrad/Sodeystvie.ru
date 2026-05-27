@@ -158,7 +158,8 @@
     const openLightbox = () => {
       if (!lightbox || !(lightboxImg instanceof HTMLImageElement) || !hasSlides) return;
       syncLightboxImage();
-      setLightboxZoom(false);
+      // Первый клик по фото сразу открывает увеличенный режим.
+      setLightboxZoom(true);
       lightbox.hidden = false;
       lightbox.setAttribute('aria-hidden', 'false');
       document.body.classList.add('has-modal');
