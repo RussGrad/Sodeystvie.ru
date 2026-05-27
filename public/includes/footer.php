@@ -99,7 +99,7 @@ $leadModalJsVersion = (string) (@filemtime(__DIR__ . '/../js/lead-modal.js') ?: 
                 <h2 class="site-footer__heading">Реквизиты</h2>
                 <p class="site-footer__requisites">
                     <?php echo htmlspecialchars(SITE_LEGAL_NAME, ENT_QUOTES, 'UTF-8'); ?><br>
-                    ИНН <?php echo htmlspecialchars(SITE_LEGAL_INN, ENT_QUOTES, 'UTF-8'); ?> · ОГРН <?php echo htmlspecialchars(SITE_LEGAL_OGRN, ENT_QUOTES, 'UTF-8'); ?>
+                    ИНН <?php echo htmlspecialchars(site_legal_inn_display(), ENT_QUOTES, 'UTF-8'); ?> · ОГРН <?php echo htmlspecialchars(site_legal_ogrn_display(), ENT_QUOTES, 'UTF-8'); ?>
                 </p>
                 <ul class="site-footer__legal-links">
                     <li><a class="site-footer__legal-link" href="/privacy/">Политика конфиденциальности</a></li>
@@ -120,6 +120,10 @@ $leadModalJsVersion = (string) (@filemtime(__DIR__ . '/../js/lead-modal.js') ?: 
     <script src="/js/site-footer.js?v=<?php echo htmlspecialchars($siteFooterJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <script src="/js/lead-modal.js?v=<?php echo htmlspecialchars($leadModalJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <script src="/js/hero.js?v=<?php echo htmlspecialchars($heroJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+    <?php
+    $mortgageQuizJsVersion = (string) (@filemtime(__DIR__ . '/../js/mortgage-quiz.js') ?: time());
+    ?>
+    <script src="/js/mortgage-quiz.js?v=<?php echo htmlspecialchars($mortgageQuizJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <?php
     $mortgageJsVersion = (string) (@filemtime(__DIR__ . '/../js/mortgage.js') ?: time());
     ?>

@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/site-about.php';
 require_once __DIR__ . '/../includes/site-image.php';
+require_once __DIR__ . '/../includes/site-team.php';
 
 $pageTitle = site_format_page_title('О компании');
 $currentNav = 'about';
@@ -13,6 +14,7 @@ $stats = site_about_stats();
 $values = site_about_values();
 $steps = site_about_work_steps();
 $story = site_about_story_paragraphs();
+$team = site_team_all();
 
 $phoneHref = preg_replace('/\D+/', '', SITE_PHONE_TEL) ?: SITE_PHONE_TEL;
 $teamAlt = 'Команда ' . site_brand_full() . ' в офисе в ' . SITE_CITY_TAG;
@@ -57,6 +59,18 @@ require __DIR__ . '/../includes/header.php';
             <?php } ?>
         </section>
 
+        <?php if (count($team) > 0) { ?>
+        <section class="about-page__team" id="team" aria-labelledby="about-team-title">
+            <h2 class="about-page__section-title" id="about-team-title">Команда</h2>
+            <p class="about-page__team-lead">Специалисты, которые ведут сделки от консультации до регистрации права собственности.</p>
+            <div class="about-page__team-grid team__grid">
+                <?php foreach ($team as $member) {
+                    site_render_team_card($member);
+                } ?>
+            </div>
+        </section>
+        <?php } ?>
+
         <section class="about-page__values" aria-labelledby="about-values-title">
             <h2 class="about-page__section-title" id="about-values-title">Наши принципы</h2>
             <ul class="about-page__values-grid">
@@ -93,11 +107,11 @@ require __DIR__ . '/../includes/header.php';
                 </div>
                 <div class="about-page__legal-row">
                     <dt>ИНН</dt>
-                    <dd><?php echo htmlspecialchars(SITE_LEGAL_INN, ENT_QUOTES, 'UTF-8'); ?></dd>
+                    <dd><?php echo htmlspecialchars(site_legal_inn_display(), ENT_QUOTES, 'UTF-8'); ?></dd>
                 </div>
                 <div class="about-page__legal-row">
                     <dt>ОГРН</dt>
-                    <dd><?php echo htmlspecialchars(SITE_LEGAL_OGRN, ENT_QUOTES, 'UTF-8'); ?></dd>
+                    <dd><?php echo htmlspecialchars(site_legal_ogrn_display(), ENT_QUOTES, 'UTF-8'); ?></dd>
                 </div>
                 <div class="about-page__legal-row">
                     <dt>Адрес офиса</dt>

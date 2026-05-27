@@ -93,6 +93,7 @@ $heroSliderEnabled = $heroSlideCount > 1;
             </div>
 
             <div class="hero__search-card">
+                <div class="hero__panel hero__panel--catalog" id="hero-panel-catalog" data-hero-panel="catalog">
                 <form class="hero__form" action="/catalog/" method="get" id="hero-search-form">
                     <input type="hidden" name="deal" id="hero-deal" value="buy">
 
@@ -152,11 +153,36 @@ $heroSliderEnabled = $heroSlideCount > 1;
                         </div>
                     </div>
                 </form>
+                </div>
+
+                <div class="hero__panel hero__panel--lead" id="hero-panel-lead" data-hero-panel="lead" hidden>
+                    <p class="hero__lead-title" id="hero-lead-title">Хотите продать квартиру в Иркутске?</p>
+                    <p class="hero__lead-text" id="hero-lead-text">Оставьте адрес — проведём бесплатную оценку стоимости за 30 минут.</p>
+                    <label class="hero__lead-field">
+                        <span class="hero__filter-hint" id="hero-lead-field-label">Адрес или район объекта</span>
+                        <input
+                            type="text"
+                            class="hero__lead-input"
+                            id="hero-lead-address"
+                            name="address"
+                            maxlength="200"
+                            placeholder="Например: ул. Карла Маркса, 25"
+                            autocomplete="street-address"
+                        >
+                    </label>
+                    <button
+                        type="button"
+                        class="hero__btn hero__btn--find hero__lead-submit"
+                        id="hero-lead-submit"
+                        data-lead-open
+                        data-lead-topic="sell-evaluation"
+                    >Получить оценку</button>
+                </div>
             </div>
 
             <div class="hero__actions">
                 <button id="hero-primary-action" type="submit" class="hero__btn hero__btn--find" form="hero-search-form">Найти</button>
-                <a class="hero__btn hero__btn--map" href="/catalog/map/">На карте</a>
+                <a class="hero__btn hero__btn--map" id="hero-map-link" href="/catalog/map/">На карте</a>
             </div>
         </div>
     </div>

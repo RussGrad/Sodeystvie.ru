@@ -149,10 +149,32 @@ function site_yandex_maps_external_url(?array $office = null): string
         . rawurlencode((string) ($office['address'] ?? SITE_ADDRESS));
 }
 
-/** Реквизиты — уточняются у заказчика */
+/** Реквизиты — имя по умолчанию; ИНН/ОГРН из public/.env (SITE_LEGAL_INN, SITE_LEGAL_OGRN) */
 const SITE_LEGAL_NAME = 'ООО «Содействие»';
-const SITE_LEGAL_INN = '0000000000';
-const SITE_LEGAL_OGRN = '0000000000000';
+
+function site_legal_inn(): string
+{
+    return trim(site_env('SITE_LEGAL_INN', ''));
+}
+
+function site_legal_ogrn(): string
+{
+    return trim(site_env('SITE_LEGAL_OGRN', ''));
+}
+
+function site_legal_inn_display(): string
+{
+    $inn = site_legal_inn();
+
+    return $inn !== '' ? $inn : '—';
+}
+
+function site_legal_ogrn_display(): string
+{
+    $ogrn = site_legal_ogrn();
+
+    return $ogrn !== '' ? $ogrn : '—';
+}
 
 /**
  * Интеграции (локально/прод):

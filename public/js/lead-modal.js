@@ -14,6 +14,8 @@
   var nameInput = document.getElementById('lead-name');
   var honeypotInput = document.getElementById('lead-company');
   var pendingObjectId = '';
+  var pendingTopic = '';
+  var pendingMessage = '';
 
   if (!modal || !openBtn) {
     return;
@@ -229,6 +231,10 @@
     var objectId = opener.getAttribute('data-lead-object-id');
     pendingObjectId =
       typeof objectId === 'string' && objectId.trim() !== '' ? objectId.trim() : '';
+    var topic = opener.getAttribute('data-lead-topic');
+    pendingTopic = typeof topic === 'string' && topic.trim() !== '' ? topic.trim() : '';
+    var message = opener.getAttribute('data-lead-message');
+    pendingMessage = typeof message === 'string' && message.trim() !== '' ? message.trim() : '';
     e.preventDefault();
     open();
   });
@@ -296,6 +302,12 @@
       };
       if (pendingObjectId) {
         payload.objectId = pendingObjectId;
+      }
+      if (pendingTopic) {
+        payload.topic = pendingTopic;
+      }
+      if (pendingMessage) {
+        payload.message = pendingMessage;
       }
 
       fetch('/api/lead-submit.php', {

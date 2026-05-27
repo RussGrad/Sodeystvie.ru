@@ -1,5 +1,5 @@
 /**
- * Первый экран: вкладки типа сделки + слайдер фона.
+ * Первый экран: вкладки типа сделки, панели «Купить» / «Продать», слайдер фона.
  */
 (function () {
   'use strict';
@@ -14,7 +14,36 @@
   var typeLabel = document.getElementById('hero-lbl-type');
   var typeSelect = hero.querySelector('select[name="type"]');
   var primaryAction = document.getElementById('hero-primary-action');
+  var mapLink = document.getElementById('hero-map-link');
   var leadOpenBtn = document.getElementById('site-header-lead-open');
+  var panelCatalog = document.getElementById('hero-panel-catalog');
+  var panelLead = document.getElementById('hero-panel-lead');
+  var leadTitle = document.getElementById('hero-lead-title');
+  var leadText = document.getElementById('hero-lead-text');
+  var leadFieldLabel = document.getElementById('hero-lead-field-label');
+  var leadAddress = document.getElementById('hero-lead-address');
+  var leadSubmit = document.getElementById('hero-lead-submit');
+
+  var leadCopy = {
+    sell: {
+      title: 'Хотите продать квартиру в Иркутске?',
+      text: 'Оставьте адрес — проведём бесплатную оценку стоимости за 30 минут.',
+      label: 'Адрес или район объекта',
+      topic: 'sell-evaluation',
+      cta: 'Получить оценку',
+    },
+    rent_out: {
+      title: 'Сдадим вашу квартиру в Иркутске',
+      text: 'Укажите объект — подберём арендатора и подготовим договор.',
+      label: 'Адрес или описание объекта',
+      topic: 'rent-out',
+      cta: 'Оставить заявку',
+    },
+  };
+
+  function isLeadDeal(deal) {
+    return deal === 'sell' || deal === 'rent_out';
+  }
 
   function setTypeLabel() {
     if (!typeLabel || !typeSelect) {
@@ -32,23 +61,49 @@
     typeLabel.textContent = map[v] || 'Квартиру';
   }
 
+  function applyLeadCopy(deal) {
+    var copy = leadCopy[deal] || leadCopy.sell;
+    if (leadTitle) {
+      leadTitle.textContent = copy.title;
+    }
+    if (leadText) {
+      leadText.textContent = copy.text;
+    }
+    if (leadFieldLabel) {
+      leadFieldLabel.textContent = copy.label;
+    }
+    if (leadSubmit) {
+      leadSubmit.textContent = copy.cta;
+      leadSubmit.setAttribute('data-lead-topic', copy.topic);
+    }
+  }
+
+  function setPanelMode(deal) {
+    var leadMode = isLeadDeal(deal);
+
+    if (panelCatalog) {
+      panelCatalog.hidden = leadMode;
+    }
+    if (panelLead) {
+      panelLead.hidden = !leadMode;
+      if (leadMode) {
+        applyLeadCopy(deal);
+      }
+    }
+    if (mapLink) {
+      mapLink.hidden = leadMode;
+    }
+    if (primaryAction) {
+      primaryAction.hidden = leadMode;
+    }
+  }
+
   function setPrimaryActionForDeal(deal) {
-    if (!primaryAction) {
+    if (!primaryAction || isLeadDeal(deal)) {
       return;
     }
 
-    var isLead = deal === 'sell' || deal === 'rent_out';
-
-    if (isLead) {
-      primaryAction.textContent = 'Оставить заявку';
-      primaryAction.setAttribute('type', 'button');
-      primaryAction.removeAttribute('form');
-      primaryAction.setAttribute('aria-haspopup', 'dialog');
-      primaryAction.setAttribute('aria-controls', 'lead-modal');
-      primaryAction.setAttribute('data-action', 'lead');
-      return;
-    }
-
+    primaryAction.hidden = false;
     primaryAction.textContent = 'Найти';
     primaryAction.setAttribute('type', 'submit');
     primaryAction.setAttribute('form', 'hero-search-form');
@@ -57,16 +112,24 @@
     primaryAction.setAttribute('data-action', 'search');
   }
 
-  if (dealInput) {
-    hero.addEventListener('click', function (e) {
-      var actionBtn = e.target.closest('#hero-primary-action');
-      if (actionBtn && hero.contains(actionBtn)) {
-        if (actionBtn.getAttribute('data-action') === 'lead' && leadOpenBtn) {
-          leadOpenBtn.click();
-        }
-      }
-    });
+  function activateDeal(deal) {
+    if (!dealInput) {
+      return;
+    }
 
+    dealInput.value = deal;
+    setPanelMode(deal);
+    setPrimaryActionForDeal(deal);
+
+    for (var i = 0; i < tabs.length; i++) {
+      var t = tabs[i];
+      var on = t.getAttribute('data-deal') === deal;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.classList.toggle('hero__tab--active', on);
+    }
+  }
+
+  if (dealInput) {
     hero.addEventListener('click', function (e) {
       var tab = e.target.closest('.hero__tab');
       if (!tab || !hero.contains(tab)) {
@@ -78,15 +141,12 @@
         return;
       }
 
-      dealInput.value = deal;
-      setPrimaryActionForDeal(deal);
-
-      for (var i = 0; i < tabs.length; i++) {
-        var t = tabs[i];
-        var on = t === tab;
-        t.setAttribute('aria-selected', on ? 'true' : 'false');
-        t.classList.toggle('hero__tab--active', on);
+      if (deal === 'abroad') {
+        window.location.href = '/contacts/';
+        return;
       }
+
+      activateDeal(deal);
     });
 
     if (typeSelect && typeLabel) {
@@ -94,7 +154,18 @@
       setTypeLabel();
     }
 
-    setPrimaryActionForDeal(String(dealInput.value || 'buy'));
+    if (leadSubmit && leadAddress) {
+      leadSubmit.addEventListener('click', function () {
+        var addr = leadAddress.value.trim();
+        if (addr !== '') {
+          leadSubmit.setAttribute('data-lead-message', 'Адрес: ' + addr);
+        } else {
+          leadSubmit.removeAttribute('data-lead-message');
+        }
+      });
+    }
+
+    activateDeal(String(dealInput.value || 'buy'));
   }
 
   // --- Фоновый слайдер ---

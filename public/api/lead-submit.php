@@ -109,7 +109,19 @@ if (site_public_site_api_key() === '') {
     exit;
 }
 
+$topic = isset($data['topic']) ? trim(substr((string) $data['topic'], 0, 80)) : '';
+$extraMessage = !$isContactsForm && isset($data['message'])
+    ? site_sanitize_lead_message((string) $data['message'])
+    : '';
+
 $source = 'Сайт an-sodeystvie.ru';
+if ($topic !== '') {
+    $source .= ' · ' . $topic;
+}
+if ($extraMessage !== '') {
+    $source .= ' · ' . $extraMessage;
+}
+
 if ($isContactsForm) {
     $regions = site_contacts_form_regions();
     $subjects = site_contacts_form_subjects();
