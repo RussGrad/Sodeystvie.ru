@@ -136,9 +136,6 @@
         if (src) lightboxImg.src = src;
         lightboxImg.alt = img.alt || '';
         if (lightboxCounter) lightboxCounter.textContent = `${index + 1} / ${slides.length}`;
-        lightboxImg.onload = () => {
-          if (lightboxZoomed) centerLightboxScroll();
-        };
       };
 
       if (img.getAttribute('data-gallery-lazy-raw')) {
@@ -148,18 +145,9 @@
       }
     };
 
-    const centerLightboxScroll = () => {
-      if (!(lightboxStage instanceof HTMLElement)) return;
-      requestAnimationFrame(() => {
-        lightboxStage.scrollLeft = Math.max(0, (lightboxStage.scrollWidth - lightboxStage.clientWidth) / 2);
-        lightboxStage.scrollTop = Math.max(0, (lightboxStage.scrollHeight - lightboxStage.clientHeight) / 2);
-      });
-    };
-
     const setLightboxZoom = (on) => {
       lightboxZoomed = on;
       if (lightboxStage) lightboxStage.classList.toggle('is-zoomed', on);
-      if (on) centerLightboxScroll();
       if (lightboxHint) {
         lightboxHint.textContent = on
           ? 'Клик по фото — уменьшить · Esc — закрыть'
