@@ -20,11 +20,11 @@
   }
 
   function loadLazyGalleryImage(img) {
-    if (!(img instanceof HTMLImageElement)) return;
-    if (img.src && img.src.indexOf('/api/image.php') >= 0) return;
+    if (!(img instanceof HTMLImageElement)) return Promise.resolve();
+    if (img.src && img.src.indexOf('/api/image.php') >= 0) return Promise.resolve();
     const raw = img.getAttribute('data-gallery-lazy-raw') || img.getAttribute('data-gallery-thumb-lazy-raw');
-    if (!raw) return;
-    resolvePhotoDisplayUrl(raw).then((url) => {
+    if (!raw) return Promise.resolve();
+    return resolvePhotoDisplayUrl(raw).then((url) => {
       if (url) img.src = url;
       img.removeAttribute('data-gallery-lazy-raw');
       img.removeAttribute('data-gallery-thumb-lazy-raw');
@@ -52,6 +52,16 @@
 
   const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 
+  function slideImage(slide) {
+    if (!slide) return null;
+    return slide.querySelector('.listing-gallery__img');
+  }
+
+  function imageSrc(img) {
+    if (!(img instanceof HTMLImageElement)) return '';
+    return img.currentSrc || img.src || '';
+  }
+
   document.querySelectorAll('[data-gallery]').forEach((root) => {
     const stage = root.querySelector('[data-gallery-stage]');
     if (!stage) return;
@@ -61,15 +71,23 @@
     const prev = root.querySelector('[data-gallery-prev]');
     const next = root.querySelector('[data-gallery-next]');
     const counter = root.querySelector('[data-gallery-counter]');
+    const lightbox = root.querySelector('[data-gallery-lightbox]');
+    const lightboxImg = root.querySelector('[data-gallery-lightbox-img]');
+    const lightboxStage = root.querySelector('[data-gallery-lightbox-stage]');
+    const lightboxCounter = root.querySelector('[data-gallery-lightbox-counter]');
+    const lightboxHint = root.querySelector('[data-gallery-lightbox-hint]');
+    const lightboxPrev = root.querySelector('[data-gallery-lightbox-prev]');
+    const lightboxNext = root.querySelector('[data-gallery-lightbox-next]');
+    const openBtns = Array.from(root.querySelectorAll('[data-gallery-open]'));
 
     const hasSlides = slides.length > 0;
     let index = 0;
+    let lightboxOpen = false;
+    let lightboxZoomed = false;
 
     const preloadSlide = (i) => {
-      const slide = slides[i];
-      if (!slide) return;
-      const lazy = slide.querySelector('[data-gallery-lazy-raw]');
-      if (lazy instanceof HTMLImageElement) loadLazyGalleryImage(lazy);
+      const img = slideImage(slides[i]);
+      if (img instanceof HTMLImageElement) loadLazyGalleryImage(img);
     };
 
     const scrollThumbIntoView = (i) => {
@@ -100,6 +118,61 @@
       preloadSlide(index + 1);
       preloadSlide(index - 1);
       scrollThumbIntoView(index);
+
+      if (lightboxOpen) syncLightboxImage();
+    };
+
+    const syncLightboxImage = () => {
+      if (!(lightboxImg instanceof HTMLImageElement)) return;
+      const img = slideImage(slides[index]);
+      if (!(img instanceof HTMLImageElement)) return;
+
+      const applySrc = () => {
+        const src = imageSrc(img);
+        if (src) lightboxImg.src = src;
+        lightboxImg.alt = img.alt || '';
+        if (lightboxCounter) lightboxCounter.textContent = `${index + 1} / ${slides.length}`;
+      };
+
+      if (img.getAttribute('data-gallery-lazy-raw')) {
+        loadLazyGalleryImage(img).then(applySrc);
+      } else {
+        applySrc();
+      }
+    };
+
+    const setLightboxZoom = (on) => {
+      lightboxZoomed = on;
+      if (lightboxStage) lightboxStage.classList.toggle('is-zoomed', on);
+      if (lightboxHint) {
+        lightboxHint.textContent = on
+          ? 'Нажмите на фото, чтобы уменьшить · Esc — закрыть'
+          : 'Нажмите на фото, чтобы увеличить · Esc — закрыть';
+      }
+    };
+
+    const openLightbox = () => {
+      if (!lightbox || !(lightboxImg instanceof HTMLImageElement) || !hasSlides) return;
+      syncLightboxImage();
+      setLightboxZoom(false);
+      lightbox.hidden = false;
+      lightbox.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('has-modal');
+      lightboxOpen = true;
+    };
+
+    const closeLightbox = () => {
+      if (!lightbox) return;
+      lightbox.hidden = true;
+      lightbox.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('has-modal');
+      lightboxOpen = false;
+      setLightboxZoom(false);
+    };
+
+    const toggleLightboxZoom = () => {
+      if (!lightboxOpen) return;
+      setLightboxZoom(!lightboxZoomed);
     };
 
     prev?.addEventListener('click', (e) => {
@@ -111,6 +184,17 @@
       setActive(index + 1);
     });
 
+    lightboxPrev?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setActive(index - 1);
+    });
+    lightboxNext?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setActive(index + 1);
+    });
+
     thumbs.forEach((thumb) => {
       thumb.addEventListener('click', (e) => {
         e.preventDefault();
@@ -118,6 +202,44 @@
         const i = raw !== null ? parseInt(raw, 10) : 0;
         if (!Number.isNaN(i)) setActive(i);
       });
+    });
+
+    openBtns.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openLightbox();
+      });
+    });
+
+    lightbox?.querySelectorAll('[data-gallery-lightbox-close]').forEach((el) => {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeLightbox();
+      });
+    });
+
+    lightboxImg?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleLightboxZoom();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (!lightboxOpen) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeLightbox();
+        return;
+      }
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        setActive(index - 1);
+        return;
+      }
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        setActive(index + 1);
+      }
     });
 
     root.querySelectorAll('[data-gallery-thumb-lazy-raw]').forEach((img) => {
