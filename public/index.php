@@ -52,6 +52,7 @@ require __DIR__ . '/includes/header.php';
     <?php require __DIR__ . '/includes/section-hero.php'; ?>
     <?php require __DIR__ . '/includes/section-featured-listings.php'; ?>
     <?php require __DIR__ . '/includes/section-services.php'; ?>
+    <?php require __DIR__ . '/includes/section-reviews.php'; ?>
 <?php if ($showDbTest) { ?>
     <div class="container">
     <section class="page-main__dev" aria-label="Проверка окружения">

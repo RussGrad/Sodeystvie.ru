@@ -1,0 +1,502 @@
+// Секция «Отзывы» на главной и страница /reviews/
+
+.review-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+
+  &__icon {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    fill: rgba(22, 22, 22, 0.15);
+
+    &.is-filled {
+      fill: #f5a623;
+    }
+  }
+
+  &--summary .review-stars__icon {
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+
+  &--lg .review-stars__icon {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+}
+
+:root[data-theme="dark"] .review-stars__icon {
+  fill: rgba(255, 255, 255, 0.18);
+
+  &.is-filled {
+    fill: #f5b84a;
+  }
+}
+
+.review-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  height: 100%;
+  margin: 0;
+  padding: 1.35rem 1.25rem 1.4rem;
+  background: var(--services-card-bg);
+  border: 1px solid var(--services-card-border);
+  border-radius: 12px;
+  box-shadow: var(--services-card-shadow);
+
+  &__text {
+    flex: 1 1 auto;
+    margin: 0;
+
+    p {
+      margin: 0;
+      font-size: 0.9375rem;
+      line-height: 1.55;
+      color: var(--services-text);
+    }
+  }
+
+  &__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.65rem;
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
+
+  &__author {
+    font-style: normal;
+    font-weight: 600;
+    color: var(--services-title);
+  }
+
+  &__date {
+    color: var(--header-muted);
+  }
+
+  &__source {
+    margin-left: auto;
+    padding: 0.15rem 0.45rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    background: rgba(var(--color-accent-rgb), 0.1);
+    border-radius: 999px;
+  }
+
+  &--compact {
+    .review-card__text p {
+      display: -webkit-box;
+      -webkit-line-clamp: 5;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
+}
+
+.reviews {
+  padding: clamp(3rem, 6.5vw, 4.5rem) 0 clamp(3.25rem, 7vw, 5rem);
+  background: var(--page-bg);
+  border-top: 1px solid var(--header-border);
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-bottom: clamp(1.5rem, 4vw, 2.25rem);
+
+    @media (min-width: 768px) {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+  }
+
+  &__intro {
+    max-width: 36rem;
+  }
+
+  &__title {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.375rem, 2.4vw, 1.75rem);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    color: var(--services-title);
+  }
+
+  &__lead {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--services-text);
+  }
+
+  &__summary {
+    flex-shrink: 0;
+    padding: 1rem 1.15rem;
+    text-align: center;
+    background: var(--featured-strip-bg);
+    border: 1px solid var(--services-card-border);
+    border-radius: 12px;
+
+    @media (min-width: 768px) {
+      min-width: 13rem;
+    }
+  }
+
+  &__rating {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0 0 0.35rem;
+  }
+
+  &__rating-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--services-title);
+  }
+
+  &__count {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--header-muted);
+  }
+
+  &__maps-link {
+    display: inline-block;
+    margin-top: 0.65rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--color-accent);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.15rem;
+
+    @media (max-width: 900px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: center;
+    margin-top: clamp(1.5rem, 4vw, 2rem);
+  }
+
+  &__all-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 1.35rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--cta-text);
+    background: linear-gradient(180deg, var(--cta-bg) 0%, var(--cta-bg-hover) 100%);
+    border-radius: 10px;
+    box-shadow: var(--btn-primary-shadow);
+    transition:
+      transform var(--duration-fast) var(--ease-smooth),
+      box-shadow var(--duration-fast) var(--ease-smooth),
+      filter 0.2s ease;
+
+    &:hover {
+      filter: brightness(1.06);
+      box-shadow: var(--btn-primary-shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: translateY(0) scale(0.98);
+    }
+  }
+}
+
+// Площадки: Яндекс, 2ГИС, Домклик, Авито
+.review-platforms-wrap {
+  margin-bottom: clamp(1.5rem, 4vw, 2.25rem);
+
+  &--compact {
+    margin-bottom: clamp(1.25rem, 3vw, 1.75rem);
+  }
+
+  &__heading {
+    margin: 0 0 0.35rem;
+    font-size: clamp(1.125rem, 2vw, 1.35rem);
+    font-weight: 700;
+    color: var(--services-title);
+  }
+
+  &__lead {
+    margin: 0 0 1rem;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--services-text);
+  }
+
+  &__label {
+    margin: 0 0 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--header-muted);
+  }
+}
+
+.review-platforms {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+
+  .review-platforms-wrap--compact & {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.65rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+
+    @media (min-width: 900px) {
+      flex-wrap: wrap;
+      overflow: visible;
+    }
+  }
+
+  &__item {
+    margin: 0;
+    min-width: 0;
+
+    .review-platforms-wrap--compact & {
+      flex: 0 0 min(14rem, 78vw);
+      scroll-snap-align: start;
+    }
+  }
+}
+
+.review-platform {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 100%;
+  padding: 0.85rem 1rem;
+  text-decoration: none;
+  color: inherit;
+  background: var(--services-card-bg);
+  border: 1px solid var(--services-card-border);
+  border-radius: 12px;
+  box-shadow: var(--services-card-shadow);
+  transition:
+    border-color var(--duration-fast) var(--ease-smooth),
+    transform var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) var(--ease-smooth);
+
+  &:hover {
+    border-color: rgba(var(--color-accent-rgb), 0.35);
+    box-shadow: var(--services-card-shadow), 0 4px 16px rgba(var(--color-accent-rgb), 0.08);
+    transform: translateY(-2px);
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    display: flex;
+    line-height: 0;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--services-title);
+  }
+
+  &__cta {
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: var(--header-muted);
+  }
+}
+
+.review-widgets {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 4vw, 2rem);
+  margin-top: clamp(1.5rem, 4vw, 2rem);
+
+  &__item {
+    margin: 0;
+  }
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: var(--services-title);
+  }
+
+  &__open {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--color-accent);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__frame-wrap {
+    overflow: hidden;
+    background: var(--services-card-bg);
+    border: 1px solid var(--services-card-border);
+    border-radius: 12px;
+  }
+
+  &__frame {
+    display: block;
+    width: 100%;
+    min-height: 420px;
+    border: 0;
+    background: #fff;
+  }
+}
+
+.reviews-page {
+  &__local-heading {
+    margin: 0 0 1rem;
+    font-size: clamp(1.125rem, 2vw, 1.35rem);
+    font-weight: 700;
+    color: var(--services-title);
+  }
+
+  &__header {
+    margin-bottom: clamp(1.5rem, 4vw, 2rem);
+  }
+
+  &__summary {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: clamp(1.75rem, 4vw, 2.5rem);
+    padding: 1.35rem 1.5rem;
+    background: var(--featured-strip-bg);
+    border: 1px solid var(--services-card-border);
+    border-radius: 12px;
+
+    @media (min-width: 640px) {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  &__score {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+
+  &__score-value {
+    font-size: clamp(2.25rem, 5vw, 3rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--page-text);
+  }
+
+  &__score-caption {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--header-muted);
+  }
+
+  &__external {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 1.2rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--color-accent);
+    background: var(--page-bg);
+    border: 1px solid var(--services-card-border);
+    border-radius: 10px;
+    transition:
+      border-color var(--duration-fast) var(--ease-smooth),
+      background var(--duration-fast) var(--ease-smooth);
+
+    &:hover {
+      border-color: var(--color-accent);
+      background: rgba(var(--color-accent-rgb), 0.06);
+    }
+  }
+
+  &__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.15rem;
+
+    @media (max-width: 720px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__empty {
+    margin: 0;
+    padding: 2rem;
+    text-align: center;
+    color: var(--header-muted);
+    background: var(--featured-strip-bg);
+    border-radius: 12px;
+  }
+}
