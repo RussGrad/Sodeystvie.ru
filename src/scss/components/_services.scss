@@ -20,15 +20,12 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.15rem;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
 
-  @media (max-width: 900px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  @media (max-width: 520px) {
-    grid-template-columns: 1fr;
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.15rem;
   }
 }
 
@@ -45,7 +42,29 @@
   border: 1px solid var(--services-card-border);
   border-radius: 12px;
   box-shadow: var(--services-card-shadow);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  transition:
+    box-shadow var(--duration-fast) var(--ease-smooth),
+    border-color var(--duration-fast) var(--ease-smooth),
+    transform var(--duration-fast) var(--ease-smooth);
+
+  @media (max-width: 767px) {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "icon title"
+      "icon text";
+    column-gap: 1rem;
+    row-gap: 0.35rem;
+    padding: 1.1rem 1rem 1.15rem;
+  }
+
+  @media (min-width: 768px) {
+    &:hover {
+      border-color: rgba(var(--color-accent-rgb), 0.3);
+      box-shadow: var(--services-card-shadow), 0 6px 20px rgba(var(--color-accent-rgb), 0.08);
+      transform: translateY(-2px);
+    }
+  }
 }
 
 .services__icon-wrap {
@@ -58,6 +77,14 @@
   border-radius: 50%;
   background: var(--services-icon-bg);
   color: var(--services-icon-color);
+
+  @media (max-width: 767px) {
+    grid-area: icon;
+    align-self: start;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-bottom: 0;
+  }
 }
 
 .services__icon {
@@ -71,6 +98,13 @@
   font-weight: 700;
   line-height: 1.35;
   color: var(--services-title);
+
+  @media (max-width: 767px) {
+    grid-area: title;
+    align-self: end;
+    margin-bottom: 0;
+    font-size: 0.9375rem;
+  }
 }
 
 .services__card-text {
@@ -78,4 +112,10 @@
   font-size: 0.875rem;
   line-height: 1.5;
   color: var(--services-text);
+
+  @media (max-width: 767px) {
+    grid-area: text;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+  }
 }
