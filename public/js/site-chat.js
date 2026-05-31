@@ -182,10 +182,6 @@
   }
 
   function openChat() {
-    if (!enabled) {
-      window.location.href = '/contacts/';
-      return;
-    }
     isOpen = true;
     root.removeAttribute('inert');
     root.setAttribute('aria-hidden', 'false');
@@ -193,6 +189,10 @@
     window.requestAnimationFrame(function () {
       root.classList.add('site-chat--open');
     });
+    if (!enabled) {
+      showError('Чат временно недоступен. Позвоните нам или оставьте заявку на странице контактов.');
+      return;
+    }
     showError('');
     fetchMessages().then(startPolling);
     window.setTimeout(function () {
@@ -248,7 +248,11 @@
   if (form) {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      if (!enabled || !input) {
+      if (!enabled) {
+        showError('Чат временно недоступен. Позвоните нам или оставьте заявку на странице контактов.');
+        return;
+      }
+      if (!input) {
         return;
       }
       var text = input.value.trim();

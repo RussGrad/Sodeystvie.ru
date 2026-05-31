@@ -27,6 +27,7 @@ $force('CRM_API_BASE', 'https://an-realty-crm.ru');
 $force('CRM_PUBLIC_BASE', 'https://an-realty-crm.ru');
 $force('CRM_LISTINGS_PATH', '/api/public/listings');
 $force('CRM_LEADS_PATH', '/api/public/leads');
+$force('CRM_SITE_CHAT_PATH', '/api/public/site-chat');
 
 /**
  * Ключ заявок с витрины (тот же — PUBLIC_SITE_API_KEY в apps/api/.env на CRM).
