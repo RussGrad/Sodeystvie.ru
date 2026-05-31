@@ -136,8 +136,12 @@ if (isset($result['_error'])) {
     if ($http < 400 || $http > 599) {
         $http = 502;
     }
+    $error = (string) $result['_error'];
+    if ($http === 404) {
+        $error = 'На CRM не развёрнут API онлайн-чата. Обновите an-realty-api на сервере (git pull, prisma migrate deploy, build, restart).';
+    }
     http_response_code($http);
-    echo json_encode(['ok' => false, 'error' => (string) $result['_error']], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => false, 'error' => $error], JSON_UNESCAPED_UNICODE);
     exit;
 }
 

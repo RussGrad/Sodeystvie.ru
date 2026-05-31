@@ -757,7 +757,12 @@ function site_http_public_api_get(string $url, int $timeoutSeconds = 8): array
                 return ['_error' => 'CRM API недоступен: ' . ($err ?: 'curl error')];
             }
             if ($code >= 400) {
-                return ['_error' => 'CRM API ответил ошибкой HTTP ' . $code, '_http' => $code];
+                $msg = 'CRM API ответил ошибкой HTTP ' . $code;
+                if ($code === 404) {
+                    $msg = 'На CRM не развёрнут API онлайн-чата (HTTP 404). Обновите an-realty-api на сервере: git pull, prisma migrate deploy, build, restart.';
+                }
+
+                return ['_error' => $msg, '_http' => $code];
             }
             try {
                 $decoded = json_decode((string) $raw, true, 512, JSON_THROW_ON_ERROR);
