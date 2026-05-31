@@ -62,7 +62,7 @@ $maxUrl = site_max_url();
     })();
     </script>
 </head>
-<body>
+<body<?php echo $currentNav === 'home' ? ' class="page-home"' : ''; ?>>
 <header class="site-header" id="site-header">
     <div class="site-header__inner container">
         <div class="site-header__cluster">

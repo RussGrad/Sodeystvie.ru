@@ -210,9 +210,16 @@ $heroSliderEnabled = $heroSlideCount > 1;
     </div>
     <?php } ?>
 
-    <a class="hero__chat" href="/contacts/" aria-label="Связаться с нами">
+    <button
+        type="button"
+        class="hero__chat"
+        data-site-chat-open
+        aria-label="Открыть онлайн-чат"
+        aria-controls="site-chat"
+        aria-haspopup="dialog"
+    >
         <svg class="hero__chat-icon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
             <path fill="currentColor" d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm0 14H6l-2 2V4h16v12z"/>
         </svg>
-    </a>
+    </button>
 </section>

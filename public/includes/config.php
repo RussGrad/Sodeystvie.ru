@@ -273,6 +273,20 @@ function site_crm_leads_url(): string
     return site_crm_api_base_resolved() . site_crm_leads_path();
 }
 
+/** Путь онлайн-чата витрины на Nest (GET/POST, ключ PUBLIC_SITE_API_KEY). */
+function site_crm_site_chat_path(): string
+{
+    $path = site_env('CRM_SITE_CHAT_PATH', '/api/public/site-chat');
+    $path = '/' . trim($path, '/');
+
+    return $path;
+}
+
+function site_crm_site_chat_url(): string
+{
+    return site_crm_api_base_resolved() . site_crm_site_chat_path();
+}
+
 function site_public_site_api_key(): string
 {
     return site_env('PUBLIC_SITE_API_KEY', '');
@@ -711,6 +725,51 @@ function site_http_post_json(string $url, array $payload, int $timeoutSeconds = 
     }
 
     return ['_error' => 'На сервере не доступен curl для отправки заявки'];
+}
+
+/** GET к публичному API CRM с X-Api-Key (онлайн-чат и т.п.). */
+function site_http_public_api_get(string $url, int $timeoutSeconds = 8): array
+{
+    $headers = ['Accept: application/json'];
+    $apiKey = site_public_site_api_key();
+    if ($apiKey !== '') {
+        $headers[] = 'X-Api-Key: ' . $apiKey;
+    }
+
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        if ($ch !== false) {
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_MAXREDIRS => 3,
+                CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+                CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+                CURLOPT_CONNECTTIMEOUT => $timeoutSeconds,
+                CURLOPT_TIMEOUT => $timeoutSeconds,
+                CURLOPT_HTTPHEADER => $headers,
+            ]);
+            $raw = curl_exec($ch);
+            $err = curl_error($ch);
+            $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            if ($raw === false) {
+                return ['_error' => 'CRM API недоступен: ' . ($err ?: 'curl error')];
+            }
+            if ($code >= 400) {
+                return ['_error' => 'CRM API ответил ошибкой HTTP ' . $code, '_http' => $code];
+            }
+            try {
+                $decoded = json_decode((string) $raw, true, 512, JSON_THROW_ON_ERROR);
+            } catch (Throwable $e) {
+                return ['_error' => 'CRM API вернул не-JSON'];
+            }
+
+            return is_array($decoded) ? $decoded : ['_error' => 'CRM API вернул неожиданный формат'];
+        }
+    }
+
+    return ['_error' => 'На сервере не доступен curl'];
 }
 
 /**

@@ -13,6 +13,7 @@ $siteFavoritesJsVersion = (string) (@filemtime(__DIR__ . '/../js/site-favorites.
 $siteFooterJsVersion = (string) (@filemtime(__DIR__ . '/../js/site-footer.js') ?: time());
 $heroJsVersion = (string) (@filemtime(__DIR__ . '/../js/hero.js') ?: time());
 $leadModalJsVersion = (string) (@filemtime(__DIR__ . '/../js/lead-modal.js') ?: time());
+$siteChatJsVersion = (string) (@filemtime(__DIR__ . '/../js/site-chat.js') ?: time());
 
 ?>
 <footer class="site-footer" id="site-footer">
@@ -114,11 +115,13 @@ $leadModalJsVersion = (string) (@filemtime(__DIR__ . '/../js/lead-modal.js') ?: 
     </div>
 </footer>
 <?php require __DIR__ . '/modal-lead.php'; ?>
+<?php require __DIR__ . '/modal-site-chat.php'; ?>
     <script src="/js/theme.js?v=<?php echo htmlspecialchars($themeJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <script src="/js/site-favorites.js?v=<?php echo htmlspecialchars($siteFavoritesJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <script src="/js/site-header.js?v=<?php echo htmlspecialchars($siteHeaderJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <script src="/js/site-footer.js?v=<?php echo htmlspecialchars($siteFooterJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <script src="/js/lead-modal.js?v=<?php echo htmlspecialchars($leadModalJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+    <script src="/js/site-chat.js?v=<?php echo htmlspecialchars($siteChatJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <script src="/js/hero.js?v=<?php echo htmlspecialchars($heroJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <?php
     $mortgageQuizJsVersion = (string) (@filemtime(__DIR__ . '/../js/mortgage-quiz.js') ?: time());
