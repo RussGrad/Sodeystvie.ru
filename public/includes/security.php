@@ -191,6 +191,58 @@ if (!function_exists('site_is_same_origin_post')) {
     }
 }
 
+if (!function_exists('site_is_same_origin_get')) {
+    /** GET /api/site-chat.php — только с того же сайта (Referer). */
+    function site_is_same_origin_get(): bool
+    {
+        return site_is_same_origin_post();
+    }
+}
+
+if (!function_exists('site_chat_rate_limit_allow')) {
+    /**
+     * Лимит опроса/отправки чата с IP (отдельный счётчик от заявок).
+     *
+     * @return array{ok: bool, error?: string}
+     */
+    function site_chat_rate_limit_allow(int $maxPerHour = 1200): array
+    {
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0';
+        if (!is_string($ip) || !filter_var($ip, FILTER_VALIDATE_IP)) {
+            $ip = '0';
+        }
+        $key = hash('sha256', $ip);
+        $dir = rtrim(sys_get_temp_dir(), '/') . '/sodeystvie-chat-limit';
+        if (!is_dir($dir) && !@mkdir($dir, 0700, true) && !is_dir($dir)) {
+            return ['ok' => true];
+        }
+        $file = $dir . '/' . $key . '.json';
+        $now = time();
+        $window = 3600;
+        $data = ['t' => []];
+        if (is_readable($file)) {
+            $raw = file_get_contents($file);
+            if ($raw !== false) {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded) && isset($decoded['t']) && is_array($decoded['t'])) {
+                    $data = $decoded;
+                }
+            }
+        }
+        $data['t'] = array_values(array_filter(
+            $data['t'],
+            static fn ($ts) => is_int($ts) && $ts > $now - $window,
+        ));
+        if (count($data['t']) >= $maxPerHour) {
+            return ['ok' => false, 'error' => 'Слишком много запросов к чату. Попробуйте позже.'];
+        }
+        $data['t'][] = $now;
+        @file_put_contents($file, json_encode($data), LOCK_EX);
+
+        return ['ok' => true];
+    }
+}
+
 if (!function_exists('site_lead_rate_limit_allow')) {
     /**
      * Простой лимит заявок с IP (файлы в sys temp).

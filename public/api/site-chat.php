@@ -27,7 +27,21 @@ if (!site_is_same_origin_post() && $method === 'POST') {
 }
 
 if ($method === 'POST') {
-    $limit = site_lead_rate_limit_allow(120);
+    $limit = site_chat_rate_limit_allow(80);
+    if (!$limit['ok']) {
+        http_response_code(429);
+        echo json_encode(['ok' => false, 'error' => $limit['error'] ?? 'Слишком много запросов'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+}
+
+if ($method === 'GET') {
+    if (!site_is_same_origin_get()) {
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'error' => 'Запрос отклонён'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    $limit = site_chat_rate_limit_allow(1200);
     if (!$limit['ok']) {
         http_response_code(429);
         echo json_encode(['ok' => false, 'error' => $limit['error'] ?? 'Слишком много запросов'], JSON_UNESCAPED_UNICODE);
@@ -51,6 +65,11 @@ if ($method === 'GET') {
         exit;
     }
     $since = isset($_GET['since']) ? trim((string) $_GET['since']) : '';
+    if ($since !== '' && strtotime($since) === false) {
+        http_response_code(400);
+        echo json_encode(['ok' => false, 'error' => 'Некорректный параметр since'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     $url = $crmBase . '?visitorToken=' . rawurlencode($token);
     if ($since !== '') {
         $url .= '&since=' . rawurlencode($since);

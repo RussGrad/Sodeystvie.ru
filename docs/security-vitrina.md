@@ -13,6 +13,7 @@
 |--------|------|
 | Отладка | `phpinfo` / тест БД только при `SITE_ALLOW_DEBUG=true` |
 | Заявки | Same-origin, rate limit по IP, лимит тела 8 КБ, honeypot, санитизация полей |
+| Онлайн-чат | Прокси без API-ключа в JS; same-origin GET/POST; rate limit; лимит длины; honeypot |
 | Каталог | Валидация `id` объекта (буквы/цифры, до 64 символов) |
 | HTTP к CRM | Ограничение редиректов, только http/https |
 | Ответы | Заголовки `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` |

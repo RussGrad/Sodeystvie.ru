@@ -134,8 +134,15 @@
     errorEl.hidden = false;
   }
 
-  function fetchMessages() {
+  function fetchMessages(silent) {
     if (!enabled) {
+      return Promise.resolve();
+    }
+    if (
+      input instanceof HTMLTextAreaElement &&
+      document.activeElement === input &&
+      input.value.trim().length > 0
+    ) {
       return Promise.resolve();
     }
     var url =
@@ -161,7 +168,7 @@
         list.forEach(appendMessage);
       })
       .catch(function (err) {
-        if (isOpen) {
+        if (isOpen && !silent) {
           showError(err.message || 'Ошибка связи с сервером');
         }
       });
@@ -170,7 +177,7 @@
   function startPolling() {
     stopPolling();
     pollTimer = window.setInterval(function () {
-      fetchMessages();
+      fetchMessages(true);
     }, POLL_MS);
   }
 
