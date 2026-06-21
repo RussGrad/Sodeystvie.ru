@@ -341,7 +341,7 @@ function site_crm_is_yandex_published_viewer_url(string $url): bool
     }
     $host = strtolower((string) $p['host']);
     $path = (string) $p['path'];
-    if (!preg_match('#^/i/#', $path)) {
+    if (!preg_match('#^/(i|d)/#', $path)) {
         return false;
     }
 
@@ -441,6 +441,18 @@ function site_crm_resolve_photo_via_crm_api(string $viewerOrStoredUrl): ?string
     return null;
 }
 
+/**
+ * Публичный прокси фото на CRM (yadisk: и /api/disk/preview без JWT).
+ *
+ * @return non-empty-string
+ */
+function site_crm_photo_proxy_url(string $storedUrl): string
+{
+    return rtrim(site_crm_public_base(), '/') .
+        '/api/public/listings/photo?' .
+        http_build_query(['url' => $storedUrl]);
+}
+
 /** URL из CRM → то, что браузер может загрузить как изображение (с кэшем в рамках запроса). */
 function site_crm_photo_src(string $urlFromApi): string
 {
@@ -455,21 +467,20 @@ function site_crm_photo_src(string $urlFromApi): string
 
     $out = '';
     if (preg_match('#^https?://#i', $u)) {
-        if (str_contains($u, 'downloader.disk.yandex.ru') || str_contains($u, 'preview.disk.yandex.ru')) {
+        if (
+            str_contains($u, 'downloader.disk.yandex.ru')
+            || str_contains($u, 'preview.disk.yandex.ru')
+        ) {
             $out = $u;
         } elseif (site_crm_is_yandex_published_viewer_url($u)) {
-            $viaCrm = site_crm_resolve_photo_via_crm_api($u);
-            if ($viaCrm !== null && $viaCrm !== '') {
-                $out = $viaCrm;
-            } else {
-                $direct = site_crm_yandex_public_share_to_direct_url($u, 8);
-                if ($direct !== null && $direct !== '') {
-                    $out = $direct;
-                }
-            }
+            $out = site_crm_photo_proxy_url($u);
         } else {
             $out = $u;
         }
+    } elseif (str_starts_with($u, 'yadisk:') || str_contains($u, '/api/disk/preview')) {
+        $out = site_crm_photo_proxy_url($u);
+    } elseif (str_starts_with($u, '/uploads/')) {
+        $out = site_crm_public_url($u);
     } else {
         $out = site_crm_public_url($u);
     }

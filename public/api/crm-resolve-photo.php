@@ -21,6 +21,7 @@ if (
     !preg_match('#^https?://#i', $url)
     && !str_starts_with($url, '/uploads/')
     && !str_starts_with($url, 'yadisk:')
+    && !str_contains($url, '/api/disk/preview')
 ) {
     http_response_code(400);
     echo json_encode(['error' => 'Некорректный url'], JSON_UNESCAPED_UNICODE);
