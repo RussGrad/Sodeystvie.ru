@@ -161,8 +161,13 @@ function site_render_head_meta(?string $description = null, ?string $canonicalPa
 
     $canonicalUrl = site_absolute_url($path);
     $ogImage = site_absolute_url('/assets/brand/logo-agenciya-nedvizhimosti.png');
+    $faviconPath = __DIR__ . '/../assets/brand/favicon.png';
+    $faviconVersion = (string) (@filemtime($faviconPath) ?: '');
 
-    echo '<meta name="description" content="' . htmlspecialchars($desc, ENT_QUOTES, 'UTF-8') . '">' . "\n";
+    echo '<link rel="icon" href="/favicon.ico' . ($faviconVersion !== '' ? '?v=' . rawurlencode($faviconVersion) : '') . '" sizes="any">' . "\n";
+    echo '    <link rel="icon" type="image/png" href="/assets/brand/favicon.png' . ($faviconVersion !== '' ? '?v=' . rawurlencode($faviconVersion) : '') . '" sizes="48x48">' . "\n";
+    echo '    <link rel="apple-touch-icon" href="/assets/brand/favicon.png' . ($faviconVersion !== '' ? '?v=' . rawurlencode($faviconVersion) : '') . '">' . "\n";
+    echo '    <meta name="description" content="' . htmlspecialchars($desc, ENT_QUOTES, 'UTF-8') . '">' . "\n";
     echo '    <link rel="canonical" href="' . htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8') . '">' . "\n";
     echo '    <meta property="og:type" content="website">' . "\n";
     echo '    <meta property="og:locale" content="ru_RU">' . "\n";
