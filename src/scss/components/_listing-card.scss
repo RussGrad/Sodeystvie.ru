@@ -46,26 +46,57 @@
     }
   }
 
-  @media (max-width: 720px) {
-    grid-template-columns: 120px minmax(0, 1fr);
-    grid-template-rows: auto auto auto;
+  // Плитка в две колонки на мобильных (см. .catalog-list в _catalog.scss)
+  @media (max-width: 767px) {
+    .catalog-list & {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto;
+      gap: 0.45rem;
+      padding: 0.5rem;
 
-    &.listing-card--no-desc {
-      grid-template-rows: auto auto;
-    }
+      &.listing-card--no-desc {
+        grid-template-rows: auto auto auto;
+      }
 
-    .listing-card__side {
-      grid-column: 1 / -1;
-    }
-  }
+      .listing-card__desc {
+        display: none;
+      }
 
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto;
+      .listing-card__deal,
+      .listing-card__district {
+        display: none;
+      }
 
-    .listing-card__desc,
-    .listing-card__side {
-      grid-column: auto;
+      .listing-card__side {
+        grid-column: 1;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        text-align: left;
+      }
+
+      .listing-card__title {
+        font-size: 0.8125rem;
+      }
+
+      .listing-card__spec-line,
+      .listing-card__address {
+        font-size: 0.6875rem;
+      }
+
+      .listing-card__price {
+        font-size: 0.875rem;
+      }
+
+      .listing-card__more {
+        font-size: 0.75rem;
+      }
+
+      .listing-card__nav {
+        width: 1.35rem;
+        height: 1.35rem;
+      }
     }
   }
 }
