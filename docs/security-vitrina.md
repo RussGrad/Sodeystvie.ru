@@ -23,7 +23,9 @@
 
 ## Админка контента
 
-URL: **https://an-sodeystvie.ru/admin/**
+URL: **https://an-sodeystvie.ru/admin/login.php** (или **/admin.php** — запасной вход)
+
+Если `/admin/` отдаёт 404 на REG.RU — используйте прямую ссылку на `login.php` или `admin.php` в корне сайта.
 
 В `public/.env` на сервере:
 

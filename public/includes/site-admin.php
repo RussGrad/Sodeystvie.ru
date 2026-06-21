@@ -18,7 +18,7 @@ function site_admin_session_start(): void
 
     session_set_cookie_params([
         'lifetime' => 0,
-        'path' => '/admin/',
+        'path' => '/',
         'secure' => $secure,
         'httponly' => true,
         'samesite' => 'Strict',

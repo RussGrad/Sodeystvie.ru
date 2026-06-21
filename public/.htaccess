@@ -9,6 +9,9 @@
     RewriteCond %{HTTP_HOST} ^www\.an-sodeystvie\.ru$ [NC]
     RewriteRule ^ https://an-sodeystvie.ru%{REQUEST_URI} [R=301,L]
 
+    # Админка: /admin/ → index.php (на REG.RU без DirectoryIndex каталог даёт 404)
+    RewriteRule ^admin/?$ /admin/index.php [L]
+
     # После покупки короткого домена раскомментируйте и укажите хост:
     # RewriteCond %{HTTP_HOST} ^(www\.)?sod-irk\.ru$ [NC]
     # RewriteRule ^ https://an-sodeystvie.ru%{REQUEST_URI} [R=301,L]
