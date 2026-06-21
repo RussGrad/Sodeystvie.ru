@@ -244,7 +244,7 @@ function site_vacancy_mailto_href(array $vacancy): string
     $subject = 'Отклик на вакансию: ' . $vacancy['title'];
     $body = "Здравствуйте!\n\nХочу откликнуться на вакансию «" . $vacancy['title'] . "».\n\nИмя:\nТелефон:\n";
 
-    return 'mailto:' . rawurlencode(SITE_EMAIL)
+    return 'mailto:' . rawurlencode(site_email_address())
         . '?subject=' . rawurlencode($subject)
         . '&body=' . rawurlencode($body);
 }

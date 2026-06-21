@@ -40,22 +40,22 @@ require __DIR__ . '/../includes/header.php';
                     <div class="contacts-page__row">
                         <dt class="contacts-page__label">Телефон</dt>
                         <dd class="contacts-page__value">
-                            <a href="tel:<?php echo htmlspecialchars(SITE_PHONE_TEL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_PHONE_DISPLAY, ENT_QUOTES, 'UTF-8'); ?></a>
+                            <a href="tel:<?php echo htmlspecialchars(site_phone_tel(), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(site_phone_display(), ENT_QUOTES, 'UTF-8'); ?></a>
                         </dd>
                     </div>
                     <div class="contacts-page__row">
                         <dt class="contacts-page__label">Email</dt>
                         <dd class="contacts-page__value">
-                            <a href="mailto:<?php echo htmlspecialchars(SITE_EMAIL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_EMAIL, ENT_QUOTES, 'UTF-8'); ?></a>
+                            <a href="mailto:<?php echo htmlspecialchars(site_email_address(), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(site_email_address(), ENT_QUOTES, 'UTF-8'); ?></a>
                         </dd>
                     </div>
                     <div class="contacts-page__row">
                         <dt class="contacts-page__label">Адрес</dt>
-                        <dd class="contacts-page__value"><?php echo htmlspecialchars(SITE_ADDRESS, ENT_QUOTES, 'UTF-8'); ?></dd>
+                        <dd class="contacts-page__value"><?php echo htmlspecialchars(site_postal_address(), ENT_QUOTES, 'UTF-8'); ?></dd>
                     </div>
                     <div class="contacts-page__row">
                         <dt class="contacts-page__label">Режим работы</dt>
-                        <dd class="contacts-page__value"><?php echo htmlspecialchars(SITE_WORK_HOURS, ENT_QUOTES, 'UTF-8'); ?></dd>
+                        <dd class="contacts-page__value"><?php echo htmlspecialchars(site_office_hours(), ENT_QUOTES, 'UTF-8'); ?></dd>
                     </div>
                     <?php if ($telegramUrl !== null || $vkUrl !== null || $maxUrl !== '') { ?>
                         <div class="contacts-page__messengers-block">
@@ -67,7 +67,7 @@ require __DIR__ . '/../includes/header.php';
                             ?>
                             <p class="contacts-page__messengers-note">
                                 Или позвоните:
-                                <a href="tel:<?php echo htmlspecialchars(SITE_PHONE_TEL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_PHONE_DISPLAY, ENT_QUOTES, 'UTF-8'); ?></a>
+                                <a href="tel:<?php echo htmlspecialchars(site_phone_tel(), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(site_phone_display(), ENT_QUOTES, 'UTF-8'); ?></a>
                             </p>
                         </div>
                     <?php } ?>

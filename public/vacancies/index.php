@@ -12,7 +12,7 @@ $vacancies = site_vacancies_all();
 $perks = site_vacancies_perks();
 $steps = site_vacancies_hiring_steps();
 
-$phoneHref = preg_replace('/\D+/', '', SITE_PHONE_TEL) ?: SITE_PHONE_TEL;
+$phoneHref = preg_replace('/\D+/', '', site_phone_tel()) ?: site_phone_tel();
 
 require __DIR__ . '/../includes/header.php';
 ?>
@@ -28,7 +28,7 @@ require __DIR__ . '/../includes/header.php';
 
         <?php if (count($vacancies) === 0) { ?>
             <p class="vacancies-page__empty">Сейчас открытых вакансий нет. Отправьте резюме на
-                <a href="mailto:<?php echo htmlspecialchars(SITE_EMAIL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_EMAIL, ENT_QUOTES, 'UTF-8'); ?></a>
+                <a href="mailto:<?php echo htmlspecialchars(site_email_address(), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(site_email_address(), ENT_QUOTES, 'UTF-8'); ?></a>
                 — свяжемся, когда появится подходящая позиция.
             </p>
         <?php } else { ?>
@@ -72,9 +72,9 @@ require __DIR__ . '/../includes/header.php';
             <h2 class="vacancies-page__bottom-title">Не нашли подходящую позицию?</h2>
             <p class="vacancies-page__bottom-text">
                 Отправьте резюме на
-                <a href="mailto:<?php echo htmlspecialchars(SITE_EMAIL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_EMAIL, ENT_QUOTES, 'UTF-8'); ?></a>
+                <a href="mailto:<?php echo htmlspecialchars(site_email_address(), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(site_email_address(), ENT_QUOTES, 'UTF-8'); ?></a>
                 или позвоните
-                <a href="tel:<?php echo htmlspecialchars($phoneHref, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_PHONE_DISPLAY, ENT_QUOTES, 'UTF-8'); ?></a>
+                <a href="tel:<?php echo htmlspecialchars($phoneHref, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(site_phone_display(), ENT_QUOTES, 'UTF-8'); ?></a>
                 — рассмотрим кандидатуру на текущие или будущие вакансии.
             </p>
             <button

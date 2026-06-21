@@ -70,8 +70,8 @@ require __DIR__ . '/../includes/header.php';
         <section class="services-page__bottom" aria-label="Связаться с нами">
             <p class="services-page__bottom-text">
                 Не нашли нужную услугу или остались вопросы? Позвоните
-                <a href="tel:<?php echo htmlspecialchars(preg_replace('/\D+/', '', SITE_PHONE_TEL) ?: SITE_PHONE_TEL, ENT_QUOTES, 'UTF-8'); ?>">
-                    <?php echo htmlspecialchars(SITE_PHONE_DISPLAY, ENT_QUOTES, 'UTF-8'); ?>
+                <a href="tel:<?php echo htmlspecialchars(preg_replace('/\D+/', '', site_phone_tel()) ?: site_phone_tel(), ENT_QUOTES, 'UTF-8'); ?>">
+                    <?php echo htmlspecialchars(site_phone_display(), ENT_QUOTES, 'UTF-8'); ?>
                 </a>
                 или оставьте заявку — перезвоним и подскажем оптимальный вариант.
             </p>

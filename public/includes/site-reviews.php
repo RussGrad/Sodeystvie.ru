@@ -84,9 +84,11 @@ function site_reviews_all(): array
  */
 function site_reviews_summary(): array
 {
-    $rating = (float) site_env('SITE_REVIEWS_RATING', '4.9');
+    $ratingRaw = site_content_setting('reviews_rating', '');
+    $rating = $ratingRaw !== '' ? (float) $ratingRaw : (float) site_env('SITE_REVIEWS_RATING', '4.9');
     $rating = max(1.0, min(5.0, round($rating, 1)));
-    $count = (int) site_env('SITE_REVIEWS_COUNT', '250');
+    $countRaw = site_content_setting('reviews_count', '');
+    $count = $countRaw !== '' ? (int) $countRaw : (int) site_env('SITE_REVIEWS_COUNT', '250');
     $count = max(0, $count);
     $countLabel = $count > 0
         ? number_format($count, 0, '.', ' ') . '+ отзывов'

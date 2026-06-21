@@ -87,12 +87,12 @@ $siteChatJsVersion = (string) (@filemtime(__DIR__ . '/../js/site-chat.js') ?: ti
                 <h2 class="site-footer__heading">Контакты</h2>
                 <ul class="site-footer__contacts">
                     <li class="site-footer__contact">
-                        <a class="site-footer__contact-link" href="tel:<?php echo htmlspecialchars(SITE_PHONE_TEL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_PHONE_DISPLAY, ENT_QUOTES, 'UTF-8'); ?></a>
+                        <a class="site-footer__contact-link" href="tel:<?php echo htmlspecialchars(site_phone_tel(), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(site_phone_display(), ENT_QUOTES, 'UTF-8'); ?></a>
                     </li>
                     <li class="site-footer__contact">
-                        <a class="site-footer__contact-link" href="mailto:<?php echo htmlspecialchars(SITE_EMAIL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_EMAIL, ENT_QUOTES, 'UTF-8'); ?></a>
+                        <a class="site-footer__contact-link" href="mailto:<?php echo htmlspecialchars(site_email_address(), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(site_email_address(), ENT_QUOTES, 'UTF-8'); ?></a>
                     </li>
-                    <li class="site-footer__contact site-footer__contact--address"><?php echo htmlspecialchars(SITE_ADDRESS, ENT_QUOTES, 'UTF-8'); ?></li>
+                    <li class="site-footer__contact site-footer__contact--address"><?php echo htmlspecialchars(site_postal_address(), ENT_QUOTES, 'UTF-8'); ?></li>
                 </ul>
             </div>
 

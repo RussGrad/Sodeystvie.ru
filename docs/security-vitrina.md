@@ -18,6 +18,21 @@
 | HTTP к CRM | Ограничение редиректов, только http/https |
 | Ответы | Заголовки `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` |
 | Apache | `.htaccess` запрещает скачивание `.env` |
+| JSON-контент | `public/data/.htaccess` — прямой доступ к JSON закрыт |
+| Админка | `/admin/` — сессия, CSRF, rate limit входа; логин/хеш в `.env` (`SITE_ADMIN_*`) |
+
+## Админка контента
+
+URL: **https://an-sodeystvie.ru/admin/**
+
+В `public/.env` на сервере:
+
+```env
+SITE_ADMIN_LOGIN=admin
+SITE_ADMIN_PASSWORD_HASH=<bcrypt из php -r "echo password_hash('пароль', PASSWORD_DEFAULT);">
+```
+
+Редактируются: контакты, тексты hero, команда, отзывы, кейсы, услуги, вакансии. Каталог объектов — только через CRM.
 
 ## Деплой после правок
 

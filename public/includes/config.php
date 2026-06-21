@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/env-bootstrap.php';
+require_once __DIR__ . '/site-content.php';
 require_once __DIR__ . '/site-brand.php';
 require_once __DIR__ . '/site-image.php';
 require_once __DIR__ . '/security.php';
@@ -27,6 +28,10 @@ const SITE_WORK_HOURS = 'Пн–Пт 9:00–19:00';
  */
 function site_vk_url(): ?string
 {
+    $fromContent = site_content_setting('vk_url', '');
+    if ($fromContent !== '' && preg_match('#^https?://#i', $fromContent)) {
+        return $fromContent;
+    }
     $fromEnv = trim(site_env('SITE_VK_URL', ''));
     if ($fromEnv !== '' && preg_match('#^https?://#i', $fromEnv)) {
         return $fromEnv;
@@ -44,7 +49,7 @@ function site_whatsapp_url(): ?string
     if ($fromEnv !== '') {
         return $fromEnv;
     }
-    $digits = preg_replace('/\D+/', '', SITE_PHONE_TEL) ?? '';
+    $digits = preg_replace('/\D+/', '', site_phone_tel()) ?? '';
     if (strlen($digits) >= 11) {
         return 'https://wa.me/' . ltrim($digits, '+');
     }
@@ -57,11 +62,15 @@ function site_whatsapp_url(): ?string
  */
 function site_telegram_url(): ?string
 {
+    $fromContent = site_content_setting('telegram_url', '');
+    if ($fromContent !== '' && preg_match('#^https?://#i', $fromContent)) {
+        return $fromContent;
+    }
     $fromEnv = trim(site_env('SITE_TELEGRAM_URL', ''));
     if ($fromEnv !== '') {
         return $fromEnv;
     }
-    $digits = preg_replace('/\D+/', '', SITE_PHONE_TEL) ?? '';
+    $digits = preg_replace('/\D+/', '', site_phone_tel()) ?? '';
     if (strlen($digits) >= 11) {
         return 'https://t.me/+' . ltrim($digits, '+');
     }
@@ -74,6 +83,10 @@ function site_telegram_url(): ?string
  */
 function site_max_url(): string
 {
+    $fromContent = site_content_setting('max_url', '');
+    if ($fromContent !== '' && preg_match('#^https?://#i', $fromContent)) {
+        return $fromContent;
+    }
     $fromEnv = trim(site_env('SITE_MAX_URL', ''));
     if ($fromEnv !== '' && preg_match('#^https?://#i', $fromEnv)) {
         return $fromEnv;
@@ -154,11 +167,21 @@ const SITE_LEGAL_NAME = 'ООО «Содействие»';
 
 function site_legal_inn(): string
 {
+    $fromContent = site_content_setting('legal_inn', '');
+    if ($fromContent !== '') {
+        return $fromContent;
+    }
+
     return trim(site_env('SITE_LEGAL_INN', ''));
 }
 
 function site_legal_ogrn(): string
 {
+    $fromContent = site_content_setting('legal_ogrn', '');
+    if ($fromContent !== '') {
+        return $fromContent;
+    }
+
     return trim(site_env('SITE_LEGAL_OGRN', ''));
 }
 

@@ -117,8 +117,8 @@ $maxUrl = site_max_url();
             </nav>
             <div class="site-header__actions">
                 <div class="site-header__contact">
-                    <p class="site-header__hours"><?php echo htmlspecialchars(SITE_WORK_HOURS, ENT_QUOTES, 'UTF-8'); ?></p>
-                    <a class="site-header__phone" href="tel:<?php echo htmlspecialchars(SITE_PHONE_TEL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_PHONE_DISPLAY, ENT_QUOTES, 'UTF-8'); ?></a>
+                    <p class="site-header__hours"><?php echo htmlspecialchars(site_office_hours(), ENT_QUOTES, 'UTF-8'); ?></p>
+                    <a class="site-header__phone" href="tel:<?php echo htmlspecialchars(site_phone_tel(), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(site_phone_display(), ENT_QUOTES, 'UTF-8'); ?></a>
                 </div>
                 <div class="site-header__toolbar">
                     <?php if ($telegramUrl !== null) { ?>

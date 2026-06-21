@@ -16,7 +16,7 @@ $steps = site_about_work_steps();
 $story = site_about_story_paragraphs();
 $team = site_team_all();
 
-$phoneHref = preg_replace('/\D+/', '', SITE_PHONE_TEL) ?: SITE_PHONE_TEL;
+$phoneHref = preg_replace('/\D+/', '', site_phone_tel()) ?: site_phone_tel();
 $teamAlt = 'Команда ' . site_brand_full() . ' в офисе в ' . SITE_CITY_TAG;
 
 require __DIR__ . '/../includes/header.php';
@@ -115,11 +115,11 @@ require __DIR__ . '/../includes/header.php';
                 </div>
                 <div class="about-page__legal-row">
                     <dt>Адрес офиса</dt>
-                    <dd><?php echo htmlspecialchars(SITE_ADDRESS, ENT_QUOTES, 'UTF-8'); ?></dd>
+                    <dd><?php echo htmlspecialchars(site_postal_address(), ENT_QUOTES, 'UTF-8'); ?></dd>
                 </div>
                 <div class="about-page__legal-row">
                     <dt>Режим работы</dt>
-                    <dd><?php echo htmlspecialchars(SITE_WORK_HOURS, ENT_QUOTES, 'UTF-8'); ?></dd>
+                    <dd><?php echo htmlspecialchars(site_office_hours(), ENT_QUOTES, 'UTF-8'); ?></dd>
                 </div>
             </dl>
         </section>
@@ -128,9 +128,9 @@ require __DIR__ . '/../includes/header.php';
             <h2 class="about-page__bottom-title">Готовы обсудить вашу задачу?</h2>
             <p class="about-page__bottom-text">
                 Позвоните
-                <a href="tel:<?php echo htmlspecialchars($phoneHref, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_PHONE_DISPLAY, ENT_QUOTES, 'UTF-8'); ?></a>,
+                <a href="tel:<?php echo htmlspecialchars($phoneHref, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(site_phone_display(), ENT_QUOTES, 'UTF-8'); ?></a>,
                 напишите на
-                <a href="mailto:<?php echo htmlspecialchars(SITE_EMAIL, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(SITE_EMAIL, ENT_QUOTES, 'UTF-8'); ?></a>
+                <a href="mailto:<?php echo htmlspecialchars(site_email_address(), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(site_email_address(), ENT_QUOTES, 'UTF-8'); ?></a>
                 или оставьте заявку — перезвоним в рабочее время.
             </p>
             <div class="about-page__bottom-actions">

@@ -21,11 +21,21 @@ function site_brand_full(): string
 
 function site_slogan_short(): string
 {
+    $fromContent = site_content_setting('slogan_short', '');
+    if ($fromContent !== '') {
+        return $fromContent;
+    }
+
     return trim(site_env('SITE_SLOGAN_SHORT', 'Сделки под ключ'));
 }
 
 function site_slogan_hero(): string
 {
+    $fromContent = site_content_setting('slogan_hero', '');
+    if ($fromContent !== '') {
+        return $fromContent;
+    }
+
     return trim(site_env(
         'SITE_SLOGAN_HERO',
         'Полное юридическое сопровождение — от подбора объекта до получения ключей'
@@ -34,6 +44,11 @@ function site_slogan_hero(): string
 
 function site_hero_headline(): string
 {
+    $fromContent = site_content_setting('hero_headline', '');
+    if ($fromContent !== '') {
+        return $fromContent;
+    }
+
     return trim(site_env(
         'SITE_HERO_HEADLINE',
         'Безопасная покупка и продажа недвижимости в Иркутске'
