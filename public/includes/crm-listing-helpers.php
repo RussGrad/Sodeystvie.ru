@@ -888,6 +888,16 @@ function site_listing_discount_percent(?string $oldRaw, ?string $currentRaw): ?i
     return (int) round((1 - $current / $old) * 100);
 }
 
+function site_listing_discount_badge_text(?string $oldRaw, ?string $currentRaw): string
+{
+    $pct = site_listing_discount_percent($oldRaw, $currentRaw);
+    if ($pct !== null && $pct > 0) {
+        return 'Цена ниже на ' . $pct . '%';
+    }
+
+    return 'Снижена';
+}
+
 /**
  * Объекты для блока «Лучшие предложения» на главной (featuredOnSite в CRM).
  *
@@ -999,10 +1009,9 @@ function site_render_featured_listing_card(array $row): void
     $areaText = $areaTotal ? rtrim(rtrim(number_format($areaTotal, 2, '.', ''), '0'), '.') . ' м²' : '—';
     $href = '/catalog/object/?id=' . rawurlencode($id);
     $hasDiscount = site_listing_has_discount($priceOldRaw, $priceRaw);
-    $discountPct = site_listing_discount_percent($priceOldRaw, $priceRaw);
     $badgeClass = $hasDiscount ? 'featured-card__badge--sale' : 'featured-card__badge--new';
     $badgeText = $hasDiscount
-        ? ($discountPct !== null ? '−' . $discountPct . '%' : 'Скидка')
+        ? site_listing_discount_badge_text($priceOldRaw, $priceRaw)
         : 'Топ';
     ?>
     <li class="featured__cell">

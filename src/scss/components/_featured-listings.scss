@@ -250,6 +250,11 @@
   &--sale {
     background: var(--featured-badge-sale);
     color: var(--page-text);
+    text-transform: none;
+    font-size: 0.625rem;
+    line-height: 1.25;
+    max-width: calc(100% - 1.3rem);
+    white-space: normal;
   }
 }
 
