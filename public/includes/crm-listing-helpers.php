@@ -60,6 +60,11 @@ function site_object_meta_label(?string $objectType, ?int $rooms): string
 
         return $short !== null ? $short . ' кв.' : 'Квартира';
     }
+    if ($t === 'newbuilding') {
+        $short = site_rooms_short_label($rooms);
+
+        return $short !== null ? $short . ' кв.' : 'Новостройка';
+    }
     if ($t === 'house') {
         return 'Дом';
     }
@@ -277,7 +282,7 @@ function site_listing_card_title(
     if ($t === 'commercial') {
         return 'Коммерческая недвижимость' . $areaSuffix;
     }
-    if ($t === 'flat' || ($rooms !== null && $rooms > 0)) {
+    if ($t === 'flat' || $t === 'newbuilding' || ($rooms !== null && $rooms > 0)) {
         $flatLabel = site_flat_short_label($rooms);
         if ($area !== null) {
             return $flatLabel . ' ' . $area . ' м²';
@@ -310,8 +315,10 @@ function site_listing_object_param_rows(array $row): array
 
     $objectType = isset($row['objectTypeValue']) ? trim((string) $row['objectTypeValue']) : '';
     $rooms = isset($row['rooms']) && is_numeric($row['rooms']) ? (int) $row['rooms'] : null;
-    if ($objectType === 'flat' || ($objectType === '' && $rooms !== null && $rooms > 0)) {
-        $typeLabel = site_flat_short_label($rooms);
+    if ($objectType === 'flat' || $objectType === 'newbuilding' || ($objectType === '' && $rooms !== null && $rooms > 0)) {
+        $typeLabel = $objectType === 'newbuilding'
+            ? ('Новостройка' . ($rooms !== null && $rooms > 0 ? ', ' . site_rooms_short_label($rooms) : ''))
+            : site_flat_short_label($rooms);
     } elseif ($objectType === 'house') {
         $typeLabel = 'Дом';
     } elseif ($objectType === 'plot' || $objectType === 'land') {
@@ -888,7 +895,144 @@ function site_listing_discount_percent(?string $oldRaw, ?string $currentRaw): ?i
  */
 function site_crm_fetch_featured_listings(int $limit = 8): array
 {
-    return site_crm_fetch_listings(max(1, min($limit, 24)), 0, ['featured' => '1']);
+    return site_crm_fetch_listings(max(1, min($limit, 48)), 0, ['featured' => '1']);
+}
+
+/** newbuild | resale | commercial */
+function site_listing_featured_group(?string $objectType): ?string
+{
+    $t = strtolower(trim((string) $objectType));
+    if ($t === 'newbuilding') {
+        return 'newbuild';
+    }
+    if ($t === 'commercial') {
+        return 'commercial';
+    }
+    if (in_array($t, ['flat', 'house', 'plot', 'land'], true)) {
+        return 'resale';
+    }
+
+    return null;
+}
+
+/**
+ * @param array<string, mixed> $row
+ */
+function site_listing_in_irkutsk(array $row): bool
+{
+    $city = mb_strtolower(trim((string) ($row['city'] ?? '')), 'UTF-8');
+    if ($city !== '' && mb_strpos($city, 'иркутск', 0, 'UTF-8') !== false) {
+        return true;
+    }
+    $line = mb_strtolower(site_listing_address_line($row), 'UTF-8');
+
+    return $line !== '' && mb_strpos($line, 'иркутск', 0, 'UTF-8') !== false;
+}
+
+/**
+ * Featured-объекты, сгруппированные для главной: новостройки / вторичка / коммерция.
+ *
+ * @return array{
+ *   groups: array{newbuild: list<array<string, mixed>>, resale: list<array<string, mixed>>, commercial: list<array<string, mixed>>},
+ *   error: ?string
+ * }
+ */
+function site_crm_fetch_featured_listing_groups(int $limitPerGroup = 8): array
+{
+    $limitPerGroup = max(1, min($limitPerGroup, 12));
+    $crm = site_crm_fetch_featured_listings(48);
+    $groups = [
+        'newbuild' => [],
+        'resale' => [],
+        'commercial' => [],
+    ];
+
+    if ($crm['error'] !== null) {
+        return ['groups' => $groups, 'error' => $crm['error']];
+    }
+
+    foreach ($crm['items'] as $row) {
+        if (!is_array($row)) {
+            continue;
+        }
+        $group = site_listing_featured_group(
+            isset($row['objectTypeValue']) ? (string) $row['objectTypeValue'] : null,
+        );
+        if ($group === null) {
+            continue;
+        }
+        if ($group === 'newbuild' && !site_listing_in_irkutsk($row)) {
+            continue;
+        }
+        if (count($groups[$group]) >= $limitPerGroup) {
+            continue;
+        }
+        $groups[$group][] = $row;
+    }
+
+    return ['groups' => $groups, 'error' => null];
+}
+
+/**
+ * @param array<string, mixed> $row
+ */
+function site_render_featured_listing_card(array $row): void
+{
+    $id = isset($row['id']) ? (string) $row['id'] : '';
+    if ($id === '') {
+        return;
+    }
+
+    $titleRaw = isset($row['title']) ? (string) $row['title'] : 'Объект';
+    $rooms = isset($row['rooms']) && is_numeric($row['rooms']) ? (int) $row['rooms'] : null;
+    $areaTotal = isset($row['areaTotal']) && is_numeric($row['areaTotal']) ? (float) $row['areaTotal'] : null;
+    $floor = isset($row['floor']) ? (string) $row['floor'] : '—';
+    $priceRaw = isset($row['price']) ? (string) $row['price'] : null;
+    $priceOldRaw = isset($row['priceOld']) ? (string) $row['priceOld'] : null;
+    $objectType = isset($row['objectTypeValue']) ? (string) $row['objectTypeValue'] : null;
+    $coverPhotoRaw = isset($row['coverPhoto']) ? (string) $row['coverPhoto'] : '';
+    $coverPhoto = $coverPhotoRaw !== '' ? site_crm_photo_src($coverPhotoRaw) : '';
+    $tone = site_tone_from_id($id);
+    $cardTitle = site_listing_card_title($objectType, $rooms, $areaTotal, $titleRaw);
+    $addressLine = site_listing_address_line($row);
+    $meta = site_object_meta_label($objectType, $rooms);
+    $areaText = $areaTotal ? rtrim(rtrim(number_format($areaTotal, 2, '.', ''), '0'), '.') . ' м²' : '—';
+    $href = '/catalog/object/?id=' . rawurlencode($id);
+    $hasDiscount = site_listing_has_discount($priceOldRaw, $priceRaw);
+    $discountPct = site_listing_discount_percent($priceOldRaw, $priceRaw);
+    $badgeClass = $hasDiscount ? 'featured-card__badge--sale' : 'featured-card__badge--new';
+    $badgeText = $hasDiscount
+        ? ($discountPct !== null ? '−' . $discountPct . '%' : 'Скидка')
+        : 'Топ';
+    ?>
+    <li class="featured__cell">
+        <article class="featured-card">
+            <a class="featured-card__link" href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>">
+                <div class="featured-card__media featured-card__media--tone-<?php echo (int) $tone; ?>" aria-hidden="true">
+                    <?php if ($coverPhoto !== '') {
+                        echo site_crm_photo_img($coverPhoto, $cardTitle, 'featured-card__photo', '', 'featured');
+                    } ?>
+                    <span class="featured-card__badge <?php echo htmlspecialchars($badgeClass, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($badgeText, ENT_QUOTES, 'UTF-8'); ?></span>
+                </div>
+                <div class="featured-card__body">
+                    <h3 class="featured-card__title"><?php echo htmlspecialchars($cardTitle, ENT_QUOTES, 'UTF-8'); ?></h3>
+                    <p class="featured-card__address"><?php echo htmlspecialchars($addressLine !== '' ? $addressLine : $titleRaw, ENT_QUOTES, 'UTF-8'); ?></p>
+                    <ul class="featured-card__meta">
+                        <li><?php echo htmlspecialchars($meta, ENT_QUOTES, 'UTF-8'); ?></li>
+                        <li><?php echo htmlspecialchars($areaText, ENT_QUOTES, 'UTF-8'); ?></li>
+                        <li><?php echo htmlspecialchars($floor, ENT_QUOTES, 'UTF-8'); ?></li>
+                    </ul>
+                    <div class="featured-card__pricing">
+                        <?php if ($hasDiscount && $priceOldRaw !== null) { ?>
+                            <p class="featured-card__price-old"><?php echo htmlspecialchars(site_fmt_rub($priceOldRaw), ENT_QUOTES, 'UTF-8'); ?></p>
+                        <?php } ?>
+                        <p class="featured-card__price"><?php echo htmlspecialchars(site_fmt_rub($priceRaw), ENT_QUOTES, 'UTF-8'); ?></p>
+                    </div>
+                </div>
+            </a>
+        </article>
+    </li>
+    <?php
 }
 
 /**

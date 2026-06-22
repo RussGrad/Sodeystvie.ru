@@ -4,89 +4,113 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/crm-listing-helpers.php';
 
-$featured = site_crm_fetch_featured_listings(8);
-$featuredItems = $featured['items'];
-$featuredError = $featured['error'];
-$useCrm = $featuredError === null && count($featuredItems) > 0;
+$featuredData = site_crm_fetch_featured_listing_groups(8);
+$groups = $featuredData['groups'];
+$featuredError = $featuredData['error'];
+
+$sections = [
+    [
+        'id' => 'featured-newbuild',
+        'mod' => 'featured--newbuild',
+        'title' => 'Лучшие новостройки Иркутска',
+        'tagline' => 'для инвестирования',
+        'lead' => 'Квартиры в новых ЖК с выгодными условиями покупки и потенциалом роста стоимости.',
+        'catalogHref' => '/catalog/?type=newbuilding&region=irkutsk',
+        'catalogLabel' => 'Все новостройки',
+        'items' => $groups['newbuild'],
+    ],
+    [
+        'id' => 'featured-resale',
+        'mod' => '',
+        'title' => 'Лучшие предложения по вторичному жилью',
+        'tagline' => null,
+        'lead' => 'Проверенные квартиры и дома — готовые к заселению и выгодные по цене.',
+        'catalogHref' => '/catalog/?region=irkutsk',
+        'catalogLabel' => 'Вторичка в каталоге',
+        'items' => $groups['resale'],
+    ],
+    [
+        'id' => 'featured-commercial',
+        'mod' => '',
+        'title' => 'Лучшие предложения по коммерции',
+        'tagline' => null,
+        'lead' => 'Офисы, торговые и свободные помещения для бизнеса в Иркутске и области.',
+        'catalogHref' => '/catalog/?type=commercial&region=irkutsk',
+        'catalogLabel' => 'Коммерция в каталоге',
+        'items' => $groups['commercial'],
+    ],
+];
+
+$hasAnyItems = false;
+foreach ($sections as $section) {
+    if (count($section['items']) > 0) {
+        $hasAnyItems = true;
+        break;
+    }
+}
 
 ?>
-<section class="featured" aria-labelledby="featured-heading">
-    <div class="container">
-        <header class="featured__header">
-            <div class="featured__intro">
-                <h2 class="featured__title" id="featured-heading">Лучшие предложения</h2>
-                <?php if ($useCrm) { ?>
-                    <p class="featured__lead">Отобранные объекты со скидкой и лучшие предложения агентства. Полный список — в каталоге.</p>
-                <?php } elseif ($featuredError !== null) { ?>
+<div class="featured-stack">
+<?php if ($featuredError !== null && !$hasAnyItems) { ?>
+    <section class="featured" aria-labelledby="featured-error-heading">
+        <div class="container">
+            <header class="featured__header">
+                <div class="featured__intro">
+                    <h2 class="featured__title" id="featured-error-heading">Лучшие предложения</h2>
                     <p class="featured__lead">Сейчас не удалось загрузить объекты из CRM. Смотрите <a href="/catalog/">каталог</a> или попробуйте позже.</p>
-                <?php } else { ?>
-                    <p class="featured__lead">Пока нет объектов в блоке «Лучшие предложения». Отметьте нужные в CRM или смотрите <a href="/catalog/">весь каталог</a>.</p>
-                <?php } ?>
-            </div>
-            <a class="featured__to-catalog" href="/catalog/">Весь каталог</a>
-        </header>
-
-        <?php if ($useCrm) { ?>
-        <ul class="featured__grid">
-            <?php foreach ($featuredItems as $row) {
-                if (!is_array($row)) {
-                    continue;
-                }
-                $id = isset($row['id']) ? (string) $row['id'] : '';
-                if ($id === '') {
-                    continue;
-                }
-                $titleRaw = isset($row['title']) ? (string) $row['title'] : 'Объект';
-                $rooms = isset($row['rooms']) && is_numeric($row['rooms']) ? (int) $row['rooms'] : null;
-                $areaTotal = isset($row['areaTotal']) && is_numeric($row['areaTotal']) ? (float) $row['areaTotal'] : null;
-                $floor = isset($row['floor']) ? (string) $row['floor'] : '—';
-                $priceRaw = isset($row['price']) ? (string) $row['price'] : null;
-                $priceOldRaw = isset($row['priceOld']) ? (string) $row['priceOld'] : null;
-                $objectType = isset($row['objectTypeValue']) ? (string) $row['objectTypeValue'] : null;
-                $coverPhotoRaw = isset($row['coverPhoto']) ? (string) $row['coverPhoto'] : '';
-                $coverPhoto = $coverPhotoRaw !== '' ? site_crm_photo_src($coverPhotoRaw) : '';
-                $tone = site_tone_from_id($id);
-                $cardTitle = site_listing_card_title($objectType, $rooms, $areaTotal, $titleRaw);
-                $addressLine = site_listing_address_line($row);
-                $meta = site_object_meta_label($objectType, $rooms);
-                $areaText = $areaTotal ? rtrim(rtrim(number_format($areaTotal, 2, '.', ''), '0'), '.') . ' м²' : '—';
-                $href = '/catalog/object/?id=' . rawurlencode($id);
-                $hasDiscount = site_listing_has_discount($priceOldRaw, $priceRaw);
-                $discountPct = site_listing_discount_percent($priceOldRaw, $priceRaw);
-                $badgeClass = $hasDiscount ? 'featured-card__badge--sale' : 'featured-card__badge--new';
-                $badgeText = $hasDiscount
-                    ? ($discountPct !== null ? '−' . $discountPct . '%' : 'Скидка')
-                    : 'Топ';
-                ?>
-                <li class="featured__cell">
-                    <article class="featured-card">
-                        <a class="featured-card__link" href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>">
-                            <div class="featured-card__media featured-card__media--tone-<?php echo (int) $tone; ?>" aria-hidden="true">
-                                <?php if ($coverPhoto !== '') {
-                                    echo site_crm_photo_img($coverPhoto, $cardTitle, 'featured-card__photo', '', 'featured');
-                                } ?>
-                                <span class="featured-card__badge <?php echo htmlspecialchars($badgeClass, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($badgeText, ENT_QUOTES, 'UTF-8'); ?></span>
-                            </div>
-                            <div class="featured-card__body">
-                                <h3 class="featured-card__title"><?php echo htmlspecialchars($cardTitle, ENT_QUOTES, 'UTF-8'); ?></h3>
-                                <p class="featured-card__address"><?php echo htmlspecialchars($addressLine !== '' ? $addressLine : $titleRaw, ENT_QUOTES, 'UTF-8'); ?></p>
-                                <ul class="featured-card__meta">
-                                    <li><?php echo htmlspecialchars($meta, ENT_QUOTES, 'UTF-8'); ?></li>
-                                    <li><?php echo htmlspecialchars($areaText, ENT_QUOTES, 'UTF-8'); ?></li>
-                                    <li><?php echo htmlspecialchars($floor, ENT_QUOTES, 'UTF-8'); ?></li>
-                                </ul>
-                                <div class="featured-card__pricing">
-                                    <?php if ($hasDiscount && $priceOldRaw !== null) { ?>
-                                        <p class="featured-card__price-old"><?php echo htmlspecialchars(site_fmt_rub($priceOldRaw), ENT_QUOTES, 'UTF-8'); ?></p>
-                                    <?php } ?>
-                                    <p class="featured-card__price"><?php echo htmlspecialchars(site_fmt_rub($priceRaw), ENT_QUOTES, 'UTF-8'); ?></p>
-                                </div>
-                            </div>
-                        </a>
-                    </article>
-                </li>
-            <?php } ?>
-        </ul>
-        <?php } ?>
-    </div>
-</section>
+                </div>
+                <a class="featured__to-catalog" href="/catalog/">Весь каталог</a>
+            </header>
+        </div>
+    </section>
+<?php } elseif (!$hasAnyItems) { ?>
+    <section class="featured" aria-labelledby="featured-empty-heading">
+        <div class="container">
+            <header class="featured__header">
+                <div class="featured__intro">
+                    <h2 class="featured__title" id="featured-empty-heading">Лучшие предложения</h2>
+                    <p class="featured__lead">Отметьте объекты в CRM («На главной сайта») по типу: новостройка, вторичка или коммерция.</p>
+                </div>
+                <a class="featured__to-catalog" href="/catalog/">Весь каталог</a>
+            </header>
+        </div>
+    </section>
+<?php } else {
+    foreach ($sections as $section) {
+        if (count($section['items']) === 0) {
+            continue;
+        }
+        $sectionMod = trim((string) $section['mod']);
+        ?>
+    <section
+        class="featured<?php echo $sectionMod !== '' ? ' ' . htmlspecialchars($sectionMod, ENT_QUOTES, 'UTF-8') : ''; ?>"
+        aria-labelledby="<?php echo htmlspecialchars((string) $section['id'], ENT_QUOTES, 'UTF-8'); ?>"
+    >
+        <div class="container">
+            <header class="featured__header">
+                <div class="featured__intro">
+                    <h2 class="featured__title" id="<?php echo htmlspecialchars((string) $section['id'], ENT_QUOTES, 'UTF-8'); ?>">
+                        <?php echo htmlspecialchars((string) $section['title'], ENT_QUOTES, 'UTF-8'); ?>
+                    </h2>
+                    <?php if (!empty($section['tagline'])) { ?>
+                        <p class="featured__tagline"><?php echo htmlspecialchars((string) $section['tagline'], ENT_QUOTES, 'UTF-8'); ?></p>
+                    <?php } ?>
+                    <p class="featured__lead"><?php echo htmlspecialchars((string) $section['lead'], ENT_QUOTES, 'UTF-8'); ?></p>
+                </div>
+                <a class="featured__to-catalog" href="<?php echo htmlspecialchars((string) $section['catalogHref'], ENT_QUOTES, 'UTF-8'); ?>">
+                    <?php echo htmlspecialchars((string) $section['catalogLabel'], ENT_QUOTES, 'UTF-8'); ?>
+                </a>
+            </header>
+            <ul class="featured__grid">
+                <?php foreach ($section['items'] as $row) {
+                    if (is_array($row)) {
+                        site_render_featured_listing_card($row);
+                    }
+                } ?>
+            </ul>
+        </div>
+    </section>
+        <?php
+    }
+} ?>
+</div>

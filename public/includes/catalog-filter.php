@@ -51,6 +51,7 @@ function site_render_catalog_filter(array $filters, string $action = '/catalog/'
             <select class="catalog-filter__select" name="type">
                 <option value=""<?php echo $type === '' ? ' selected' : ''; ?>>Любой</option>
                 <option value="flat"<?php echo $type === 'flat' ? ' selected' : ''; ?>>Квартира</option>
+                <option value="newbuilding"<?php echo $type === 'newbuilding' ? ' selected' : ''; ?>>Новостройка</option>
                 <option value="house"<?php echo $type === 'house' ? ' selected' : ''; ?>>Дом</option>
                 <option value="land"<?php echo $type === 'land' || $type === 'plot' ? ' selected' : ''; ?>>Участок</option>
                 <option value="commercial"<?php echo $type === 'commercial' ? ' selected' : ''; ?>>Коммерция</option>

@@ -1,8 +1,36 @@
 // Секция «Лучшие предложения»: сетка карточек объектов (как превью каталога)
 
-.featured {
-  padding: clamp(3rem, 6.5vw, 4.5rem) 0 clamp(3.5rem, 8vw, 5.5rem);
+.featured-stack {
   background: var(--featured-strip-bg);
+}
+
+.featured {
+  padding: clamp(2.5rem, 5.5vw, 3.75rem) 0;
+  background: transparent;
+
+  &:first-child {
+    padding-top: clamp(3rem, 6.5vw, 4.5rem);
+  }
+
+  &:last-child {
+    padding-bottom: clamp(3.5rem, 8vw, 5.5rem);
+  }
+
+  & + .featured {
+    padding-top: 0;
+    border-top: 1px solid var(--featured-card-border);
+  }
+}
+
+.featured--newbuild {
+  .featured__title {
+    font-size: clamp(1.125rem, 2vw, 1.45rem);
+    font-weight: 700;
+  }
+
+  .featured__lead {
+    font-size: 0.875rem;
+  }
 }
 
 .featured__header {
@@ -31,6 +59,21 @@
   line-height: 1.25;
   letter-spacing: -0.02em;
   color: var(--featured-title);
+}
+
+.featured__tagline {
+  margin: -0.15rem 0 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  color: var(--featured-muted);
+  opacity: 0.9;
+
+  @media (min-width: 768px) {
+    font-size: 0.8125rem;
+  }
 }
 
 .featured__lead {
