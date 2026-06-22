@@ -185,8 +185,15 @@ function site_hero_slides_resolve(int $max = 5): array
  */
 function site_hero_slides_from_crm(int $max = 5): array
 {
-    $crm = site_crm_fetch_listings(max(1, min($max, 8)), 0);
+    $crm = site_crm_fetch_featured_listings(max(1, min($max, 8)));
     $items = $crm['items'];
+    if (($crm['error'] !== null || count($items) === 0) && $max > 0) {
+        $fallback = site_crm_fetch_listings(max(1, min($max, 8)), 0);
+        if ($fallback['error'] === null && count($fallback['items']) > 0) {
+            $crm = $fallback;
+            $items = $fallback['items'];
+        }
+    }
     if ($crm['error'] !== null || count($items) === 0) {
         return [];
     }
@@ -850,6 +857,38 @@ function site_listing_price_number(?string $raw): ?float
     $n = (float) preg_replace('/[^\d.]/', '', str_replace(',', '.', $raw));
 
     return $n > 0 ? $n : null;
+}
+
+function site_listing_has_discount(?string $oldRaw, ?string $currentRaw): bool
+{
+    $old = site_listing_price_number($oldRaw);
+    $current = site_listing_price_number($currentRaw);
+
+    return $old !== null && $current !== null && $old > $current;
+}
+
+function site_listing_discount_percent(?string $oldRaw, ?string $currentRaw): ?int
+{
+    if (!site_listing_has_discount($oldRaw, $currentRaw)) {
+        return null;
+    }
+    $old = site_listing_price_number($oldRaw);
+    $current = site_listing_price_number($currentRaw);
+    if ($old === null || $current === null || $old <= 0) {
+        return null;
+    }
+
+    return (int) round((1 - $current / $old) * 100);
+}
+
+/**
+ * Объекты для блока «Лучшие предложения» на главной (featuredOnSite в CRM).
+ *
+ * @return array{items: list<array<string, mixed>>, total: ?int, error: ?string}
+ */
+function site_crm_fetch_featured_listings(int $limit = 8): array
+{
+    return site_crm_fetch_listings(max(1, min($limit, 24)), 0, ['featured' => '1']);
 }
 
 /**
