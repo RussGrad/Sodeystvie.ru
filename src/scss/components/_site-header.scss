@@ -7,28 +7,31 @@
   z-index: 100;
   background: var(--header-bg);
   border-bottom: 1px solid var(--header-border);
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.25s var(--ease-smooth);
+
+  &.site-header--ready {
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.25s var(--ease-smooth);
+  }
 }
 
 .site-header--scrolled {
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
 
-  .site-header__inner {
+  &.site-header--ready .site-header__inner {
     min-height: 3.4rem;
     padding-block: 0.5rem;
   }
 
-  .site-header__logo-svg {
+  &.site-header--ready .site-header__logo-svg,
+  &.site-header--ready .site-header__logo--fallback {
     height: 2rem;
 
     @media (min-width: $breakpoint-nav) {
       height: 2.15rem;
     }
   }
-
 }
 
 // Внутренняя полоса: логотип + бургер (mobile) или трёхколоночная сетка (desktop)
@@ -41,9 +44,12 @@
   gap: 0.75rem;
   min-height: 4.25rem;
   padding-block: 0.75rem;
-  transition:
-    min-height 0.25s var(--ease-smooth),
-    padding 0.25s var(--ease-smooth);
+
+  .site-header--ready & {
+    transition:
+      min-height 0.25s var(--ease-smooth),
+      padding 0.25s var(--ease-smooth);
+  }
 
   @media (min-width: $breakpoint-nav) {
     align-items: center;
@@ -63,7 +69,7 @@
 
   @media (min-width: $breakpoint-nav) {
     display: grid;
-    grid-template-columns: minmax(0, max-content) minmax(0, 1fr) minmax(0, max-content);
+    grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
     align-items: center;
     width: 100%;
     column-gap: clamp(1rem, 2.2vw, 2rem);
@@ -97,6 +103,10 @@
   display: block;
   height: 2.5rem;
   width: auto;
+
+  .site-header--ready & {
+    transition: height 0.25s var(--ease-smooth);
+  }
 
   @media (min-width: $breakpoint-nav) {
     height: 2.75rem;
@@ -189,7 +199,20 @@
   }
 
   @media (min-width: $breakpoint-nav) {
-    display: contents;
+    position: static;
+    inset: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(0.5rem, 1.5vw, 1.25rem);
+    grid-column: 2;
+    min-width: 0;
+    width: 100%;
+    padding: 0;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    overflow: visible;
   }
 }
 
@@ -207,14 +230,12 @@
   }
 
   @media (min-width: $breakpoint-nav) {
-    grid-column: 2;
+    flex: 1 1 auto;
     display: flex;
     align-items: center;
     justify-content: center;
-    justify-self: center;
-    align-self: center;
-    width: 100%;
     min-width: 0;
+    width: auto;
   }
 }
 
@@ -438,14 +459,12 @@ $header-tool-size: 2rem; // 32px
   width: 100%;
 
   @media (min-width: $breakpoint-nav) {
-    grid-column: 3;
+    flex: 0 0 auto;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
     justify-content: flex-end;
-    justify-self: end;
-    align-self: center;
     gap: 0.55rem;
     margin-top: 0;
     width: auto;

@@ -32,9 +32,19 @@ $maxUrl = site_max_url();
     <?php } ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap"></noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap">
     <link rel="stylesheet" href="/css/main.css?v=<?php echo htmlspecialchars($cssVersion, ENT_QUOTES, 'UTF-8'); ?>">
+    <style>
+    /* Критичная вёрстка шапки до полной загрузки CSS — без «двоения» и скачка */
+    .site-header__inner{min-height:4.25rem;padding-block:.75rem}
+    .site-header__logo-svg,.site-header__logo--fallback{height:2.5rem;width:auto;display:block}
+    .site-header__burger{display:flex}
+    @media(min-width:1024px){
+      .site-header__cluster{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;width:100%;column-gap:1rem}
+      .site-header__bar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;min-width:0;grid-column:2;width:100%}
+      .site-header__burger{display:none}
+    }
+    </style>
     <!-- Ранняя установка темы: уменьшает мигание до загрузки CSS (localStorage или prefers-color-scheme). -->
     <script>
     (function () {
@@ -46,19 +56,6 @@ $maxUrl = site_max_url();
             }
             document.documentElement.setAttribute('data-theme', t);
         } catch (e) {}
-    })();
-    </script>
-    <script>
-    (function () {
-        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
-        document.addEventListener('DOMContentLoaded', function () {
-            var btn = document.getElementById('site-theme-toggle');
-            if (!btn) return;
-            var moon = btn.querySelector('.site-header__theme-icon--moon');
-            var sun = btn.querySelector('.site-header__theme-icon--sun');
-            if (moon) moon.hidden = !dark;
-            if (sun) sun.hidden = dark;
-        });
     })();
     </script>
 </head>

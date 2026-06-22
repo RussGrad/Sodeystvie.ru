@@ -132,9 +132,31 @@
     });
 
     var scrollThreshold = 12;
+    var scrollReady = false;
+
     function onScroll() {
+        if (!scrollReady) {
+            return;
+        }
         header.classList.toggle('site-header--scrolled', window.scrollY > scrollThreshold);
     }
-    onScroll();
+
+    function markHeaderReady() {
+        if (scrollReady) {
+            return;
+        }
+        scrollReady = true;
+        header.classList.add('site-header--ready');
+        onScroll();
+    }
+
+    if (document.readyState === 'complete') {
+        requestAnimationFrame(markHeaderReady);
+    } else {
+        window.addEventListener('load', function () {
+            requestAnimationFrame(markHeaderReady);
+        }, { once: true });
+    }
+
     window.addEventListener('scroll', onScroll, { passive: true });
 })();
