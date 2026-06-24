@@ -10,6 +10,7 @@
 html {
   font-size: 100%;
   -webkit-text-size-adjust: 100%; // уменьшение авто-масштаба текста в мобильном Safari
+  scrollbar-gutter: stable;
 }
 
 body {
