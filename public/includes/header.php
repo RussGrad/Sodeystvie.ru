@@ -35,7 +35,7 @@ $maxUrl = site_max_url();
     <link rel="stylesheet" href="/css/main.css?v=<?php echo htmlspecialchars($cssVersion, ENT_QUOTES, 'UTF-8'); ?>">
     <style>
     /* Критичные стили шапки: совпадают с main.css, чтобы не было скачка при догрузке */
-    :root[data-theme="dark"]{--header-bg:#161616;--header-border:rgba(255,255,255,.1)}
+    :root[data-theme="dark"]{--header-bg:#141414;--header-border:rgba(255,255,255,.1)}
     :root[data-theme="light"]{--header-bg:#fff;--header-border:rgba(22,22,22,.1)}
     html{scrollbar-gutter:stable}
     body{margin:0}
