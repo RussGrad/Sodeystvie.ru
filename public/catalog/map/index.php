@@ -31,6 +31,7 @@ $filterQuery = http_build_query(array_filter($catalogFilters, static fn ($v) => 
 $listHref = '/catalog/' . ($filterQuery !== '' ? '?' . $filterQuery : '');
 
 $catalogMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/catalog-map.js') ?: time());
+$ymapListingPinJsVersion = (string) (@filemtime(__DIR__ . '/../../js/ymap-listing-pin.js') ?: time());
 
 require __DIR__ . '/../../includes/header.php';
 
@@ -84,6 +85,7 @@ require __DIR__ . '/../../includes/header.php';
                     aria-label="Карта объектов недвижимости"
                 ></div>
                 <script src="https://api-maps.yandex.ru/2.1/?apikey=<?php echo htmlspecialchars($yandexMapsKey, ENT_QUOTES, 'UTF-8'); ?>&amp;lang=ru_RU"></script>
+                <script src="/js/ymap-listing-pin.js?v=<?php echo htmlspecialchars($ymapListingPinJsVersion, ENT_QUOTES, 'UTF-8'); ?>"></script>
                 <script src="/js/catalog-map.js?v=<?php echo htmlspecialchars($catalogMapJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
             <?php } ?>
         </div>

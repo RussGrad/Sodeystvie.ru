@@ -11,6 +11,7 @@
   var centerRaw = root.getAttribute('data-center') || '{}';
   var markers = [];
   var center = { lat: 52.2896, lng: 104.2806, zoom: 11 };
+  var pinApi = window.SodeystvieYmapListingPin;
 
   try {
     markers = JSON.parse(markersRaw);
@@ -31,6 +32,45 @@
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
+  }
+
+  function balloonHtml(m) {
+    var photo = m.photo
+      ? '<img class="catalog-map-balloon__thumb" src="' +
+        escapeHtml(m.photo) +
+        '" alt="" width="72" height="54" loading="lazy" decoding="async">'
+      : '';
+    return (
+      '<div class="catalog-map-balloon">' +
+      photo +
+      '<div class="catalog-map-balloon__body">' +
+      '<strong>' +
+      escapeHtml(m.title || 'Объект') +
+      '</strong>' +
+      '<p>' +
+      escapeHtml(m.price || '') +
+      '</p>' +
+      '<a href="' +
+      escapeHtml(m.href || '#') +
+      '">Подробнее</a>' +
+      '</div>' +
+      '</div>'
+    );
+  }
+
+  function placemarkOptions() {
+    if (pinApi && typeof pinApi.placemarkOptions === 'function') {
+      return pinApi.placemarkOptions();
+    }
+    return { preset: 'islands#circleDotIcon', iconColor: '#0d3e36' };
+  }
+
+  function placemarkProperties(m) {
+    var html = balloonHtml(m);
+    if (pinApi && typeof pinApi.placemarkProperties === 'function') {
+      return pinApi.placemarkProperties(m, html);
+    }
+    return { balloonContent: html, hintContent: m.title || '' };
   }
 
   function init() {
@@ -55,23 +95,10 @@
         var coords = [m.lat, m.lng];
         bounds.push(coords);
 
-        var balloon =
-          '<div class="catalog-map-balloon">' +
-          '<strong>' +
-          escapeHtml(m.title || 'Объект') +
-          '</strong>' +
-          '<p>' +
-          escapeHtml(m.price || '') +
-          '</p>' +
-          '<a href="' +
-          escapeHtml(m.href || '#') +
-          '">Подробнее</a>' +
-          '</div>';
-
         var placemark = new ymaps.Placemark(
           coords,
-          { balloonContent: balloon, hintContent: m.title || '' },
-          { preset: 'islands#circleDotIcon', iconColor: '#0d3e36' }
+          placemarkProperties(m),
+          placemarkOptions()
         );
         collection.add(placemark);
       });

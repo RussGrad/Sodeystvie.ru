@@ -759,8 +759,23 @@ p.listing-object__address {
 }
 
 .listing-object-map-balloon {
+  display: flex;
+  gap: 0.65rem;
   font-size: 0.9rem;
   line-height: 1.4;
+
+  &__thumb {
+    flex-shrink: 0;
+    width: 72px;
+    height: 54px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: var(--featured-strip-bg, #f0f0f0);
+  }
+
+  &__body {
+    min-width: 0;
+  }
 
   strong {
     display: block;

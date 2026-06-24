@@ -1232,8 +1232,39 @@ function site_crm_fetch_listings_for_map(array $filters): array
 }
 
 /**
+ * URL миниатюры объекта для метки на карте.
+ *
+ * @param array<string, mixed> $row
+ */
+function site_map_marker_photo_url(array $row): string
+{
+    $coverRaw = isset($row['coverPhoto']) ? trim((string) $row['coverPhoto']) : '';
+    if ($coverRaw === '' && isset($row['photos']) && is_array($row['photos'])) {
+        foreach ($row['photos'] as $p) {
+            if (is_string($p) && trim($p) !== '') {
+                $coverRaw = trim($p);
+                break;
+            }
+        }
+    }
+    if ($coverRaw === '') {
+        return '';
+    }
+
+    $display = site_crm_photo_display_src(site_crm_photo_src($coverRaw), 96);
+    if ($display === '') {
+        return '';
+    }
+    if (str_starts_with($display, '/')) {
+        return site_absolute_url($display);
+    }
+
+    return $display;
+}
+
+/**
  * @param list<array<string, mixed>> $items
- * @return list<array{id: string, lat: float, lng: float, title: string, price: string, href: string}>
+ * @return list<array{id: string, lat: float, lng: float, title: string, price: string, href: string, photo: string}>
  */
 function site_catalog_map_markers_from_items(array $items): array
 {
@@ -1274,6 +1305,7 @@ function site_catalog_map_markers_from_items(array $items): array
             'title' => $title,
             'price' => site_fmt_rub($priceRaw),
             'href' => '/catalog/object/?id=' . rawurlencode($id),
+            'photo' => site_map_marker_photo_url($row),
         ];
     }
 

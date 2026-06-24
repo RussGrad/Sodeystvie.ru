@@ -9,6 +9,7 @@
 
   var markerRaw = root.getAttribute('data-marker') || '{}';
   var marker = {};
+  var pinApi = window.SodeystvieYmapListingPin;
 
   try {
     marker = JSON.parse(markerRaw);
@@ -26,6 +27,30 @@
       .replace(/"/g, '&quot;');
   }
 
+  function balloonHtml() {
+    var photo = marker.photo
+      ? '<img class="listing-object-map-balloon__thumb" src="' +
+        escapeHtml(marker.photo) +
+        '" alt="" width="72" height="54" loading="lazy" decoding="async">'
+      : '';
+    return (
+      '<div class="listing-object-map-balloon">' +
+      photo +
+      '<div class="listing-object-map-balloon__body">' +
+      '<strong>' +
+      escapeHtml(marker.title || '') +
+      '</strong>' +
+      (marker.address
+        ? '<p>' + escapeHtml(marker.address) + '</p>'
+        : '') +
+      (marker.price
+        ? '<p class="listing-object-map-balloon__price">' + escapeHtml(marker.price) + '</p>'
+        : '') +
+      '</div>' +
+      '</div>'
+    );
+  }
+
   function init() {
     if (typeof ymaps === 'undefined') return;
 
@@ -41,27 +66,17 @@
         { suppressMapOpenBlock: true }
       );
 
-      var balloon =
-        '<div class="listing-object-map-balloon">' +
-        '<strong>' +
-        escapeHtml(marker.title || '') +
-        '</strong>' +
-        (marker.address
-          ? '<p>' + escapeHtml(marker.address) + '</p>'
-          : '') +
-        (marker.price
-          ? '<p class="listing-object-map-balloon__price">' + escapeHtml(marker.price) + '</p>'
-          : '') +
-        '</div>';
+      var html = balloonHtml();
+      var props =
+        pinApi && typeof pinApi.placemarkProperties === 'function'
+          ? pinApi.placemarkProperties(marker, html)
+          : { balloonContent: html, hintContent: marker.title || marker.address || '' };
+      var opts =
+        pinApi && typeof pinApi.placemarkOptions === 'function'
+          ? pinApi.placemarkOptions()
+          : { preset: 'islands#dotIcon', iconColor: '#0d3e36' };
 
-      var placemark = new ymaps.Placemark(
-        [marker.lat, marker.lng],
-        {
-          balloonContent: balloon,
-          hintContent: marker.title || marker.address || '',
-        },
-        { preset: 'islands#dotIcon', iconColor: '#0d3e36' }
-      );
+      var placemark = new ymaps.Placemark([marker.lat, marker.lng], props, opts);
 
       map.geoObjects.add(placemark);
     });

@@ -88,12 +88,14 @@ $markerJson = json_encode([
     'title' => $headingTitle,
     'address' => $addressLine,
     'price' => $priceText,
+    'photo' => site_map_marker_photo_url($obj),
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}';
 
 $metaParts = array_filter([$dealLine, $district], static fn (string $v): bool => $v !== '');
 $metaLine = implode(' · ', $metaParts);
 
 $listingMapScripts = $hasMapCoords && $yandexMapsKey !== '';
+$ymapListingPinJsVersion = (string) (@filemtime(__DIR__ . '/../../js/ymap-listing-pin.js') ?: time());
 $listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-object-map.js') ?: time());
 ?>
 
@@ -205,6 +207,7 @@ $listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-o
 
 <?php if ($listingMapScripts) { ?>
     <script src="https://api-maps.yandex.ru/2.1/?apikey=<?php echo htmlspecialchars($yandexMapsKey, ENT_QUOTES, 'UTF-8'); ?>&amp;lang=ru_RU"></script>
+    <script src="/js/ymap-listing-pin.js?v=<?php echo htmlspecialchars($ymapListingPinJsVersion, ENT_QUOTES, 'UTF-8'); ?>"></script>
     <script src="/js/listing-object-map.js?v=<?php echo htmlspecialchars($listingObjectMapJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
 <?php } ?>
 
