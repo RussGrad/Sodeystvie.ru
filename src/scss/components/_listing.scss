@@ -586,6 +586,11 @@ p.listing-object__address {
     grid-template-columns: 1fr;
     gap: 1.75rem;
   }
+
+  &--one {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 36rem;
+  }
 }
 
 .listing-object__specs-col-title {

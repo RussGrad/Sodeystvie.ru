@@ -339,138 +339,274 @@ function site_listing_documents_ready_label(mixed $value): ?string
 }
 
 /**
- * Две колонки характеристик для карточки объекта (как на Циан).
+ * Нормализованный тип объекта для блока характеристик.
+ *
+ * @param array<string, mixed> $row
+ */
+function site_listing_object_spec_kind(array $row): string
+{
+    $t = isset($row['objectTypeValue']) ? trim((string) $row['objectTypeValue']) : '';
+    if ($t === 'land') {
+        return 'plot';
+    }
+    if (in_array($t, ['flat', 'newbuilding', 'house', 'plot', 'commercial'], true)) {
+        return $t;
+    }
+
+    $rooms = isset($row['rooms']) && is_numeric($row['rooms']) ? (int) $row['rooms'] : null;
+    $areaLand = isset($row['areaLand']) && is_numeric($row['areaLand']) ? (float) $row['areaLand'] : null;
+    if ($areaLand !== null && $areaLand > 0 && ($rooms === null || $rooms <= 0)) {
+        return 'plot';
+    }
+    if ($rooms !== null && $rooms > 0) {
+        return 'flat';
+    }
+
+    return 'flat';
+}
+
+/**
+ * @param array<string, mixed> $row
+ * @return array{
+ *   objectType: string,
+ *   kind: string,
+ *   rooms: ?int,
+ *   areaTotal: ?float,
+ *   areaLiving: ?float,
+ *   areaKitchen: ?float,
+ *   areaLand: ?float,
+ *   floor: ?string,
+ *   floorTotal: ?int,
+ *   yearBuilt: ?int,
+ *   deal: string,
+ *   housingType: ?string,
+ *   ownership: string,
+ *   documents: ?string,
+ *   jk: string,
+ *   district: string,
+ *   city: string,
+ *   cadastral: string
+ * }
+ */
+function site_listing_spec_context(array $row): array
+{
+    $objectType = isset($row['objectTypeValue']) ? trim((string) $row['objectTypeValue']) : '';
+    $rooms = isset($row['rooms']) && is_numeric($row['rooms']) ? (int) $row['rooms'] : null;
+
+    return [
+        'objectType' => $objectType,
+        'kind' => site_listing_object_spec_kind($row),
+        'rooms' => $rooms !== null && $rooms > 0 ? $rooms : null,
+        'areaTotal' => isset($row['areaTotal']) && is_numeric($row['areaTotal']) ? (float) $row['areaTotal'] : null,
+        'areaLiving' => isset($row['areaLiving']) && is_numeric($row['areaLiving']) ? (float) $row['areaLiving'] : null,
+        'areaKitchen' => isset($row['areaKitchen']) && is_numeric($row['areaKitchen']) ? (float) $row['areaKitchen'] : null,
+        'areaLand' => isset($row['areaLand']) && is_numeric($row['areaLand']) ? (float) $row['areaLand'] : null,
+        'floor' => isset($row['floor']) ? trim((string) $row['floor']) : null,
+        'floorTotal' => isset($row['floorTotal']) && is_numeric($row['floorTotal']) ? (int) $row['floorTotal'] : null,
+        'yearBuilt' => isset($row['yearBuilt']) && is_numeric($row['yearBuilt']) ? (int) $row['yearBuilt'] : null,
+        'deal' => site_deal_line_public_label(isset($row['dealLineValue']) ? (string) $row['dealLineValue'] : null),
+        'housingType' => site_listing_housing_type_label($objectType !== '' ? $objectType : site_listing_object_spec_kind($row)),
+        'ownership' => isset($row['ownershipType']) ? trim((string) $row['ownershipType']) : '',
+        'documents' => site_listing_documents_ready_label($row['documentsReady'] ?? null),
+        'jk' => isset($row['residentialComplex']) ? trim((string) $row['residentialComplex']) : '',
+        'district' => isset($row['districtValue']) ? trim((string) $row['districtValue']) : '',
+        'city' => isset($row['city']) ? trim((string) $row['city']) : '',
+        'cadastral' => isset($row['cadastral']) ? trim((string) $row['cadastral']) : '',
+    ];
+}
+
+/**
+ * @return list<array{label: string, value: string}>
+ */
+function site_listing_spec_rows_from_map(array $map): array
+{
+    $rows = [];
+    foreach ($map as $label => $value) {
+        $v = trim((string) $value);
+        if ($v !== '') {
+            $rows[] = ['label' => (string) $label, 'value' => $v];
+        }
+    }
+
+    return $rows;
+}
+
+/**
+ * @param array<string, mixed> $ctx
+ * @return list<array{title: string, rows: list<array{label: string, value: string}>}>
+ */
+function site_listing_flat_spec_sections(array $ctx): array
+{
+    $floorText = site_listing_floor_label($ctx['floor'] ?: null, $ctx['floorTotal']);
+    $area = site_fmt_area_short($ctx['areaTotal']);
+    $living = site_fmt_area_short($ctx['areaLiving']);
+    $kitchen = site_fmt_area_short($ctx['areaKitchen']);
+
+    $unit = site_listing_spec_rows_from_map([
+        'Тип жилья' => $ctx['housingType'] ?? '',
+        'Сделка' => $ctx['deal'],
+        'Комнат' => $ctx['rooms'] !== null ? (string) $ctx['rooms'] : '',
+        'Общая площадь' => $area !== null ? $area . ' м²' : '',
+        'Жилая площадь' => $living !== null ? $living . ' м²' : '',
+        'Площадь кухни' => $kitchen !== null ? $kitchen . ' м²' : '',
+        'Этаж' => $floorText ?? '',
+        'Собственность' => $ctx['ownership'],
+        'Документы готовы' => $ctx['documents'] ?? '',
+    ]);
+
+    $building = site_listing_spec_rows_from_map([
+        'Год постройки' => ($ctx['yearBuilt'] ?? 0) > 0 ? (string) $ctx['yearBuilt'] : '',
+        'Этажность' => ($ctx['floorTotal'] ?? 0) > 0 ? (string) $ctx['floorTotal'] : '',
+        'Жилой комплекс' => $ctx['jk'],
+        'Район' => $ctx['district'],
+        'Город' => $ctx['city'],
+    ]);
+
+    $sections = [];
+    if (count($unit) > 0) {
+        $sections[] = ['title' => $ctx['objectType'] === 'newbuilding' ? 'О новостройке' : 'О квартире', 'rows' => $unit];
+    }
+    if (count($building) > 0) {
+        $sections[] = ['title' => 'О доме', 'rows' => $building];
+    }
+
+    return $sections;
+}
+
+/**
+ * @param array<string, mixed> $ctx
+ * @return list<array{title: string, rows: list<array{label: string, value: string}>}>
+ */
+function site_listing_house_spec_sections(array $ctx): array
+{
+    $area = site_fmt_area_short($ctx['areaTotal']);
+    $land = site_fmt_area_short($ctx['areaLand']);
+    $living = site_fmt_area_short($ctx['areaLiving']);
+    $kitchen = site_fmt_area_short($ctx['areaKitchen']);
+    $floorText = site_listing_floor_label($ctx['floor'] ?: null, $ctx['floorTotal']);
+
+    $house = site_listing_spec_rows_from_map([
+        'Тип объекта' => 'Дом',
+        'Сделка' => $ctx['deal'],
+        'Комнат' => $ctx['rooms'] !== null ? (string) $ctx['rooms'] : '',
+        'Площадь дома' => $area !== null ? $area . ' м²' : '',
+        'Жилая площадь' => $living !== null ? $living . ' м²' : '',
+        'Площадь кухни' => $kitchen !== null ? $kitchen . ' м²' : '',
+        'Этажей в доме' => $floorText ?? (($ctx['floorTotal'] ?? 0) > 0 ? (string) $ctx['floorTotal'] : ''),
+        'Год постройки' => ($ctx['yearBuilt'] ?? 0) > 0 ? (string) $ctx['yearBuilt'] : '',
+        'Собственность' => $ctx['ownership'],
+        'Документы готовы' => $ctx['documents'] ?? '',
+    ]);
+
+    $landSection = site_listing_spec_rows_from_map([
+        'Площадь участка' => $land !== null && ($ctx['areaLand'] ?? 0) > 0 ? $land . ' сот.' : '',
+        'Кадастровый номер' => $ctx['cadastral'],
+        'Район' => $ctx['district'],
+        'Город' => $ctx['city'],
+    ]);
+
+    $sections = [];
+    if (count($house) > 0) {
+        $sections[] = ['title' => 'О доме', 'rows' => $house];
+    }
+    if (count($landSection) > 0) {
+        $sections[] = ['title' => 'Участок и расположение', 'rows' => $landSection];
+    }
+
+    return $sections;
+}
+
+/**
+ * @param array<string, mixed> $ctx
+ * @return list<array{title: string, rows: list<array{label: string, value: string}>}>
+ */
+function site_listing_plot_spec_sections(array $ctx): array
+{
+    $land = site_fmt_area_short($ctx['areaLand']);
+    $area = site_fmt_area_short($ctx['areaTotal']);
+
+    $plot = site_listing_spec_rows_from_map([
+        'Тип объекта' => 'Земельный участок',
+        'Сделка' => $ctx['deal'],
+        'Площадь участка' => $land !== null && ($ctx['areaLand'] ?? 0) > 0
+            ? $land . ' сот.'
+            : ($area !== null ? $area . ' м²' : ''),
+        'Кадастровый номер' => $ctx['cadastral'],
+        'Собственность' => $ctx['ownership'],
+        'Документы готовы' => $ctx['documents'] ?? '',
+    ]);
+
+    $location = site_listing_spec_rows_from_map([
+        'Район' => $ctx['district'],
+        'Город' => $ctx['city'],
+    ]);
+
+    $sections = [];
+    if (count($plot) > 0) {
+        $sections[] = ['title' => 'Об участке', 'rows' => $plot];
+    }
+    if (count($location) > 0) {
+        $sections[] = ['title' => 'Расположение', 'rows' => $location];
+    }
+
+    return $sections;
+}
+
+/**
+ * @param array<string, mixed> $ctx
+ * @return list<array{title: string, rows: list<array{label: string, value: string}>}>
+ */
+function site_listing_commercial_spec_sections(array $ctx): array
+{
+    $area = site_fmt_area_short($ctx['areaTotal']);
+    $floorText = site_listing_floor_label($ctx['floor'] ?: null, $ctx['floorTotal']);
+
+    $unit = site_listing_spec_rows_from_map([
+        'Тип объекта' => 'Коммерческая недвижимость',
+        'Сделка' => $ctx['deal'],
+        'Площадь' => $area !== null ? $area . ' м²' : '',
+        'Этаж' => $floorText ?? '',
+        'Собственность' => $ctx['ownership'],
+        'Документы готовы' => $ctx['documents'] ?? '',
+    ]);
+
+    $building = site_listing_spec_rows_from_map([
+        'Год постройки' => ($ctx['yearBuilt'] ?? 0) > 0 ? (string) $ctx['yearBuilt'] : '',
+        'Этажность здания' => ($ctx['floorTotal'] ?? 0) > 0 ? (string) $ctx['floorTotal'] : '',
+        'Жилой комплекс / БЦ' => $ctx['jk'],
+        'Район' => $ctx['district'],
+        'Город' => $ctx['city'],
+        'Кадастровый номер' => $ctx['cadastral'],
+    ]);
+
+    $sections = [];
+    if (count($unit) > 0) {
+        $sections[] = ['title' => 'О помещении', 'rows' => $unit];
+    }
+    if (count($building) > 0) {
+        $sections[] = ['title' => 'О здании', 'rows' => $building];
+    }
+
+    return $sections;
+}
+
+/**
+ * Две колонки характеристик для карточки объекта (набор полей зависит от типа).
  *
  * @param array<string, mixed> $row
  * @return list<array{title: string, rows: list<array{label: string, value: string}>}>
  */
 function site_listing_object_spec_sections(array $row): array
 {
-    $unitRows = [];
-    $buildingRows = [];
-    $addUnit = static function (string $label, ?string $value) use (&$unitRows): void {
-        $v = trim((string) $value);
-        if ($v !== '') {
-            $unitRows[] = ['label' => $label, 'value' => $v];
-        }
+    $ctx = site_listing_spec_context($row);
+
+    return match ($ctx['kind']) {
+        'house' => site_listing_house_spec_sections($ctx),
+        'plot' => site_listing_plot_spec_sections($ctx),
+        'commercial' => site_listing_commercial_spec_sections($ctx),
+        'newbuilding', 'flat' => site_listing_flat_spec_sections($ctx),
+        default => site_listing_flat_spec_sections($ctx),
     };
-    $addBuilding = static function (string $label, ?string $value) use (&$buildingRows): void {
-        $v = trim((string) $value);
-        if ($v !== '') {
-            $buildingRows[] = ['label' => $label, 'value' => $v];
-        }
-    };
-
-    $objectType = isset($row['objectTypeValue']) ? trim((string) $row['objectTypeValue']) : '';
-    $rooms = isset($row['rooms']) && is_numeric($row['rooms']) ? (int) $row['rooms'] : null;
-
-    $housingType = site_listing_housing_type_label($objectType);
-    if ($housingType !== null) {
-        $addUnit('Тип жилья', $housingType);
-    }
-
-    $deal = site_deal_line_public_label(isset($row['dealLineValue']) ? (string) $row['dealLineValue'] : null);
-    if ($deal !== '') {
-        $addUnit('Сделка', $deal);
-    }
-
-    if ($rooms !== null && $rooms > 0) {
-        $addUnit('Комнат', (string) $rooms);
-    }
-
-    $areaTotal = isset($row['areaTotal']) && is_numeric($row['areaTotal']) ? (float) $row['areaTotal'] : null;
-    $areaLiving = isset($row['areaLiving']) && is_numeric($row['areaLiving']) ? (float) $row['areaLiving'] : null;
-    $areaKitchen = isset($row['areaKitchen']) && is_numeric($row['areaKitchen']) ? (float) $row['areaKitchen'] : null;
-    $areaLand = isset($row['areaLand']) && is_numeric($row['areaLand']) ? (float) $row['areaLand'] : null;
-
-    $area = site_fmt_area_short($areaTotal);
-    if ($area !== null) {
-        $addUnit('Общая площадь', $area . ' м²');
-    }
-    $living = site_fmt_area_short($areaLiving);
-    if ($living !== null) {
-        $addUnit('Жилая площадь', $living . ' м²');
-    }
-    $kitchen = site_fmt_area_short($areaKitchen);
-    if ($kitchen !== null) {
-        $addUnit('Площадь кухни', $kitchen . ' м²');
-    }
-
-    $floor = isset($row['floor']) ? (string) $row['floor'] : null;
-    $floorTotal = isset($row['floorTotal']) && is_numeric($row['floorTotal']) ? (int) $row['floorTotal'] : null;
-    $floorText = site_listing_floor_label($floor, $floorTotal);
-    if ($floorText !== null && !in_array($objectType, ['plot', 'land'], true)) {
-        $addUnit('Этаж', $floorText);
-    }
-
-    $land = site_fmt_area_short($areaLand);
-    if ($land !== null && $areaLand !== null && $areaLand > 0) {
-        if (in_array($objectType, ['plot', 'land', 'house'], true)) {
-            $addUnit('Площадь участка', $land . ' сот.');
-        }
-    }
-
-    $ownership = isset($row['ownershipType']) ? trim((string) $row['ownershipType']) : '';
-    if ($ownership !== '') {
-        $addUnit('Собственность', $ownership);
-    }
-
-    $docs = site_listing_documents_ready_label($row['documentsReady'] ?? null);
-    if ($docs !== null) {
-        $addUnit('Документы готовы', $docs);
-    }
-
-    $yearBuilt = isset($row['yearBuilt']) && is_numeric($row['yearBuilt']) ? (int) $row['yearBuilt'] : null;
-    if ($yearBuilt !== null && $yearBuilt > 0) {
-        $addBuilding('Год постройки', (string) $yearBuilt);
-    }
-
-    if ($floorTotal !== null && $floorTotal > 0 && !in_array($objectType, ['plot', 'land', 'house'], true)) {
-        $addBuilding('Этажность', (string) $floorTotal);
-    }
-
-    $jk = isset($row['residentialComplex']) ? trim((string) $row['residentialComplex']) : '';
-    if ($jk !== '') {
-        $addBuilding('Жилой комплекс', $jk);
-    }
-
-    $district = isset($row['districtValue']) ? trim((string) $row['districtValue']) : '';
-    if ($district !== '') {
-        $addBuilding('Район', $district);
-    }
-
-    $city = isset($row['city']) ? trim((string) $row['city']) : '';
-    if ($city !== '') {
-        $addBuilding('Город', $city);
-    }
-
-    $cadastral = isset($row['cadastral']) ? trim((string) $row['cadastral']) : '';
-    if ($cadastral !== '') {
-        $addBuilding('Кадастровый номер', $cadastral);
-    }
-
-    $unitTitle = match ($objectType) {
-        'house' => 'О доме',
-        'plot', 'land' => 'Об участке',
-        'commercial' => 'О помещении',
-        default => 'О квартире',
-    };
-    $buildingTitle = match ($objectType) {
-        'plot', 'land' => 'Расположение',
-        'commercial' => 'Здание и район',
-        'house' => 'Участок и район',
-        default => 'О доме',
-    };
-
-    $sections = [];
-    if (count($unitRows) > 0) {
-        $sections[] = ['title' => $unitTitle, 'rows' => $unitRows];
-    }
-    if (count($buildingRows) > 0) {
-        $sections[] = ['title' => $buildingTitle, 'rows' => $buildingRows];
-    }
-
-    return $sections;
 }
 
 /**
@@ -481,10 +617,11 @@ function site_render_listing_object_specs(array $sections): void
     if (count($sections) === 0) {
         return;
     }
+    $gridClass = 'listing-object__specs-grid' . (count($sections) === 1 ? ' listing-object__specs-grid--one' : '');
     ?>
     <section class="listing-object__specs" aria-labelledby="listing-specs-title">
         <h2 class="visually-hidden" id="listing-specs-title">Характеристики объекта</h2>
-        <div class="listing-object__specs-grid">
+        <div class="<?php echo htmlspecialchars($gridClass, ENT_QUOTES, 'UTF-8'); ?>">
             <?php foreach ($sections as $section) {
                 if (count($section['rows']) === 0) {
                     continue;
