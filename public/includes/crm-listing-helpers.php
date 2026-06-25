@@ -18,6 +18,13 @@ function site_fmt_rub(?string $raw): string
     return number_format((int) round($n), 0, '.', ' ') . ' ₽';
 }
 
+function site_fmt_rub_from(?string $raw): string
+{
+    $value = site_fmt_rub($raw);
+
+    return $value === '—' ? $value : 'от ' . $value;
+}
+
 function site_fmt_m2(?float $areaTotal, ?string $priceRaw): ?string
 {
     if ($areaTotal === null || $areaTotal <= 0) {
@@ -592,6 +599,310 @@ function site_listing_commercial_spec_sections(array $ctx): array
 }
 
 /**
+ * @param array<string, mixed> $ctx
+ * @param array<string, mixed> $row
+ * @return list<array{title: string, rows: list<array{label: string, value: string}>}>
+ */
+function site_listing_newbuilding_complex_spec_sections(array $ctx, array $row): array
+{
+    $offersTotal = site_developer_offers_total($row);
+    $unit = site_listing_spec_rows_from_map([
+        'Тип жилья' => $ctx['housingType'] ?? '',
+        'Сделка' => $ctx['deal'],
+        'Предложений от застройщика' => $offersTotal > 0 ? (string) $offersTotal : '',
+    ]);
+    $building = site_listing_spec_rows_from_map([
+        'Жилой комплекс' => $ctx['jk'],
+        'Район' => $ctx['district'],
+        'Город' => $ctx['city'],
+    ]);
+    $sections = [];
+    if (count($unit) > 0) {
+        $sections[] = ['title' => 'О жилом комплексе', 'rows' => $unit];
+    }
+    if (count($building) > 0) {
+        $sections[] = ['title' => 'Расположение', 'rows' => $building];
+    }
+
+    return $sections;
+}
+
+/**
+ * @param array<string, mixed> $row
+ */
+function site_newbuilding_page_title(array $row): string
+{
+    $jk = trim((string) ($row['residentialComplex'] ?? ''));
+    if ($jk !== '') {
+        return $jk;
+    }
+    $title = trim((string) ($row['title'] ?? ''));
+    if ($title !== '') {
+        return $title;
+    }
+
+    return 'Жилой комплекс';
+}
+
+/**
+ * @param array<string, mixed> $row
+ */
+function site_developer_offers_total(array $row): int
+{
+    $total = isset($row['developerOffersTotal']) && is_numeric($row['developerOffersTotal'])
+        ? (int) $row['developerOffersTotal']
+        : 0;
+    $count = count(site_developer_offers_entries($row));
+
+    return max($total, $count);
+}
+
+/**
+ * @param array<string, mixed> $row
+ * @return list<array<string, mixed>>
+ */
+function site_developer_buildings_entries(array $row): array
+{
+    $raw = $row['developerBuildings'] ?? null;
+    if (!is_array($raw)) {
+        return [];
+    }
+    $out = [];
+    foreach ($raw as $item) {
+        if (!is_array($item)) {
+            continue;
+        }
+        $buildingId = isset($item['buildingId']) && is_numeric($item['buildingId'])
+            ? (int) $item['buildingId']
+            : null;
+        $name = isset($item['name']) ? trim((string) $item['name']) : '';
+        if ($buildingId === null || $name === '') {
+            continue;
+        }
+        $out[] = [
+            'buildingId' => $buildingId,
+            'name' => $name,
+            'isReady' => !empty($item['isReady']),
+            'completionYear' => isset($item['completionYear']) && is_numeric($item['completionYear'])
+                ? (int) $item['completionYear']
+                : null,
+            'completionQuarter' => isset($item['completionQuarter']) && is_numeric($item['completionQuarter'])
+                ? (int) $item['completionQuarter']
+                : null,
+            'floors' => isset($item['floors']) && is_numeric($item['floors']) ? (int) $item['floors'] : null,
+        ];
+    }
+
+    return $out;
+}
+
+/**
+ * @param array<string, mixed> $row
+ * @return list<array<string, mixed>>
+ */
+function site_developer_offers_entries(array $row): array
+{
+    $raw = $row['developerOffers'] ?? null;
+    if (!is_array($raw)) {
+        return [];
+    }
+    $out = [];
+    foreach ($raw as $item) {
+        if (!is_array($item)) {
+            continue;
+        }
+        $layoutId = isset($item['layoutId']) ? trim((string) $item['layoutId']) : '';
+        if ($layoutId === '') {
+            continue;
+        }
+        $out[] = [
+            'layoutId' => $layoutId,
+            'offerId' => isset($item['offerId']) && is_numeric($item['offerId']) ? (int) $item['offerId'] : null,
+            'buildingId' => isset($item['buildingId']) && is_numeric($item['buildingId'])
+                ? (int) $item['buildingId']
+                : null,
+            'buildingName' => isset($item['buildingName']) ? trim((string) $item['buildingName']) : null,
+            'rooms' => isset($item['rooms']) && is_numeric($item['rooms']) ? (int) $item['rooms'] : null,
+            'area' => isset($item['area']) && is_numeric($item['area']) ? (float) $item['area'] : null,
+            'price' => isset($item['price']) && is_numeric($item['price']) ? (int) $item['price'] : null,
+            'floor' => isset($item['floor']) && is_numeric($item['floor']) ? (int) $item['floor'] : null,
+            'floorMax' => isset($item['floorMax']) && is_numeric($item['floorMax']) ? (int) $item['floorMax'] : null,
+            'floorsTotal' => isset($item['floorsTotal']) && is_numeric($item['floorsTotal'])
+                ? (int) $item['floorsTotal']
+                : null,
+            'planImageUrl' => isset($item['planImageUrl']) ? trim((string) $item['planImageUrl']) : null,
+            'flatsCount' => isset($item['flatsCount']) && is_numeric($item['flatsCount'])
+                ? (int) $item['flatsCount']
+                : 1,
+            'completionYear' => isset($item['completionYear']) && is_numeric($item['completionYear'])
+                ? (int) $item['completionYear']
+                : null,
+            'completionQuarter' => isset($item['completionQuarter']) && is_numeric($item['completionQuarter'])
+                ? (int) $item['completionQuarter']
+                : null,
+            'sourceUrl' => isset($item['sourceUrl']) ? trim((string) $item['sourceUrl']) : null,
+        ];
+    }
+
+    return $out;
+}
+
+function site_developer_completion_label(?int $quarter, ?int $year, bool $isReady = false): string
+{
+    if ($isReady) {
+        return 'Сдан';
+    }
+    if ($quarter !== null && $quarter > 0 && $year !== null && $year > 0) {
+        return 'Сдача в ' . site_construction_quarter_label($quarter) . ' ' . $year . ' г.';
+    }
+    if ($year !== null && $year > 0) {
+        return 'Сдача в ' . $year . ' г.';
+    }
+
+    return '';
+}
+
+/**
+ * @param array<string, mixed> $row
+ */
+function site_render_developer_offers_section(array $row): void
+{
+    $offers = site_developer_offers_entries($row);
+    if (count($offers) === 0) {
+        return;
+    }
+    $buildings = site_developer_buildings_entries($row);
+    $complexTitle = site_newbuilding_page_title($row);
+    $offersTotal = site_developer_offers_total($row);
+    $sourceUrl = isset($row['sourceUrl']) ? trim((string) $row['sourceUrl']) : '';
+    ?>
+    <section
+        class="listing-object__section listing-object__section--developer-offers"
+        aria-labelledby="listing-developer-offers-title"
+        data-developer-offers
+    >
+        <div class="developer-offers__head">
+            <h2 class="listing-object__section-title" id="listing-developer-offers-title">
+                <?php echo (int) $offersTotal; ?> предложений от застройщика в <?php echo htmlspecialchars($complexTitle, ENT_QUOTES, 'UTF-8'); ?>
+            </h2>
+        </div>
+        <?php if (count($buildings) > 0) { ?>
+            <div class="developer-offers__tabs" role="tablist" aria-label="Корпуса">
+                <button
+                    type="button"
+                    class="developer-offers__tab is-active"
+                    role="tab"
+                    aria-selected="true"
+                    data-building-filter="all"
+                >Все корпуса</button>
+                <?php foreach ($buildings as $building) {
+                    $bid = (int) $building['buildingId'];
+                    $status = site_developer_completion_label(
+                        $building['completionQuarter'] ?? null,
+                        $building['completionYear'] ?? null,
+                        !empty($building['isReady']),
+                    );
+                    ?>
+                    <button
+                        type="button"
+                        class="developer-offers__tab"
+                        role="tab"
+                        aria-selected="false"
+                        data-building-filter="<?php echo $bid; ?>"
+                    >
+                        <span class="developer-offers__tab-name"><?php echo htmlspecialchars((string) $building['name'], ENT_QUOTES, 'UTF-8'); ?></span>
+                        <?php if ($status !== '') { ?>
+                            <span class="developer-offers__tab-status<?php echo !empty($building['isReady']) ? ' developer-offers__tab-status--ready' : ''; ?>">
+                                <?php echo htmlspecialchars($status, ENT_QUOTES, 'UTF-8'); ?>
+                            </span>
+                        <?php } ?>
+                    </button>
+                <?php } ?>
+            </div>
+        <?php } ?>
+        <div class="developer-offers__list">
+            <?php foreach ($offers as $offer) {
+                $buildingId = $offer['buildingId'] ?? null;
+                $rooms = $offer['rooms'] ?? null;
+                $roomLabel = $rooms !== null && $rooms > 0 ? $rooms . '-комн.' : 'Квартира';
+                $area = isset($offer['area']) && is_numeric($offer['area'])
+                    ? rtrim(rtrim(number_format((float) $offer['area'], 2, '.', ''), '0'), '.')
+                    : null;
+                $floor = $offer['floor'] ?? null;
+                $floorMax = $offer['floorMax'] ?? null;
+                $floorsTotal = $offer['floorsTotal'] ?? null;
+                $floorText = '';
+                if ($floor !== null && $floorsTotal !== null && $floorsTotal > 0) {
+                    $floorText = $floorMax !== null && $floorMax > $floor
+                        ? $floor . '–' . $floorMax . ' / ' . $floorsTotal
+                        : $floor . ' / ' . $floorsTotal;
+                }
+                $completion = site_developer_completion_label(
+                    $offer['completionQuarter'] ?? null,
+                    $offer['completionYear'] ?? null,
+                );
+                $priceText = isset($offer['price']) ? site_fmt_rub((string) $offer['price']) : '—';
+                $planUrl = isset($offer['planImageUrl']) ? trim((string) $offer['planImageUrl']) : '';
+                $href = isset($offer['sourceUrl']) ? trim((string) $offer['sourceUrl']) : '';
+                $flatsCount = (int) ($offer['flatsCount'] ?? 1);
+                ?>
+                <article
+                    class="developer-offers__row"
+                    data-building-id="<?php echo $buildingId !== null ? (int) $buildingId : ''; ?>"
+                >
+                    <div class="developer-offers__plan">
+                        <?php if ($planUrl !== '') { ?>
+                            <img
+                                class="developer-offers__plan-img"
+                                src="<?php echo htmlspecialchars($planUrl, ENT_QUOTES, 'UTF-8'); ?>"
+                                alt="Планировка"
+                                loading="lazy"
+                                decoding="async"
+                                referrerpolicy="no-referrer"
+                            >
+                        <?php } else { ?>
+                            <div class="developer-offers__plan-placeholder" aria-hidden="true"></div>
+                        <?php } ?>
+                    </div>
+                    <div class="developer-offers__meta">
+                        <p class="developer-offers__rooms"><?php echo htmlspecialchars($roomLabel, ENT_QUOTES, 'UTF-8'); ?></p>
+                        <?php if (!empty($offer['buildingName'])) { ?>
+                            <p class="developer-offers__building"><?php echo htmlspecialchars((string) $offer['buildingName'], ENT_QUOTES, 'UTF-8'); ?></p>
+                        <?php } ?>
+                    </div>
+                    <div class="developer-offers__col developer-offers__col--area">
+                        <span class="developer-offers__col-label">Площадь</span>
+                        <span class="developer-offers__col-value"><?php echo $area !== null ? htmlspecialchars($area . ' м²', ENT_QUOTES, 'UTF-8') : '—'; ?></span>
+                    </div>
+                    <div class="developer-offers__col developer-offers__col--floor">
+                        <span class="developer-offers__col-label">Этаж</span>
+                        <span class="developer-offers__col-value"><?php echo $floorText !== '' ? htmlspecialchars($floorText, ENT_QUOTES, 'UTF-8') : '—'; ?></span>
+                    </div>
+                    <div class="developer-offers__col developer-offers__col--completion">
+                        <span class="developer-offers__col-label">Сдача</span>
+                        <span class="developer-offers__col-value"><?php echo $completion !== '' ? htmlspecialchars($completion, ENT_QUOTES, 'UTF-8') : '—'; ?></span>
+                    </div>
+                    <div class="developer-offers__price-wrap">
+                        <p class="developer-offers__price"><?php echo htmlspecialchars($priceText, ENT_QUOTES, 'UTF-8'); ?></p>
+                        <?php if ($href !== '') { ?>
+                            <a class="developer-offers__link" href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
+                                <?php echo (int) $flatsCount; ?> <?php echo $flatsCount === 1 ? 'предложение' : 'предложения'; ?>
+                            </a>
+                        <?php } ?>
+                    </div>
+                </article>
+            <?php } ?>
+        </div>
+        <?php if ($sourceUrl !== '' && $offersTotal > count($offers)) { ?>
+            <a class="developer-offers__more" href="<?php echo htmlspecialchars($sourceUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
+                Смотреть все
+            </a>
+        <?php } ?>
+    </section>
+    <?php
+}
+
+/**
  * Две колонки характеристик для карточки объекта (набор полей зависит от типа).
  *
  * @param array<string, mixed> $row
@@ -600,6 +911,12 @@ function site_listing_commercial_spec_sections(array $ctx): array
 function site_listing_object_spec_sections(array $row): array
 {
     $ctx = site_listing_spec_context($row);
+    if (
+        $ctx['kind'] === 'newbuilding'
+        && count(site_developer_offers_entries($row)) > 0
+    ) {
+        return site_listing_newbuilding_complex_spec_sections($ctx, $row);
+    }
 
     return match ($ctx['kind']) {
         'house' => site_listing_house_spec_sections($ctx),
@@ -790,8 +1107,22 @@ function site_crm_listing_enrich_row(array $row): array
     $needDesc = trim((string) ($row['description'] ?? '')) === '';
     $needAddress = trim((string) ($row['address'] ?? '')) === ''
         && trim((string) ($row['addressLine'] ?? '')) === '';
+    $objectType = strtolower(trim((string) ($row['objectTypeValue'] ?? '')));
+    $isNewbuilding = $objectType === 'newbuilding';
+    $hasConstruction = isset($row['constructionProgress'])
+        && is_array($row['constructionProgress'])
+        && count($row['constructionProgress']) > 0;
+    $hasSimilar = isset($row['similarComplexes'])
+        && is_array($row['similarComplexes'])
+        && count($row['similarComplexes']) > 0;
+    $hasDeveloperOffers = isset($row['developerOffers'])
+        && is_array($row['developerOffers'])
+        && count($row['developerOffers']) > 0;
+    $needConstruction = $isNewbuilding && !$hasConstruction;
+    $needSimilar = $isNewbuilding && !$hasSimilar;
+    $needDeveloperOffers = $isNewbuilding && !$hasDeveloperOffers;
 
-    if (!$needPhotos && !$needDesc && !$needAddress) {
+    if (!$needPhotos && !$needDesc && !$needAddress && !$needConstruction && !$needSimilar && !$needDeveloperOffers) {
         return $row;
     }
 
@@ -814,6 +1145,21 @@ function site_crm_listing_enrich_row(array $row): array
             }
         }
     }
+    if ($needConstruction && isset($detail['constructionProgress']) && is_array($detail['constructionProgress'])) {
+        $row['constructionProgress'] = $detail['constructionProgress'];
+    }
+    if ($needSimilar && isset($detail['similarComplexes']) && is_array($detail['similarComplexes'])) {
+        $row['similarComplexes'] = $detail['similarComplexes'];
+    }
+    if ($needDeveloperOffers && isset($detail['developerOffers']) && is_array($detail['developerOffers'])) {
+        $row['developerOffers'] = $detail['developerOffers'];
+    }
+    if ($needDeveloperOffers && isset($detail['developerBuildings']) && is_array($detail['developerBuildings'])) {
+        $row['developerBuildings'] = $detail['developerBuildings'];
+    }
+    if ($needDeveloperOffers && isset($detail['developerOffersTotal']) && is_numeric($detail['developerOffersTotal'])) {
+        $row['developerOffersTotal'] = (int) $detail['developerOffersTotal'];
+    }
     if ($needPhotos) {
         if (isset($detail['photos']) && is_array($detail['photos']) && count($detail['photos']) > 0) {
             $row['photos'] = $detail['photos'];
@@ -821,6 +1167,29 @@ function site_crm_listing_enrich_row(array $row): array
         if (isset($detail['coverPhoto']) && is_string($detail['coverPhoto']) && trim($detail['coverPhoto']) !== '') {
             $row['coverPhoto'] = $detail['coverPhoto'];
         }
+    }
+    if (!isset($row['constructionProgress']) || !is_array($row['constructionProgress'])) {
+        if (isset($detail['constructionProgress']) && is_array($detail['constructionProgress'])) {
+            $row['constructionProgress'] = $detail['constructionProgress'];
+        }
+    }
+    if (!isset($row['similarComplexes']) || !is_array($row['similarComplexes'])) {
+        if (isset($detail['similarComplexes']) && is_array($detail['similarComplexes'])) {
+            $row['similarComplexes'] = $detail['similarComplexes'];
+        }
+    }
+    if (!isset($row['developerOffers']) || !is_array($row['developerOffers'])) {
+        if (isset($detail['developerOffers']) && is_array($detail['developerOffers'])) {
+            $row['developerOffers'] = $detail['developerOffers'];
+        }
+    }
+    if (!isset($row['developerBuildings']) || !is_array($row['developerBuildings'])) {
+        if (isset($detail['developerBuildings']) && is_array($detail['developerBuildings'])) {
+            $row['developerBuildings'] = $detail['developerBuildings'];
+        }
+    }
+    if (!isset($row['developerOffersTotal']) && isset($detail['developerOffersTotal']) && is_numeric($detail['developerOffersTotal'])) {
+        $row['developerOffersTotal'] = (int) $detail['developerOffersTotal'];
     }
 
     return $row;
@@ -1564,4 +1933,273 @@ function site_catalog_map_markers_from_items(array $items): array
     }
 
     return $markers;
+}
+
+function site_construction_quarter_label(int $quarter): string
+{
+    return match ($quarter) {
+        1 => '1 кв.',
+        2 => '2 кв.',
+        3 => '3 кв.',
+        4 => '4 кв.',
+        default => $quarter > 0 ? (string) $quarter . ' кв.' : '',
+    };
+}
+
+/**
+ * @param array<string, mixed> $row
+ * @return list<array<string, mixed>>
+ */
+function site_construction_progress_entries(array $row): array
+{
+    $raw = $row['constructionProgress'] ?? null;
+    if (!is_array($raw)) {
+        return [];
+    }
+    $entries = [];
+    foreach ($raw as $item) {
+        if (!is_array($item)) {
+            continue;
+        }
+        $photos = [];
+        if (isset($item['photos']) && is_array($item['photos'])) {
+            foreach ($item['photos'] as $p) {
+                if (is_string($p) && trim($p) !== '') {
+                    $photos[] = trim($p);
+                }
+            }
+        }
+        $videos = [];
+        if (isset($item['videos']) && is_array($item['videos'])) {
+            foreach ($item['videos'] as $v) {
+                if (is_string($v) && trim($v) !== '') {
+                    $videos[] = trim($v);
+                }
+            }
+        }
+        if (count($photos) === 0 && count($videos) === 0) {
+            continue;
+        }
+        $year = isset($item['year']) && is_numeric($item['year']) ? (int) $item['year'] : 0;
+        $quarter = isset($item['quarter']) && is_numeric($item['quarter']) ? (int) $item['quarter'] : 0;
+        $buildingId = isset($item['buildingId']) && is_numeric($item['buildingId'])
+            ? (int) $item['buildingId']
+            : null;
+        $buildingName = isset($item['buildingName']) ? trim((string) $item['buildingName']) : '';
+        $lastUpdate = isset($item['lastUpdate']) ? trim((string) $item['lastUpdate']) : '';
+        $entries[] = [
+            'buildingId' => $buildingId,
+            'buildingName' => $buildingName !== '' ? $buildingName : null,
+            'year' => $year,
+            'quarter' => $quarter,
+            'lastUpdate' => $lastUpdate !== '' ? $lastUpdate : null,
+            'photos' => $photos,
+            'videos' => $videos,
+        ];
+    }
+    usort($entries, static function (array $a, array $b): int {
+        $da = isset($a['lastUpdate']) ? strtotime((string) $a['lastUpdate']) : false;
+        $db = isset($b['lastUpdate']) ? strtotime((string) $b['lastUpdate']) : false;
+        if ($da !== false && $db !== false && $da !== $db) {
+            return $db <=> $da;
+        }
+        $ya = ((int) ($a['year'] ?? 0)) * 10 + (int) ($a['quarter'] ?? 0);
+        $yb = ((int) ($b['year'] ?? 0)) * 10 + (int) ($b['quarter'] ?? 0);
+
+        return $yb <=> $ya;
+    });
+
+    return $entries;
+}
+
+/**
+ * @param list<array<string, mixed>> $entries
+ */
+function site_construction_progress_last_update(array $entries): ?string
+{
+    foreach ($entries as $entry) {
+        $lu = isset($entry['lastUpdate']) ? trim((string) $entry['lastUpdate']) : '';
+        if ($lu !== '') {
+            $ts = strtotime($lu);
+            if ($ts !== false) {
+                return date('j', $ts) . ' ' . site_month_name_ru((int) date('n', $ts)) . ' ' . date('Y', $ts);
+            }
+
+            return $lu;
+        }
+    }
+
+    return null;
+}
+
+function site_month_name_ru(int $month): string
+{
+    static $names = [
+        1 => 'января', 2 => 'февраля', 3 => 'марта', 4 => 'апреля',
+        5 => 'мая', 6 => 'июня', 7 => 'июля', 8 => 'августа',
+        9 => 'сентября', 10 => 'октября', 11 => 'ноября', 12 => 'декабря',
+    ];
+
+    return $names[$month] ?? '';
+}
+
+/**
+ * @param list<array<string, mixed>> $entries
+ * @return list<string>
+ */
+function site_construction_progress_preview_photos(array $entries, int $limit = 9): array
+{
+    $limit = max(1, min(20, $limit));
+    $out = [];
+    foreach ($entries as $entry) {
+        if (!isset($entry['photos']) || !is_array($entry['photos'])) {
+            continue;
+        }
+        foreach ($entry['photos'] as $url) {
+            if (!is_string($url) || trim($url) === '') {
+                continue;
+            }
+            $out[] = trim($url);
+            if (count($out) >= $limit) {
+                return $out;
+            }
+        }
+    }
+
+    return $out;
+}
+
+/**
+ * @param list<array<string, mixed>> $entries
+ */
+function site_construction_progress_total_photos(array $entries): int
+{
+    $n = 0;
+    foreach ($entries as $entry) {
+        if (isset($entry['photos']) && is_array($entry['photos'])) {
+            $n += count($entry['photos']);
+        }
+    }
+
+    return $n;
+}
+
+/**
+ * @param array<string, mixed> $row
+ * @return list<array<string, mixed>>
+ */
+function site_similar_complexes_entries(array $row): array
+{
+    $raw = $row['similarComplexes'] ?? null;
+    if (!is_array($raw)) {
+        return [];
+    }
+    $out = [];
+    foreach ($raw as $item) {
+        if (!is_array($item)) {
+            continue;
+        }
+        $name = isset($item['name']) ? trim((string) $item['name']) : '';
+        if ($name === '') {
+            continue;
+        }
+        $minPrice = isset($item['minPrice']) && is_numeric($item['minPrice']) ? (float) $item['minPrice'] : null;
+        $offersCount = isset($item['offersCount']) && is_numeric($item['offersCount'])
+            ? (int) $item['offersCount']
+            : null;
+        $photoUrl = isset($item['photoUrl']) ? trim((string) $item['photoUrl']) : '';
+        $sourceUrl = isset($item['sourceUrl']) ? trim((string) $item['sourceUrl']) : '';
+        $address = isset($item['address']) ? trim((string) $item['address']) : '';
+        $out[] = [
+            'name' => $name,
+            'minPrice' => $minPrice,
+            'offersCount' => $offersCount,
+            'photoUrl' => $photoUrl !== '' ? $photoUrl : null,
+            'sourceUrl' => $sourceUrl !== '' ? $sourceUrl : null,
+            'address' => $address !== '' ? $address : null,
+        ];
+    }
+
+    return $out;
+}
+
+/**
+ * @param list<array<string, mixed>> $entries
+ * @return list<array{key: string, label: string, buildingId: int|null, year: int, quarter: int, photos: list<string>, videos: list<string>, lastUpdate: string|null}>
+ */
+function site_construction_progress_period_groups(array $entries): array
+{
+    $map = [];
+    foreach ($entries as $entry) {
+        $buildingId = $entry['buildingId'] ?? null;
+        $year = (int) ($entry['year'] ?? 0);
+        $quarter = (int) ($entry['quarter'] ?? 0);
+        $key = ($buildingId !== null ? (string) $buildingId : 'all') . ':' . $year . ':' . $quarter;
+        if (!isset($map[$key])) {
+            $periodLabel = site_construction_quarter_label($quarter);
+            $label = trim($periodLabel . ($year > 0 ? ' ' . $year : ''));
+            $buildingName = isset($entry['buildingName']) ? trim((string) $entry['buildingName']) : '';
+            if ($buildingName !== '') {
+                $label = $buildingName . ' · ' . $label;
+            }
+            $map[$key] = [
+                'key' => $key,
+                'label' => $label,
+                'buildingId' => is_int($buildingId) ? $buildingId : null,
+                'buildingName' => $buildingName !== '' ? $buildingName : null,
+                'year' => $year,
+                'quarter' => $quarter,
+                'photos' => [],
+                'videos' => [],
+                'lastUpdate' => $entry['lastUpdate'] ?? null,
+            ];
+        }
+        if (isset($entry['photos']) && is_array($entry['photos'])) {
+            foreach ($entry['photos'] as $p) {
+                if (is_string($p) && trim($p) !== '') {
+                    $map[$key]['photos'][] = trim($p);
+                }
+            }
+        }
+        if (isset($entry['videos']) && is_array($entry['videos'])) {
+            foreach ($entry['videos'] as $v) {
+                if (is_string($v) && trim($v) !== '') {
+                    $map[$key]['videos'][] = trim($v);
+                }
+            }
+        }
+    }
+    $groups = array_values($map);
+    usort($groups, static function (array $a, array $b): int {
+        $ya = ((int) ($a['year'] ?? 0)) * 10 + (int) ($a['quarter'] ?? 0);
+        $yb = ((int) ($b['year'] ?? 0)) * 10 + (int) ($b['quarter'] ?? 0);
+
+        return $yb <=> $ya;
+    });
+
+    return $groups;
+}
+
+/**
+ * @param list<array<string, mixed>> $entries
+ * @return list<array{id: int|null, name: string}>
+ */
+function site_construction_progress_buildings(array $entries): array
+{
+    $map = [];
+    foreach ($entries as $entry) {
+        $id = isset($entry['buildingId']) && is_numeric($entry['buildingId'])
+            ? (int) $entry['buildingId']
+            : null;
+        $name = isset($entry['buildingName']) ? trim((string) $entry['buildingName']) : '';
+        if ($name === '') {
+            continue;
+        }
+        $mapKey = $id !== null ? (string) $id : $name;
+        if (!isset($map[$mapKey])) {
+            $map[$mapKey] = ['id' => $id, 'name' => $name];
+        }
+    }
+
+    return array_values($map);
 }

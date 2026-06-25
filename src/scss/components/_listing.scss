@@ -900,3 +900,412 @@ p.listing-object__address {
     transition: none;
   }
 }
+
+// ——— Ход строительства (превью на карточке) ———
+
+.listing-object__section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.listing-object__section-sub {
+  margin: 0.25rem 0 0;
+  font-size: 0.88rem;
+  color: var(--page-muted, #6b7280);
+}
+
+.listing-object__section-link {
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--cta-bg);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.construction-preview {
+  position: relative;
+}
+
+.construction-preview__track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(140px, 1fr);
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.construction-preview__item {
+  display: block;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  scroll-snap-align: start;
+  border: 1px solid var(--featured-card-border);
+  background: var(--featured-strip-bg, #f3f4f6);
+}
+
+.construction-preview__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.construction-preview__count {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--page-muted, #6b7280);
+}
+
+// ——— Похожие ЖК ———
+
+.similar-complexes__track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(200px, 240px);
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.similar-complexes__card {
+  min-width: 0;
+}
+
+.similar-complexes__link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  background: var(--featured-card-bg);
+  border: 1px solid var(--featured-card-border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--featured-card-shadow);
+  height: 100%;
+
+  &:hover .similar-complexes__name {
+    color: var(--cta-bg);
+  }
+}
+
+.similar-complexes__img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  background: var(--featured-strip-bg, #f3f4f6);
+
+  &--placeholder {
+    min-height: 120px;
+  }
+}
+
+.similar-complexes__name {
+  margin: 0;
+  padding: 0.65rem 0.75rem 0.25rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.similar-complexes__price {
+  margin: 0;
+  padding: 0 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--cta-bg);
+}
+
+.similar-complexes__address {
+  margin: 0;
+  padding: 0.35rem 0.75rem 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--page-muted, #6b7280);
+}
+
+// ——— Предложения от застройщика (новостройки) ———
+
+.developer-offers__head {
+  margin-bottom: 1rem;
+}
+
+.developer-offers__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.developer-offers__tab {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--featured-card-border, rgba(0, 0, 0, 0.1));
+  background: var(--featured-card-bg, #fff);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+
+  &.is-active {
+    border-color: var(--cta-bg, #0d9488);
+    background: rgba(13, 148, 136, 0.08);
+  }
+}
+
+.developer-offers__tab-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.developer-offers__tab-status {
+  font-size: 0.75rem;
+  color: var(--page-muted, #6b7280);
+
+  &--ready {
+    color: #16a34a;
+  }
+}
+
+.developer-offers__list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.developer-offers__row {
+  display: grid;
+  grid-template-columns: 72px minmax(120px, 1.2fr) repeat(3, minmax(72px, 0.8fr)) minmax(140px, 1fr);
+  gap: 0.75rem 1rem;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px solid var(--featured-card-border, rgba(0, 0, 0, 0.08));
+  background: var(--featured-card-bg, #fff);
+
+  @media (max-width: 900px) {
+    grid-template-columns: 64px 1fr 1fr;
+    grid-template-areas:
+      "plan meta meta"
+      "plan area floor"
+      "plan completion price";
+  }
+}
+
+.developer-offers__plan-img,
+.developer-offers__plan-placeholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: #f3f4f6;
+
+  @media (max-width: 900px) {
+    grid-area: plan;
+    width: 64px;
+    height: 64px;
+  }
+}
+
+.developer-offers__meta {
+  @media (max-width: 900px) {
+    grid-area: meta;
+  }
+}
+
+.developer-offers__rooms {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.developer-offers__building {
+  margin: 0.2rem 0 0;
+  font-size: 0.82rem;
+  color: var(--page-muted, #6b7280);
+}
+
+.developer-offers__col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+
+  @media (max-width: 900px) {
+    &--area { grid-area: area; }
+    &--floor { grid-area: floor; }
+    &--completion { grid-area: completion; }
+  }
+}
+
+.developer-offers__col-label {
+  font-size: 0.72rem;
+  color: var(--page-muted, #6b7280);
+}
+
+.developer-offers__col-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.developer-offers__price-wrap {
+  text-align: right;
+
+  @media (max-width: 900px) {
+    grid-area: price;
+    text-align: left;
+  }
+}
+
+.developer-offers__price {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.developer-offers__link {
+  display: inline-block;
+  margin-top: 0.2rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--cta-bg, #0d9488);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.developer-offers__more {
+  display: inline-flex;
+  margin-top: 1rem;
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  background: rgba(13, 148, 136, 0.1);
+  color: var(--cta-bg, #0d9488);
+  font-weight: 700;
+  text-decoration: none;
+
+  &:hover {
+    background: rgba(13, 148, 136, 0.16);
+  }
+}
+
+// ——— Страница хода строительства ———
+
+.listing-construction-page {
+  padding-bottom: 2rem;
+}
+
+.listing-construction__head {
+  margin-bottom: 1.25rem;
+}
+
+.listing-construction__title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+  font-weight: 900;
+}
+
+.listing-construction__complex {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.listing-construction__updated {
+  margin: 0.35rem 0 0;
+  font-size: 0.9rem;
+  color: var(--page-muted, #6b7280);
+}
+
+.listing-construction__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.listing-construction__filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 180px;
+}
+
+.listing-construction__filter-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--page-muted, #6b7280);
+}
+
+.listing-construction__select {
+  padding: 0.45rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--featured-card-border);
+  background: var(--featured-card-bg);
+  font: inherit;
+}
+
+.listing-construction__period-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.listing-construction__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.5rem;
+}
+
+.listing-construction__photo {
+  display: block;
+  border-radius: 10px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border: 1px solid var(--featured-card-border);
+}
+
+.listing-construction__photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.listing-construction__videos {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.listing-construction__video {
+  width: 100%;
+  max-height: 420px;
+  border-radius: 12px;
+  background: #000;
+}
+
+.listing-construction__empty {
+  margin: 1rem 0;
+  color: var(--page-muted, #6b7280);
+}
+
+.listing-construction__back {
+  margin-top: 1.5rem;
+}
