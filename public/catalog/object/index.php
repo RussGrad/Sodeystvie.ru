@@ -69,7 +69,7 @@ $addressLine = site_listing_address_line($obj);
 $district = isset($obj['districtValue']) ? trim((string) $obj['districtValue']) : '';
 $dealLine = site_deal_line_public_label(isset($obj['dealLineValue']) ? (string) $obj['dealLineValue'] : null);
 $description = isset($obj['description']) ? trim((string) $obj['description']) : '';
-$paramRows = site_listing_object_param_rows($obj);
+$specSections = site_listing_object_spec_sections($obj);
 
 $lat = isset($obj['latitude']) && is_numeric($obj['latitude']) ? (float) $obj['latitude'] : null;
 $lng = isset($obj['longitude']) && is_numeric($obj['longitude']) ? (float) $obj['longitude'] : null;
@@ -142,28 +142,12 @@ $listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-o
                 <?php site_render_listing_gallery($galleryBundle, $headingTitle); ?>
             </div>
 
-            <?php
-            $hasParams = count($paramRows) > 0;
-            $panelClass = 'listing-object__panel' . ($hasParams ? '' : ' listing-object__panel--map-only');
-            ?>
-            <section class="<?php echo $panelClass; ?>" aria-labelledby="listing-details-title">
-                <h2 class="listing-object__panel-title" id="listing-details-title">Об объекте</h2>
+            <?php site_render_listing_object_specs($specSections); ?>
+
+            <section class="listing-object__panel listing-object__panel--map-only" aria-labelledby="listing-map-block-title">
+                <h2 class="listing-object__panel-title" id="listing-map-block-title">Расположение</h2>
                 <div class="listing-object__panel-grid">
-                    <?php if ($hasParams) { ?>
-                        <div class="listing-object__panel-col listing-object__panel-col--params">
-                            <h3 class="listing-object__panel-subtitle" id="listing-params-title">Характеристики</h3>
-                            <dl class="listing-params listing-params--panel">
-                                <?php foreach ($paramRows as $row) { ?>
-                                    <div class="listing-params__row">
-                                        <dt><?php echo htmlspecialchars($row['label'], ENT_QUOTES, 'UTF-8'); ?></dt>
-                                        <dd><?php echo htmlspecialchars($row['value'], ENT_QUOTES, 'UTF-8'); ?></dd>
-                                    </div>
-                                <?php } ?>
-                            </dl>
-                        </div>
-                    <?php } ?>
                     <div class="listing-object__panel-col listing-object__panel-col--map">
-                        <h3 class="listing-object__panel-subtitle" id="listing-map-title">Расположение</h3>
                         <div class="listing-object__map-block">
                             <?php if ($listingMapScripts) { ?>
                                 <div

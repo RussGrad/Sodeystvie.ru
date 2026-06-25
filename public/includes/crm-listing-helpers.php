@@ -298,43 +298,84 @@ function site_listing_card_title(
 }
 
 /**
- * Строки блока «Характеристики» на странице объекта.
- *
- * @param array<string, mixed> $row
  * @return list<array{label: string, value: string}>
  */
 function site_listing_object_param_rows(array $row): array
 {
+    $sections = site_listing_object_spec_sections($row);
     $rows = [];
-    $add = static function (string $label, ?string $value) use (&$rows): void {
+    foreach ($sections as $section) {
+        foreach ($section['rows'] as $item) {
+            $rows[] = $item;
+        }
+    }
+
+    return $rows;
+}
+
+function site_listing_housing_type_label(?string $objectType): ?string
+{
+    $t = trim((string) $objectType);
+    return match ($t) {
+        'newbuilding' => 'Новостройка',
+        'flat' => 'Вторичка',
+        'house' => 'Дом',
+        'plot', 'land' => 'Участок',
+        'commercial' => 'Коммерция',
+        default => $t !== '' ? 'Объект' : null,
+    };
+}
+
+function site_listing_documents_ready_label(mixed $value): ?string
+{
+    if ($value === true || $value === 'true' || $value === 1 || $value === '1') {
+        return 'Да';
+    }
+    if ($value === false || $value === 'false' || $value === 0 || $value === '0') {
+        return 'Нет';
+    }
+
+    return null;
+}
+
+/**
+ * Две колонки характеристик для карточки объекта (как на Циан).
+ *
+ * @param array<string, mixed> $row
+ * @return list<array{title: string, rows: list<array{label: string, value: string}>}>
+ */
+function site_listing_object_spec_sections(array $row): array
+{
+    $unitRows = [];
+    $buildingRows = [];
+    $addUnit = static function (string $label, ?string $value) use (&$unitRows): void {
         $v = trim((string) $value);
         if ($v !== '') {
-            $rows[] = ['label' => $label, 'value' => $v];
+            $unitRows[] = ['label' => $label, 'value' => $v];
+        }
+    };
+    $addBuilding = static function (string $label, ?string $value) use (&$buildingRows): void {
+        $v = trim((string) $value);
+        if ($v !== '') {
+            $buildingRows[] = ['label' => $label, 'value' => $v];
         }
     };
 
     $objectType = isset($row['objectTypeValue']) ? trim((string) $row['objectTypeValue']) : '';
     $rooms = isset($row['rooms']) && is_numeric($row['rooms']) ? (int) $row['rooms'] : null;
-    if ($objectType === 'flat' || $objectType === 'newbuilding' || ($objectType === '' && $rooms !== null && $rooms > 0)) {
-        $typeLabel = $objectType === 'newbuilding'
-            ? ('Новостройка' . ($rooms !== null && $rooms > 0 ? ', ' . site_rooms_short_label($rooms) : ''))
-            : site_flat_short_label($rooms);
-    } elseif ($objectType === 'house') {
-        $typeLabel = 'Дом';
-    } elseif ($objectType === 'plot' || $objectType === 'land') {
-        $typeLabel = 'Участок';
-    } elseif ($objectType === 'commercial') {
-        $typeLabel = 'Коммерческая недвижимость';
-    } else {
-        $typeLabel = 'Объект';
+
+    $housingType = site_listing_housing_type_label($objectType);
+    if ($housingType !== null) {
+        $addUnit('Тип жилья', $housingType);
     }
-    $add('Тип', $typeLabel);
 
     $deal = site_deal_line_public_label(isset($row['dealLineValue']) ? (string) $row['dealLineValue'] : null);
-    $add('Сделка', $deal);
+    if ($deal !== '') {
+        $addUnit('Сделка', $deal);
+    }
 
     if ($rooms !== null && $rooms > 0) {
-        $add('Комнат', (string) $rooms);
+        $addUnit('Комнат', (string) $rooms);
     }
 
     $areaTotal = isset($row['areaTotal']) && is_numeric($row['areaTotal']) ? (float) $row['areaTotal'] : null;
@@ -344,35 +385,126 @@ function site_listing_object_param_rows(array $row): array
 
     $area = site_fmt_area_short($areaTotal);
     if ($area !== null) {
-        $add('Общая площадь', $area . ' м²');
+        $addUnit('Общая площадь', $area . ' м²');
     }
     $living = site_fmt_area_short($areaLiving);
     if ($living !== null) {
-        $add('Жилая площадь', $living . ' м²');
+        $addUnit('Жилая площадь', $living . ' м²');
     }
     $kitchen = site_fmt_area_short($areaKitchen);
     if ($kitchen !== null) {
-        $add('Кухня', $kitchen . ' м²');
-    }
-    $land = site_fmt_area_short($areaLand);
-    if ($land !== null && $areaLand !== null && $areaLand > 0) {
-        $add('Участок', $land . ' сот.');
+        $addUnit('Площадь кухни', $kitchen . ' м²');
     }
 
     $floor = isset($row['floor']) ? (string) $row['floor'] : null;
     $floorTotal = isset($row['floorTotal']) && is_numeric($row['floorTotal']) ? (int) $row['floorTotal'] : null;
     $floorText = site_listing_floor_label($floor, $floorTotal);
-    $add('Этаж', $floorText);
+    if ($floorText !== null && !in_array($objectType, ['plot', 'land'], true)) {
+        $addUnit('Этаж', $floorText);
+    }
+
+    $land = site_fmt_area_short($areaLand);
+    if ($land !== null && $areaLand !== null && $areaLand > 0) {
+        if (in_array($objectType, ['plot', 'land', 'house'], true)) {
+            $addUnit('Площадь участка', $land . ' сот.');
+        }
+    }
+
+    $ownership = isset($row['ownershipType']) ? trim((string) $row['ownershipType']) : '';
+    if ($ownership !== '') {
+        $addUnit('Собственность', $ownership);
+    }
+
+    $docs = site_listing_documents_ready_label($row['documentsReady'] ?? null);
+    if ($docs !== null) {
+        $addUnit('Документы готовы', $docs);
+    }
 
     $yearBuilt = isset($row['yearBuilt']) && is_numeric($row['yearBuilt']) ? (int) $row['yearBuilt'] : null;
     if ($yearBuilt !== null && $yearBuilt > 0) {
-        $add('Год постройки', (string) $yearBuilt);
+        $addBuilding('Год постройки', (string) $yearBuilt);
+    }
+
+    if ($floorTotal !== null && $floorTotal > 0 && !in_array($objectType, ['plot', 'land', 'house'], true)) {
+        $addBuilding('Этажность', (string) $floorTotal);
     }
 
     $jk = isset($row['residentialComplex']) ? trim((string) $row['residentialComplex']) : '';
-    $add('Жилой комплекс', $jk);
+    if ($jk !== '') {
+        $addBuilding('Жилой комплекс', $jk);
+    }
 
-    return $rows;
+    $district = isset($row['districtValue']) ? trim((string) $row['districtValue']) : '';
+    if ($district !== '') {
+        $addBuilding('Район', $district);
+    }
+
+    $city = isset($row['city']) ? trim((string) $row['city']) : '';
+    if ($city !== '') {
+        $addBuilding('Город', $city);
+    }
+
+    $cadastral = isset($row['cadastral']) ? trim((string) $row['cadastral']) : '';
+    if ($cadastral !== '') {
+        $addBuilding('Кадастровый номер', $cadastral);
+    }
+
+    $unitTitle = match ($objectType) {
+        'house' => 'О доме',
+        'plot', 'land' => 'Об участке',
+        'commercial' => 'О помещении',
+        default => 'О квартире',
+    };
+    $buildingTitle = match ($objectType) {
+        'plot', 'land' => 'Расположение',
+        'commercial' => 'Здание и район',
+        'house' => 'Участок и район',
+        default => 'О доме',
+    };
+
+    $sections = [];
+    if (count($unitRows) > 0) {
+        $sections[] = ['title' => $unitTitle, 'rows' => $unitRows];
+    }
+    if (count($buildingRows) > 0) {
+        $sections[] = ['title' => $buildingTitle, 'rows' => $buildingRows];
+    }
+
+    return $sections;
+}
+
+/**
+ * @param list<array{title: string, rows: list<array{label: string, value: string}>}> $sections
+ */
+function site_render_listing_object_specs(array $sections): void
+{
+    if (count($sections) === 0) {
+        return;
+    }
+    ?>
+    <section class="listing-object__specs" aria-labelledby="listing-specs-title">
+        <h2 class="visually-hidden" id="listing-specs-title">Характеристики объекта</h2>
+        <div class="listing-object__specs-grid">
+            <?php foreach ($sections as $section) {
+                if (count($section['rows']) === 0) {
+                    continue;
+                }
+                ?>
+                <div class="listing-object__specs-col">
+                    <h3 class="listing-object__specs-col-title"><?php echo htmlspecialchars($section['title'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                    <dl class="listing-specs">
+                        <?php foreach ($section['rows'] as $item) { ?>
+                            <div class="listing-specs__row">
+                                <dt class="listing-specs__label"><?php echo htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8'); ?></dt>
+                                <dd class="listing-specs__value"><?php echo htmlspecialchars($item['value'], ENT_QUOTES, 'UTF-8'); ?></dd>
+                            </div>
+                        <?php } ?>
+                    </dl>
+                </div>
+            <?php } ?>
+        </div>
+    </section>
+    <?php
 }
 
 /**

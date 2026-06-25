@@ -571,7 +571,70 @@ p.listing-object__address {
   }
 }
 
-// ——— Объект: характеристики + карта в одном блоке ———
+// ——— Характеристики объекта (две колонки) ———
+
+.listing-object__specs {
+  margin-bottom: clamp(1.25rem, 3.5vw, 2rem);
+}
+
+.listing-object__specs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.5rem, 4vw, 2.5rem);
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+}
+
+.listing-object__specs-col-title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.25rem, 2.2vw, 1.625rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--page-text);
+}
+
+.listing-specs {
+  margin: 0;
+}
+
+.listing-specs__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem 1.25rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--header-border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.listing-specs__label {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--header-muted);
+}
+
+.listing-specs__value {
+  margin: 0;
+  flex: 0 1 52%;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: right;
+  color: var(--page-text);
+  word-break: break-word;
+}
+
+// ——— Объект: карта ———
 
 .listing-object__panel {
   margin-bottom: clamp(1rem, 3vw, 1.35rem);
@@ -592,13 +655,9 @@ p.listing-object__address {
 
 .listing-object__panel-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr);
-  gap: 1.15rem 1.35rem;
+  grid-template-columns: 1fr;
+  gap: 1.15rem;
   align-items: stretch;
-
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
 }
 
 .listing-object__panel--map-only .listing-object__panel-grid {
@@ -670,7 +729,7 @@ p.listing-object__address {
 .listing-object__map-canvas {
   width: 100%;
   flex: 1;
-  min-height: 280px;
+  min-height: 320px;
   height: 100%;
   border-radius: 10px;
   overflow: hidden;
