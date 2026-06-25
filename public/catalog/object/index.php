@@ -180,8 +180,8 @@ $listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-o
             <?php if ($description !== '') { ?>
                 <section class="listing-object__section listing-object__section--desc" aria-labelledby="listing-desc-title">
                     <h2 class="listing-object__section-title" id="listing-desc-title">Описание</h2>
-                    <div class="listing-object__desc listing-object__desc--compact">
-                        <?php echo nl2br(htmlspecialchars($description, ENT_QUOTES, 'UTF-8')); ?>
+                    <div class="listing-object__desc listing-object__desc--body">
+                        <?php echo site_listing_object_description_html($description); ?>
                     </div>
                 </section>
             <?php } ?>
