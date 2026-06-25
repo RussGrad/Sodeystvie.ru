@@ -248,7 +248,7 @@ $listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-o
                                     : null;
                                 ?>
                                 <article class="similar-complexes__card">
-                                    <?php if ($href !== '') { ?><a class="similar-complexes__link" href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer"><?php } ?>
+                                    <?php if ($href !== '') { ?><a class="similar-complexes__link" href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>"><?php } ?>
                                         <?php if (!empty($complex['photoUrl'])) { ?>
                                             <img
                                                 class="similar-complexes__img"

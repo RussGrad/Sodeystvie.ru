@@ -1112,14 +1112,11 @@ function site_crm_listing_enrich_row(array $row): array
     $hasConstruction = isset($row['constructionProgress'])
         && is_array($row['constructionProgress'])
         && count($row['constructionProgress']) > 0;
-    $hasSimilar = isset($row['similarComplexes'])
-        && is_array($row['similarComplexes'])
-        && count($row['similarComplexes']) > 0;
     $hasDeveloperOffers = isset($row['developerOffers'])
         && is_array($row['developerOffers'])
         && count($row['developerOffers']) > 0;
     $needConstruction = $isNewbuilding && !$hasConstruction;
-    $needSimilar = $isNewbuilding && !$hasSimilar;
+    $needSimilar = false;
     $needDeveloperOffers = $isNewbuilding && !$hasDeveloperOffers;
 
     if (!$needPhotos && !$needDesc && !$needAddress && !$needConstruction && !$needSimilar && !$needDeveloperOffers) {
@@ -1148,9 +1145,6 @@ function site_crm_listing_enrich_row(array $row): array
     if ($needConstruction && isset($detail['constructionProgress']) && is_array($detail['constructionProgress'])) {
         $row['constructionProgress'] = $detail['constructionProgress'];
     }
-    if ($needSimilar && isset($detail['similarComplexes']) && is_array($detail['similarComplexes'])) {
-        $row['similarComplexes'] = $detail['similarComplexes'];
-    }
     if ($needDeveloperOffers && isset($detail['developerOffers']) && is_array($detail['developerOffers'])) {
         $row['developerOffers'] = $detail['developerOffers'];
     }
@@ -1171,11 +1165,6 @@ function site_crm_listing_enrich_row(array $row): array
     if (!isset($row['constructionProgress']) || !is_array($row['constructionProgress'])) {
         if (isset($detail['constructionProgress']) && is_array($detail['constructionProgress'])) {
             $row['constructionProgress'] = $detail['constructionProgress'];
-        }
-    }
-    if (!isset($row['similarComplexes']) || !is_array($row['similarComplexes'])) {
-        if (isset($detail['similarComplexes']) && is_array($detail['similarComplexes'])) {
-            $row['similarComplexes'] = $detail['similarComplexes'];
         }
     }
     if (!isset($row['developerOffers']) || !is_array($row['developerOffers'])) {
@@ -2099,6 +2088,10 @@ function site_similar_complexes_entries(array $row): array
         if (!is_array($item)) {
             continue;
         }
+        $catalogObjectId = isset($item['catalogObjectId']) ? trim((string) $item['catalogObjectId']) : '';
+        if ($catalogObjectId === '' || !site_validate_crm_object_id($catalogObjectId)) {
+            continue;
+        }
         $name = isset($item['name']) ? trim((string) $item['name']) : '';
         if ($name === '') {
             continue;
@@ -2108,14 +2101,13 @@ function site_similar_complexes_entries(array $row): array
             ? (int) $item['offersCount']
             : null;
         $photoUrl = isset($item['photoUrl']) ? trim((string) $item['photoUrl']) : '';
-        $sourceUrl = isset($item['sourceUrl']) ? trim((string) $item['sourceUrl']) : '';
         $address = isset($item['address']) ? trim((string) $item['address']) : '';
         $out[] = [
             'name' => $name,
             'minPrice' => $minPrice,
             'offersCount' => $offersCount,
             'photoUrl' => $photoUrl !== '' ? $photoUrl : null,
-            'sourceUrl' => $sourceUrl !== '' ? $sourceUrl : null,
+            'sourceUrl' => '/catalog/object/?id=' . rawurlencode($catalogObjectId),
             'address' => $address !== '' ? $address : null,
         ];
     }
