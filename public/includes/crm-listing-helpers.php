@@ -724,7 +724,11 @@ function site_developer_offers_entries(array $row): array
             'buildingName' => isset($item['buildingName']) ? trim((string) $item['buildingName']) : null,
             'rooms' => isset($item['rooms']) && is_numeric($item['rooms']) ? (int) $item['rooms'] : null,
             'area' => isset($item['area']) && is_numeric($item['area']) ? (float) $item['area'] : null,
+            'kitchenArea' => isset($item['kitchenArea']) && is_numeric($item['kitchenArea'])
+                ? (float) $item['kitchenArea']
+                : null,
             'price' => isset($item['price']) && is_numeric($item['price']) ? (int) $item['price'] : null,
+            'priceMax' => isset($item['priceMax']) && is_numeric($item['priceMax']) ? (int) $item['priceMax'] : null,
             'floor' => isset($item['floor']) && is_numeric($item['floor']) ? (int) $item['floor'] : null,
             'floorMax' => isset($item['floorMax']) && is_numeric($item['floorMax']) ? (int) $item['floorMax'] : null,
             'floorsTotal' => isset($item['floorsTotal']) && is_numeric($item['floorsTotal'])
@@ -745,6 +749,106 @@ function site_developer_offers_entries(array $row): array
     }
 
     return $out;
+}
+
+function site_developer_offer_room_label(?int $rooms): string
+{
+    if ($rooms === 0) {
+        return 'Студия';
+    }
+    if ($rooms !== null && $rooms > 0) {
+        return $rooms . '-комн.';
+    }
+
+    return 'Квартира';
+}
+
+function site_developer_offer_floor_text(?int $floor, ?int $floorMax, ?int $floorsTotal): string
+{
+    if ($floor === null || $floorsTotal === null || $floorsTotal <= 0) {
+        return '';
+    }
+    if ($floorMax !== null && $floorMax > $floor) {
+        return $floor . '–' . $floorMax . ' / ' . $floorsTotal;
+    }
+
+    return $floor . ' / ' . $floorsTotal;
+}
+
+function site_developer_offer_area_text(?float $area): ?string
+{
+    if ($area === null || $area <= 0) {
+        return null;
+    }
+
+    return rtrim(rtrim(number_format($area, 2, '.', ''), '0'), '.') . ' м²';
+}
+
+/**
+ * @param array<string, mixed> $row
+ */
+function site_developer_offers_client_payload(array $row): string
+{
+    $offers = site_developer_offers_entries($row);
+    $complexTitle = site_newbuilding_page_title($row);
+    $payload = [
+        'complexTitle' => $complexTitle,
+        'city' => trim((string) ($row['city'] ?? '')),
+        'district' => trim((string) ($row['district'] ?? '')),
+        'address' => trim((string) ($row['addressLine'] ?? $row['address'] ?? '')),
+        'offers' => array_map(
+            static function (array $offer) use ($complexTitle): array {
+                $rooms = $offer['rooms'] ?? null;
+                $areaText = site_developer_offer_area_text(
+                    isset($offer['area']) && is_numeric($offer['area']) ? (float) $offer['area'] : null,
+                );
+                $kitchenText = site_developer_offer_area_text(
+                    isset($offer['kitchenArea']) && is_numeric($offer['kitchenArea'])
+                        ? (float) $offer['kitchenArea']
+                        : null,
+                );
+                $floorText = site_developer_offer_floor_text(
+                    $offer['floor'] ?? null,
+                    $offer['floorMax'] ?? null,
+                    $offer['floorsTotal'] ?? null,
+                );
+                $completion = site_developer_completion_label(
+                    $offer['completionQuarter'] ?? null,
+                    $offer['completionYear'] ?? null,
+                );
+                $roomLabel = site_developer_offer_room_label(is_int($rooms) ? $rooms : null);
+                $titleParts = array_filter([$roomLabel, $areaText], static fn (string $v): bool => $v !== '');
+                if ($floorText !== '') {
+                    $titleParts[] = $floorText . ' эт.';
+                }
+                if ($complexTitle !== '') {
+                    $titleParts[] = 'в ' . $complexTitle;
+                }
+
+                return [
+                    'layoutId' => (string) ($offer['layoutId'] ?? ''),
+                    'title' => implode(', ', $titleParts),
+                    'roomLabel' => $roomLabel,
+                    'area' => $areaText,
+                    'kitchenArea' => $kitchenText,
+                    'floor' => $floorText !== '' ? $floorText : null,
+                    'buildingName' => $offer['buildingName'] ?? null,
+                    'completion' => $completion !== '' ? $completion : null,
+                    'price' => isset($offer['price']) && is_numeric($offer['price'])
+                        ? (int) $offer['price']
+                        : null,
+                    'priceMax' => isset($offer['priceMax']) && is_numeric($offer['priceMax'])
+                        ? (int) $offer['priceMax']
+                        : null,
+                    'flatsCount' => (int) ($offer['flatsCount'] ?? 1),
+                    'planImageUrl' => $offer['planImageUrl'] ?? null,
+                ];
+            },
+            $offers,
+        ),
+    ];
+
+    return json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}';
 }
 
 function site_developer_completion_label(?int $quarter, ?int $year, bool $isReady = false): string
@@ -774,7 +878,7 @@ function site_render_developer_offers_section(array $row): void
     $buildings = site_developer_buildings_entries($row);
     $complexTitle = site_newbuilding_page_title($row);
     $offersTotal = site_developer_offers_total($row);
-    $sourceUrl = isset($row['sourceUrl']) ? trim((string) $row['sourceUrl']) : '';
+    $offersJson = site_developer_offers_client_payload($row);
     ?>
     <section
         class="listing-object__section listing-object__section--developer-offers"
@@ -824,31 +928,32 @@ function site_render_developer_offers_section(array $row): void
             <?php foreach ($offers as $offer) {
                 $buildingId = $offer['buildingId'] ?? null;
                 $rooms = $offer['rooms'] ?? null;
-                $roomLabel = $rooms !== null && $rooms > 0 ? $rooms . '-комн.' : 'Квартира';
-                $area = isset($offer['area']) && is_numeric($offer['area'])
-                    ? rtrim(rtrim(number_format((float) $offer['area'], 2, '.', ''), '0'), '.')
-                    : null;
-                $floor = $offer['floor'] ?? null;
-                $floorMax = $offer['floorMax'] ?? null;
-                $floorsTotal = $offer['floorsTotal'] ?? null;
-                $floorText = '';
-                if ($floor !== null && $floorsTotal !== null && $floorsTotal > 0) {
-                    $floorText = $floorMax !== null && $floorMax > $floor
-                        ? $floor . '–' . $floorMax . ' / ' . $floorsTotal
-                        : $floor . ' / ' . $floorsTotal;
-                }
+                $roomLabel = site_developer_offer_room_label(is_int($rooms) ? $rooms : null);
+                $area = site_developer_offer_area_text(
+                    isset($offer['area']) && is_numeric($offer['area']) ? (float) $offer['area'] : null,
+                );
+                $floorText = site_developer_offer_floor_text(
+                    $offer['floor'] ?? null,
+                    $offer['floorMax'] ?? null,
+                    $offer['floorsTotal'] ?? null,
+                );
                 $completion = site_developer_completion_label(
                     $offer['completionQuarter'] ?? null,
                     $offer['completionYear'] ?? null,
                 );
                 $priceText = isset($offer['price']) ? site_fmt_rub((string) $offer['price']) : '—';
                 $planUrl = isset($offer['planImageUrl']) ? trim((string) $offer['planImageUrl']) : '';
-                $href = isset($offer['sourceUrl']) ? trim((string) $offer['sourceUrl']) : '';
                 $flatsCount = (int) ($offer['flatsCount'] ?? 1);
+                $layoutId = (string) ($offer['layoutId'] ?? '');
                 ?>
                 <article
                     class="developer-offers__row"
                     data-building-id="<?php echo $buildingId !== null ? (int) $buildingId : ''; ?>"
+                    data-layout-id="<?php echo htmlspecialchars($layoutId, ENT_QUOTES, 'UTF-8'); ?>"
+                    data-developer-offer-open
+                    role="button"
+                    tabindex="0"
+                    aria-label="<?php echo htmlspecialchars($roomLabel . ($area !== null ? ', ' . $area : ''), ENT_QUOTES, 'UTF-8'); ?>"
                 >
                     <div class="developer-offers__plan">
                         <?php if ($planUrl !== '') { ?>
@@ -872,7 +977,7 @@ function site_render_developer_offers_section(array $row): void
                     </div>
                     <div class="developer-offers__col developer-offers__col--area">
                         <span class="developer-offers__col-label">Площадь</span>
-                        <span class="developer-offers__col-value"><?php echo $area !== null ? htmlspecialchars($area . ' м²', ENT_QUOTES, 'UTF-8') : '—'; ?></span>
+                        <span class="developer-offers__col-value"><?php echo $area !== null ? htmlspecialchars($area, ENT_QUOTES, 'UTF-8') : '—'; ?></span>
                     </div>
                     <div class="developer-offers__col developer-offers__col--floor">
                         <span class="developer-offers__col-label">Этаж</span>
@@ -884,20 +989,53 @@ function site_render_developer_offers_section(array $row): void
                     </div>
                     <div class="developer-offers__price-wrap">
                         <p class="developer-offers__price"><?php echo htmlspecialchars($priceText, ENT_QUOTES, 'UTF-8'); ?></p>
-                        <?php if ($href !== '') { ?>
-                            <a class="developer-offers__link" href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
-                                <?php echo (int) $flatsCount; ?> <?php echo $flatsCount === 1 ? 'предложение' : 'предложения'; ?>
-                            </a>
-                        <?php } ?>
+                        <button type="button" class="developer-offers__link" data-developer-offer-open data-layout-id="<?php echo htmlspecialchars($layoutId, ENT_QUOTES, 'UTF-8'); ?>">
+                            <?php echo (int) $flatsCount; ?> <?php echo $flatsCount === 1 ? 'предложение' : 'предложения'; ?>
+                        </button>
                     </div>
                 </article>
             <?php } ?>
         </div>
-        <?php if ($sourceUrl !== '' && $offersTotal > count($offers)) { ?>
-            <a class="developer-offers__more" href="<?php echo htmlspecialchars($sourceUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">
-                Смотреть все
-            </a>
+        <?php if ($offersTotal > count($offers)) { ?>
+            <p class="developer-offers__note">
+                Показаны <?php echo count($offers); ?> из <?php echo (int) $offersTotal; ?> предложений. Уточните наличие и цену у менеджера.
+            </p>
         <?php } ?>
+        <script type="application/json" id="developer-offers-data"><?php echo $offersJson; ?></script>
+        <div class="developer-offer-modal" data-developer-offer-modal hidden aria-hidden="true">
+            <div class="developer-offer-modal__backdrop" data-developer-offer-close tabindex="-1" aria-hidden="true"></div>
+            <div
+                class="developer-offer-modal__panel"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="developer-offer-modal-title"
+                tabindex="-1"
+            >
+                <button type="button" class="developer-offer-modal__close" data-developer-offer-close aria-label="Закрыть">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <div class="developer-offer-modal__layout">
+                    <div class="developer-offer-modal__media">
+                        <img class="developer-offer-modal__plan" data-offer-plan alt="" decoding="async" referrerpolicy="no-referrer" hidden>
+                        <div class="developer-offer-modal__plan-placeholder" data-offer-plan-placeholder aria-hidden="true"></div>
+                    </div>
+                    <div class="developer-offer-modal__body">
+                        <h2 class="developer-offer-modal__title" id="developer-offer-modal-title" data-offer-title></h2>
+                        <p class="developer-offer-modal__price" data-offer-price></p>
+                        <p class="developer-offer-modal__price-m2" data-offer-price-m2 hidden></p>
+                        <dl class="developer-offer-modal__specs" data-offer-specs></dl>
+                        <p class="developer-offer-modal__location" data-offer-location hidden></p>
+                        <button
+                            type="button"
+                            class="developer-offer-modal__cta"
+                            data-lead-open
+                            data-lead-topic="newbuilding"
+                            data-developer-offer-close
+                        >Оставить заявку</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
     <?php
 }
