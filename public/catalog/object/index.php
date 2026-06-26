@@ -78,8 +78,7 @@ $constructionLastUpdate = site_construction_progress_last_update($constructionEn
 $similarComplexes = $isNewbuilding ? site_similar_complexes_entries($obj) : [];
 $developerOffers = $isNewbuilding ? site_developer_offers_entries($obj) : [];
 $isComplexPage = $isNewbuilding && count($developerOffers) > 0;
-$complexName = isset($obj['residentialComplex']) ? trim((string) $obj['residentialComplex']) : '';
-if ($isComplexPage) {
+if ($isNewbuilding) {
     $headingTitle = site_newbuilding_page_title($obj);
 }
 
@@ -111,7 +110,7 @@ $ymapListingPinJsVersion = (string) (@filemtime(__DIR__ . '/../../js/ymap-listin
 $listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-object-map.js') ?: time());
 ?>
 
-<main class="page-main page-main--inner listing-object-page" id="main">
+<main class="page-main page-main--inner listing-object-page<?php echo $isNewbuilding ? ' listing-object-page--complex' : ''; ?>" id="main">
     <div class="container">
         <nav class="listing__crumbs" aria-label="Хлебные крошки">
             <a class="listing__crumb" href="/catalog/">Каталог</a>
@@ -119,7 +118,149 @@ $listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-o
             <span class="listing__crumb listing__crumb--current"><?php echo htmlspecialchars($headingTitle, ENT_QUOTES, 'UTF-8'); ?></span>
         </nav>
 
-        <article class="listing-object" data-listing-object data-listing-id="<?php echo htmlspecialchars($id, ENT_QUOTES, 'UTF-8'); ?>">
+        <article class="listing-object<?php echo $isNewbuilding ? ' listing-object--complex' : ''; ?>" data-listing-object data-listing-id="<?php echo htmlspecialchars($id, ENT_QUOTES, 'UTF-8'); ?>">
+            <?php if ($isNewbuilding) { ?>
+                <div class="listing-complex__hero">
+                    <?php site_render_listing_gallery($galleryBundle, $headingTitle); ?>
+                </div>
+                <div class="listing-complex__layout">
+                    <div class="listing-complex__main">
+                        <?php site_render_complex_main_intro($obj, $addressLine); ?>
+
+                        <?php if ($isComplexPage) {
+                            site_render_developer_offers_section($obj);
+                        } ?>
+
+                        <?php site_render_listing_object_specs($specSections, 'complex-about'); ?>
+
+                        <section class="listing-object__panel listing-object__panel--map-only" aria-labelledby="listing-map-block-title">
+                            <h2 class="listing-object__panel-title" id="listing-map-block-title">Расположение</h2>
+                            <div class="listing-object__panel-grid">
+                                <div class="listing-object__panel-col listing-object__panel-col--map">
+                                    <div class="listing-object__map-block">
+                                        <?php if ($listingMapScripts) { ?>
+                                            <div
+                                                class="listing-object__map-canvas"
+                                                id="listing-object-map"
+                                                data-marker="<?php echo htmlspecialchars($markerJson, ENT_QUOTES, 'UTF-8'); ?>"
+                                                role="img"
+                                                aria-label="Карта расположения объекта"
+                                            ></div>
+                                        <?php } else { ?>
+                                            <div class="listing-object__map-fallback">
+                                                <?php if ($yandexMapsKey === '' && $hasMapCoords) { ?>
+                                                    <p>Интерактивная карта подключается ключом <code>YANDEX_MAPS_API_KEY</code> в <code>.env</code> на хостинге.</p>
+                                                <?php } elseif ($addressLine !== '') { ?>
+                                                    <p>Точные координаты объекта пока не указаны в CRM. Адрес:</p>
+                                                    <p class="listing-object__map-address"><?php echo htmlspecialchars($addressLine, ENT_QUOTES, 'UTF-8'); ?></p>
+                                                <?php } else { ?>
+                                                    <p>Адрес и координаты объекта не указаны.</p>
+                                                <?php } ?>
+                                            </div>
+                                        <?php } ?>
+                                        <?php if ($mapsExternalUrl !== '') { ?>
+                                            <a class="listing-object__map-link" href="<?php echo htmlspecialchars($mapsExternalUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer">Открыть в Яндекс.Картах</a>
+                                        <?php } ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <?php if (count($constructionPreviewPhotos) > 0) { ?>
+                            <section class="listing-object__section listing-object__section--construction" aria-labelledby="listing-construction-title">
+                                <div class="listing-object__section-head">
+                                    <div>
+                                        <h2 class="listing-object__section-title" id="listing-construction-title">Ход строительства</h2>
+                                        <?php if ($constructionLastUpdate !== null) { ?>
+                                            <p class="listing-object__section-sub">Актуально на <?php echo htmlspecialchars($constructionLastUpdate, ENT_QUOTES, 'UTF-8'); ?></p>
+                                        <?php } ?>
+                                    </div>
+                                    <a class="listing-object__section-link" href="/catalog/object/construction/?id=<?php echo rawurlencode($id); ?>">Подробнее</a>
+                                </div>
+                                <div class="construction-preview">
+                                    <div class="construction-preview__track">
+                                        <?php foreach ($constructionPreviewPhotos as $photoUrl) { ?>
+                                            <a
+                                                class="construction-preview__item"
+                                                href="/catalog/object/construction/?id=<?php echo rawurlencode($id); ?>"
+                                            >
+                                                <img
+                                                    class="construction-preview__img"
+                                                    src="<?php echo htmlspecialchars($photoUrl, ENT_QUOTES, 'UTF-8'); ?>"
+                                                    alt="Фото хода строительства"
+                                                    loading="lazy"
+                                                    decoding="async"
+                                                    referrerpolicy="no-referrer"
+                                                >
+                                            </a>
+                                        <?php } ?>
+                                    </div>
+                                    <?php if ($constructionPhotoTotal > count($constructionPreviewPhotos)) { ?>
+                                        <p class="construction-preview__count"><?php echo (int) $constructionPhotoTotal; ?> фото</p>
+                                    <?php } ?>
+                                </div>
+                            </section>
+                        <?php } ?>
+
+                        <?php if (count($similarComplexes) > 0) { ?>
+                            <section class="listing-object__section listing-object__section--similar" aria-labelledby="listing-similar-title">
+                                <h2 class="listing-object__section-title" id="listing-similar-title">Похожие жилые комплексы</h2>
+                                <div class="similar-complexes">
+                                    <div class="similar-complexes__track">
+                                        <?php foreach ($similarComplexes as $complex) {
+                                            $href = isset($complex['sourceUrl']) && is_string($complex['sourceUrl']) && $complex['sourceUrl'] !== ''
+                                                ? $complex['sourceUrl']
+                                                : '';
+                                            $priceTextComplex = isset($complex['minPrice']) && is_numeric($complex['minPrice'])
+                                                ? 'от ' . site_fmt_rub((string) (int) $complex['minPrice'])
+                                                : '';
+                                            $offers = isset($complex['offersCount']) && is_numeric($complex['offersCount'])
+                                                ? (int) $complex['offersCount']
+                                                : null;
+                                            ?>
+                                            <article class="similar-complexes__card">
+                                                <?php if ($href !== '') { ?><a class="similar-complexes__link" href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>"><?php } ?>
+                                                    <?php if (!empty($complex['photoUrl'])) { ?>
+                                                        <img
+                                                            class="similar-complexes__img"
+                                                            src="<?php echo htmlspecialchars((string) $complex['photoUrl'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                            alt="<?php echo htmlspecialchars((string) $complex['name'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                            loading="lazy"
+                                                            decoding="async"
+                                                            referrerpolicy="no-referrer"
+                                                        >
+                                                    <?php } else { ?>
+                                                        <div class="similar-complexes__img similar-complexes__img--placeholder" aria-hidden="true"></div>
+                                                    <?php } ?>
+                                                    <h3 class="similar-complexes__name"><?php echo htmlspecialchars((string) $complex['name'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                                                    <?php if ($priceTextComplex !== '') { ?>
+                                                        <p class="similar-complexes__price"><?php echo htmlspecialchars($priceTextComplex, ENT_QUOTES, 'UTF-8'); ?><?php if ($offers !== null) { ?> · <?php echo (int) $offers; ?> предложений<?php } ?></p>
+                                                    <?php } ?>
+                                                    <?php if (!empty($complex['address'])) { ?>
+                                                        <p class="similar-complexes__address"><?php echo htmlspecialchars((string) $complex['address'], ENT_QUOTES, 'UTF-8'); ?></p>
+                                                    <?php } ?>
+                                                <?php if ($href !== '') { ?></a><?php } ?>
+                                            </article>
+                                        <?php } ?>
+                                    </div>
+                                </div>
+                            </section>
+                        <?php } ?>
+
+                        <?php if ($description !== '') { ?>
+                            <section class="listing-object__section listing-object__section--desc" aria-labelledby="listing-desc-title">
+                                <h2 class="listing-object__section-title" id="listing-desc-title">Описание</h2>
+                                <div class="listing-object__desc listing-object__desc--body">
+                                    <?php echo site_listing_object_description_html($description); ?>
+                                </div>
+                            </section>
+                        <?php } ?>
+                    </div>
+                    <aside class="listing-complex__aside" aria-label="Краткая информация о ЖК">
+                        <?php site_render_complex_sidebar($obj, $priceText); ?>
+                    </aside>
+                </div>
+            <?php } else { ?>
             <header class="listing-object__top">
                 <div class="listing-object__intro">
                     <h1 class="listing-object__title"><?php echo htmlspecialchars($headingTitle, ENT_QUOTES, 'UTF-8'); ?></h1>
@@ -153,10 +294,6 @@ $listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-o
             <div class="listing-object__gallery-wrap">
                 <?php site_render_listing_gallery($galleryBundle, $headingTitle); ?>
             </div>
-
-            <?php if ($isComplexPage) {
-                site_render_developer_offers_section($obj);
-            } ?>
 
             <?php site_render_listing_object_specs($specSections); ?>
 
@@ -281,6 +418,7 @@ $listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-o
                         <?php echo site_listing_object_description_html($description); ?>
                     </div>
                 </section>
+            <?php } ?>
             <?php } ?>
         </article>
     </div>

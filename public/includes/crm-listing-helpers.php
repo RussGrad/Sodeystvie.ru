@@ -890,6 +890,259 @@ function site_developer_completion_label(?int $quarter, ?int $year, bool $isRead
 
 /**
  * @param array<string, mixed> $row
+ * @return array{min: ?int, max: ?int}
+ */
+function site_developer_offers_price_bounds(array $row): array
+{
+    $offers = site_developer_offers_entries($row);
+    $min = null;
+    $max = null;
+    foreach ($offers as $offer) {
+        if (isset($offer['price']) && is_numeric($offer['price'])) {
+            $price = (int) $offer['price'];
+            $min = $min === null ? $price : min($min, $price);
+            $max = $max === null ? $price : max($max, $price);
+        }
+        if (isset($offer['priceMax']) && is_numeric($offer['priceMax'])) {
+            $priceMax = (int) $offer['priceMax'];
+            $max = $max === null ? $priceMax : max($max, $priceMax);
+        }
+    }
+    if ($min === null && isset($row['price']) && is_numeric($row['price'])) {
+        $min = (int) $row['price'];
+        $max = $max ?? $min;
+    }
+
+    return ['min' => $min, 'max' => $max];
+}
+
+function site_fmt_millions_rub(?int $amount, int $decimals = 1): ?string
+{
+    if ($amount === null || $amount <= 0) {
+        return null;
+    }
+    $millions = $amount / 1_000_000;
+    if ($millions >= 10) {
+        $decimals = 0;
+    } elseif ($millions < 1) {
+        return number_format($amount, 0, '.', ' ');
+    }
+    $formatted = number_format($millions, $decimals, ',', ' ');
+    if ($decimals > 0) {
+        $formatted = rtrim(rtrim($formatted, '0'), ',');
+    }
+
+    return $formatted;
+}
+
+function site_fmt_price_range_millions(?int $min, ?int $max): string
+{
+    $minLabel = site_fmt_millions_rub($min);
+    if ($minLabel === null) {
+        return '—';
+    }
+    $maxLabel = site_fmt_millions_rub($max);
+    if ($maxLabel === null || $max === null || $max <= $min) {
+        return 'от ' . $minLabel . ' млн ₽';
+    }
+
+    return 'от ' . $minLabel . ' до ' . $maxLabel . ' млн ₽';
+}
+
+/**
+ * @param array<string, mixed> $row
+ * @return array{min: ?float, max: ?float}
+ */
+function site_developer_offers_area_bounds(array $row): array
+{
+    $offers = site_developer_offers_entries($row);
+    $min = null;
+    $max = null;
+    foreach ($offers as $offer) {
+        if (!isset($offer['area']) || !is_numeric($offer['area'])) {
+            continue;
+        }
+        $area = (float) $offer['area'];
+        $min = $min === null ? $area : min($min, $area);
+        $max = $max === null ? $area : max($max, $area);
+    }
+
+    return ['min' => $min, 'max' => $max];
+}
+
+function site_fmt_area_range(?float $min, ?float $max): string
+{
+    if ($min === null) {
+        return '';
+    }
+    $fmt = static function (float $value): string {
+        $text = number_format($value, 2, ',', '');
+        $text = rtrim(rtrim($text, '0'), ',');
+
+        return $text;
+    };
+    if ($max === null || abs($max - $min) < 0.01) {
+        return $fmt($min) . ' м²';
+    }
+
+    return $fmt($min) . '–' . $fmt($max) . ' м²';
+}
+
+/**
+ * @param array<string, mixed> $row
+ */
+function site_complex_floors_label(array $row): string
+{
+    $buildings = site_developer_buildings_entries($row);
+    $floors = [];
+    foreach ($buildings as $building) {
+        if (isset($building['floors']) && is_numeric($building['floors'])) {
+            $floors[] = (int) $building['floors'];
+        }
+    }
+    if (count($floors) === 0) {
+        $offers = site_developer_offers_entries($row);
+        foreach ($offers as $offer) {
+            if (isset($offer['floorMax']) && is_numeric($offer['floorMax'])) {
+                $floors[] = (int) $offer['floorMax'];
+            } elseif (isset($offer['floor']) && is_numeric($offer['floor'])) {
+                $floors[] = (int) $offer['floor'];
+            }
+        }
+    }
+    if (count($floors) === 0) {
+        return '';
+    }
+    $min = min($floors);
+    $max = max($floors);
+
+    return $min === $max ? (string) $min : $min . '–' . $max;
+}
+
+/**
+ * @param array<string, mixed> $row
+ */
+function site_complex_readiness_summary(array $row): string
+{
+    $buildings = site_developer_buildings_entries($row);
+    if (count($buildings) === 0) {
+        return '';
+    }
+    $readyCount = 0;
+    foreach ($buildings as $building) {
+        if (!empty($building['isReady'])) {
+            $readyCount++;
+        }
+    }
+    if ($readyCount === count($buildings)) {
+        return 'Сдан';
+    }
+    if ($readyCount > 0) {
+        return 'Частично сдан';
+    }
+
+    return '';
+}
+
+/**
+ * @param array<string, mixed> $row
+ */
+function site_render_complex_sidebar(array $row, string $fallbackPriceText): void
+{
+    $title = site_newbuilding_page_title($row);
+    $bounds = site_developer_offers_price_bounds($row);
+    $priceRange = site_fmt_price_range_millions($bounds['min'], $bounds['max']);
+    if ($priceRange === '—' && $fallbackPriceText !== '') {
+        $priceRange = $fallbackPriceText;
+    }
+    $readiness = site_complex_readiness_summary($row);
+    $offersTotal = site_developer_offers_total($row);
+    $hasOffers = $offersTotal > 0;
+    ?>
+    <div class="complex-sidebar" data-complex-sidebar>
+        <div class="complex-sidebar__actions">
+            <button
+                type="button"
+                class="listing-object__fav"
+                data-listing-fav
+                aria-label="Добавить в избранное"
+                aria-pressed="false"
+            >
+                <svg class="listing-object__fav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 21s-6.7-4.35-9.33-8.1C.5 9.5 2.5 5.5 6.5 5.5c2 0 3.2 1.2 4 2.3 0.8-1.1 2-2.3 4-2.3 4 0 6 4 3.83 7.4C18.7 16.65 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+            </button>
+        </div>
+        <h1 class="complex-sidebar__title"><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></h1>
+        <p class="complex-sidebar__price" data-testid="priceRange"><?php echo htmlspecialchars($priceRange, ENT_QUOTES, 'UTF-8'); ?></p>
+        <?php if ($readiness !== '') { ?>
+            <p class="complex-sidebar__status">
+                <span class="complex-sidebar__status-icon" aria-hidden="true">✓</span>
+                <?php echo htmlspecialchars($readiness, ENT_QUOTES, 'UTF-8'); ?>
+            </p>
+        <?php } ?>
+        <?php if ($hasOffers) { ?>
+            <p class="complex-sidebar__offers-count"><?php echo (int) $offersTotal; ?> предложений</p>
+        <?php } ?>
+        <p class="complex-sidebar__note">Подробности о ЖК уточняйте у менеджера</p>
+        <div class="complex-sidebar__cta">
+            <button type="button" class="listing-object__lead-btn complex-sidebar__lead-btn" data-lead-open>
+                Оставить заявку
+            </button>
+            <a class="complex-sidebar__more" href="#complex-about">Подробнее</a>
+        </div>
+    </div>
+    <?php
+}
+
+/**
+ * @param array<string, mixed> $row
+ */
+function site_render_complex_main_intro(array $row, string $addressText): void
+{
+    $areaBounds = site_developer_offers_area_bounds($row);
+    $areaLabel = site_fmt_area_range($areaBounds['min'], $areaBounds['max']);
+    $floorsLabel = site_complex_floors_label($row);
+    $buildings = site_developer_buildings_entries($row);
+    $buildingCount = count($buildings);
+    $facts = [];
+    if ($areaLabel !== '') {
+        $facts[] = ['label' => 'Площади квартир', 'value' => $areaLabel];
+    }
+    $facts[] = ['label' => 'Тип жилья', 'value' => 'квартиры'];
+    if ($floorsLabel !== '') {
+        $facts[] = ['label' => 'Этажность', 'value' => $floorsLabel];
+    }
+    if ($buildingCount > 0) {
+        $facts[] = [
+            'label' => 'Количество корпусов',
+            'value' => $buildingCount . ' корпусов',
+        ];
+    }
+    ?>
+    <section class="complex-main-intro" aria-label="О жилом комплексе">
+        <?php if ($addressText !== '') { ?>
+            <div class="complex-main-intro__address">
+                <span class="complex-main-intro__address-text"><?php echo htmlspecialchars($addressText, ENT_QUOTES, 'UTF-8'); ?></span>
+            </div>
+        <?php } ?>
+        <?php if (count($facts) > 0) { ?>
+            <dl class="complex-main-intro__facts">
+                <?php foreach ($facts as $fact) { ?>
+                    <div class="complex-main-intro__fact">
+                        <dt><?php echo htmlspecialchars($fact['label'], ENT_QUOTES, 'UTF-8'); ?></dt>
+                        <dd><?php echo htmlspecialchars($fact['value'], ENT_QUOTES, 'UTF-8'); ?></dd>
+                    </div>
+                <?php } ?>
+            </dl>
+            <a class="complex-main-intro__more" href="#complex-about">Подробнее о ЖК</a>
+        <?php } ?>
+    </section>
+    <?php
+}
+
+/**
+ * @param array<string, mixed> $row
  */
 function site_render_developer_offers_section(array $row): void
 {
@@ -1090,14 +1343,17 @@ function site_listing_object_spec_sections(array $row): array
 /**
  * @param list<array{title: string, rows: list<array{label: string, value: string}>}> $sections
  */
-function site_render_listing_object_specs(array $sections): void
+function site_render_listing_object_specs(array $sections, ?string $sectionId = null): void
 {
     if (count($sections) === 0) {
         return;
     }
     $gridClass = 'listing-object__specs-grid' . (count($sections) === 1 ? ' listing-object__specs-grid--one' : '');
+    $idAttr = $sectionId !== null && $sectionId !== ''
+        ? ' id="' . htmlspecialchars($sectionId, ENT_QUOTES, 'UTF-8') . '"'
+        : '';
     ?>
-    <section class="listing-object__specs" aria-labelledby="listing-specs-title">
+    <section class="listing-object__specs" aria-labelledby="listing-specs-title"<?php echo $idAttr; ?>>
         <h2 class="visually-hidden" id="listing-specs-title">Характеристики объекта</h2>
         <div class="<?php echo htmlspecialchars($gridClass, ENT_QUOTES, 'UTF-8'); ?>">
             <?php foreach ($sections as $section) {

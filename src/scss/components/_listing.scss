@@ -174,6 +174,209 @@ p.listing-object__address {
   margin-bottom: clamp(1.5rem, 4vw, 2.25rem);
 }
 
+// ——— Страница ЖК (новостройка, макет как DomClick) ———
+
+.listing-object-page--complex .container {
+  max-width: min(1180px, 100%);
+}
+
+.listing-object--complex {
+  display: block;
+}
+
+.listing-complex__hero {
+  margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
+
+  .listing-gallery__stage {
+    height: clamp(240px, 42vw, 520px);
+  }
+
+  .listing-gallery__slide img.listing-gallery__img {
+    object-fit: cover;
+    object-position: center center;
+  }
+}
+
+.listing-complex__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+  gap: clamp(1.25rem, 3vw, 2rem);
+  align-items: start;
+}
+
+.listing-complex__main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+.listing-complex__aside {
+  position: sticky;
+  top: calc(var(--header-height, 4rem) + 1rem);
+}
+
+.complex-sidebar {
+  padding: 1.25rem 1.35rem 1.35rem;
+  border: 1px solid var(--featured-card-border);
+  border-radius: 16px;
+  background: var(--featured-card-bg);
+  box-shadow: var(--featured-card-shadow);
+}
+
+.complex-sidebar__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.35rem;
+}
+
+.complex-sidebar__title {
+  margin: 0 0 0.65rem;
+  font-size: clamp(1.15rem, 2.2vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.complex-sidebar__price {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.05rem, 2vw, 1.2rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.complex-sidebar__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 0.65rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #2f9d62;
+}
+
+.complex-sidebar__status-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  background: rgba(47, 157, 98, 0.12);
+  font-size: 0.7rem;
+}
+
+.complex-sidebar__offers-count {
+  margin: 0 0 0.85rem;
+  font-size: 0.875rem;
+  color: var(--page-muted, #6b7280);
+}
+
+.complex-sidebar__note {
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 10px;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--page-muted, #6b7280);
+  background: rgba(var(--color-accent-rgb), 0.06);
+}
+
+.complex-sidebar__cta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.complex-sidebar__lead-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.complex-sidebar__more {
+  display: block;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--cta-bg);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.complex-main-intro {
+  padding: 1.15rem 1.25rem 1.25rem;
+  border: 1px solid var(--featured-card-border);
+  border-radius: 16px;
+  background: var(--featured-card-bg);
+  box-shadow: var(--featured-card-shadow);
+}
+
+.complex-main-intro__address {
+  margin-bottom: 1rem;
+}
+
+.complex-main-intro__address-text {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.complex-main-intro__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem 1.25rem;
+  margin: 0;
+}
+
+.complex-main-intro__fact {
+  margin: 0;
+
+  dt {
+    margin: 0 0 0.2rem;
+    font-size: 0.8125rem;
+    color: var(--page-muted, #6b7280);
+    font-weight: 500;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+}
+
+.complex-main-intro__more {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--cta-bg);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+@media (max-width: 960px) {
+  .listing-complex__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .listing-complex__aside {
+    position: static;
+    order: -1;
+  }
+
+  .complex-main-intro__facts {
+    grid-template-columns: 1fr;
+  }
+}
+
 // ——— Галерея (Avito-style): крупный кадр + миниатюры + fullscreen ———
 
 .listing-gallery {
