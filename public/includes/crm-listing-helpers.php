@@ -25,6 +25,28 @@ function site_fmt_rub_from(?string $raw): string
     return $value === '—' ? $value : 'от ' . $value;
 }
 
+function site_fmt_rub_for_listing(?string $raw, ?string $objectType): string
+{
+    if ($objectType !== null && strtolower(trim($objectType)) === 'newbuilding') {
+        return site_fmt_rub_from($raw);
+    }
+
+    return site_fmt_rub($raw);
+}
+
+function site_fmt_m2_for_listing(?float $areaTotal, ?string $priceRaw, ?string $objectType): ?string
+{
+    $value = site_fmt_m2($areaTotal, $priceRaw);
+    if ($value === null) {
+        return null;
+    }
+    if ($objectType !== null && strtolower(trim($objectType)) === 'newbuilding') {
+        return 'от ' . $value;
+    }
+
+    return $value;
+}
+
 function site_fmt_m2(?float $areaTotal, ?string $priceRaw): ?string
 {
     if ($areaTotal === null || $areaTotal <= 0) {
@@ -941,7 +963,7 @@ function site_render_developer_offers_section(array $row): void
                     $offer['completionQuarter'] ?? null,
                     $offer['completionYear'] ?? null,
                 );
-                $priceText = isset($offer['price']) ? site_fmt_rub((string) $offer['price']) : '—';
+                $priceText = isset($offer['price']) ? site_fmt_rub_from((string) $offer['price']) : '—';
                 $planUrl = isset($offer['planImageUrl']) ? trim((string) $offer['planImageUrl']) : '';
                 $flatsCount = (int) ($offer['flatsCount'] ?? 1);
                 $layoutId = (string) ($offer['layoutId'] ?? '');
@@ -1469,8 +1491,8 @@ function site_render_catalog_listing_card(array $row): void
     $photosB64 = base64_encode(json_encode($photoUrls, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '[]');
     $photosRawB64 = base64_encode(json_encode($photoBundle['raw'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '[]');
 
-    $priceText = site_fmt_rub($priceRaw);
-    $priceM2 = site_fmt_m2($areaTotal, $priceRaw);
+    $priceText = site_fmt_rub_for_listing($priceRaw, $objectType);
+    $priceM2 = site_fmt_m2_for_listing($areaTotal, $priceRaw, $objectType);
     $floorText = site_listing_floor_label($floor, $floorTotal);
     $buildingText = site_listing_building_label($yearBuilt, $jk);
     $addressLine = site_listing_address_line($row);
@@ -1785,7 +1807,7 @@ function site_render_featured_listing_card(array $row): void
                         <?php if ($hasDiscount && $priceOldRaw !== null) { ?>
                             <p class="featured-card__price-old"><?php echo htmlspecialchars(site_fmt_rub($priceOldRaw), ENT_QUOTES, 'UTF-8'); ?></p>
                         <?php } ?>
-                        <p class="featured-card__price"><?php echo htmlspecialchars(site_fmt_rub($priceRaw), ENT_QUOTES, 'UTF-8'); ?></p>
+                        <p class="featured-card__price"><?php echo htmlspecialchars(site_fmt_rub_for_listing($priceRaw, $objectType), ENT_QUOTES, 'UTF-8'); ?></p>
                     </div>
                 </div>
             </a>
@@ -2053,7 +2075,7 @@ function site_catalog_map_markers_from_items(array $items): array
             'lat' => $latF,
             'lng' => $lngF,
             'title' => $title,
-            'price' => site_fmt_rub($priceRaw),
+            'price' => site_fmt_rub_for_listing($priceRaw, $objectType),
             'href' => '/catalog/object/?id=' . rawurlencode($id),
             'photo' => site_map_marker_photo_url($row),
         ];

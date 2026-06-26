@@ -54,6 +54,11 @@
     return new Intl.NumberFormat('ru-RU').format(Math.round(Number(value))) + ' ₽';
   }
 
+  function formatRubFrom(value) {
+    const formatted = formatRub(value);
+    return formatted === '—' ? formatted : 'от ' + formatted;
+  }
+
   function flatsLabel(count) {
     const n = Number(count) || 0;
     const mod10 = n % 10;
@@ -102,14 +107,14 @@
     if (titleEl) titleEl.textContent = typeof offer.title === 'string' ? offer.title : '';
     if (priceEl) {
       const price = offer.price != null ? Number(offer.price) : null;
-      priceEl.textContent = price != null ? formatRub(price) : 'Цена по запросу';
+      priceEl.textContent = price != null ? formatRubFrom(price) : 'Цена по запросу';
     }
     if (priceM2El) {
       const price = offer.price != null ? Number(offer.price) : null;
       const areaRaw = typeof offer.area === 'string' ? offer.area.replace(/[^\d.,]/g, '').replace(',', '.') : '';
       const area = areaRaw ? Number(areaRaw) : NaN;
       if (price != null && Number.isFinite(area) && area > 0) {
-        priceM2El.textContent = formatRub(Math.round(price / area)) + ' за м²';
+        priceM2El.textContent = formatRubFrom(Math.round(price / area)) + ' за м²';
         priceM2El.hidden = false;
       } else {
         priceM2El.hidden = true;

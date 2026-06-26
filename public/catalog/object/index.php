@@ -63,14 +63,14 @@ if ($error) {
 }
 
 $priceRaw = isset($obj['price']) ? (string) $obj['price'] : null;
-$priceText = site_fmt_rub($priceRaw);
-$priceM2 = site_fmt_m2($areaTotal, $priceRaw);
+$isNewbuilding = $objectTypeValue === 'newbuilding';
+$priceText = site_fmt_rub_for_listing($priceRaw, $objectTypeValue);
+$priceM2 = $isNewbuilding ? null : site_fmt_m2($areaTotal, $priceRaw);
 $addressLine = site_listing_address_line($obj);
 $district = isset($obj['districtValue']) ? trim((string) $obj['districtValue']) : '';
 $dealLine = site_deal_line_public_label(isset($obj['dealLineValue']) ? (string) $obj['dealLineValue'] : null);
 $description = isset($obj['description']) ? trim((string) $obj['description']) : '';
 $specSections = site_listing_object_spec_sections($obj);
-$isNewbuilding = $objectTypeValue === 'newbuilding';
 $constructionEntries = $isNewbuilding ? site_construction_progress_entries($obj) : [];
 $constructionPreviewPhotos = site_construction_progress_preview_photos($constructionEntries, 9);
 $constructionPhotoTotal = site_construction_progress_total_photos($constructionEntries);
@@ -81,8 +81,6 @@ $isComplexPage = $isNewbuilding && count($developerOffers) > 0;
 $complexName = isset($obj['residentialComplex']) ? trim((string) $obj['residentialComplex']) : '';
 if ($isComplexPage) {
     $headingTitle = site_newbuilding_page_title($obj);
-    $priceText = site_fmt_rub_from($priceRaw);
-    $priceM2 = null;
 }
 
 $lat = isset($obj['latitude']) && is_numeric($obj['latitude']) ? (float) $obj['latitude'] : null;
