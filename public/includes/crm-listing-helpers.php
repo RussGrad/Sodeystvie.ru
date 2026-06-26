@@ -628,8 +628,19 @@ function site_listing_commercial_spec_sections(array $ctx): array
 function site_listing_newbuilding_complex_spec_sections(array $ctx, array $row): array
 {
     $offersTotal = site_developer_offers_total($row);
+    $meta = site_complex_meta_entries($row);
+    $buildings = site_developer_buildings_entries($row);
+    $floorsLabel = site_complex_floors_label($row);
+    $finishing = count($meta['finishingOptions']) > 0
+        ? implode(', ', $meta['finishingOptions'])
+        : '';
+
     $unit = site_listing_spec_rows_from_map([
         'Тип жилья' => $ctx['housingType'] ?? '',
+        'Этажность' => $floorsLabel,
+        'Варианты отделки' => $finishing,
+        'Количество корпусов' => count($buildings) > 0 ? (string) count($buildings) : '',
+        'Тип стен' => $meta['wallType'] ?? '',
         'Сделка' => $ctx['deal'],
         'Предложений от застройщика' => $offersTotal > 0 ? (string) $offersTotal : '',
     ]);
@@ -677,6 +688,82 @@ function site_developer_offers_total(array $row): int
     $count = count(site_developer_offers_entries($row));
 
     return max($total, $count);
+}
+
+/**
+ * @return array{
+ *   complexClass: ?string,
+ *   isVerified: bool,
+ *   developerName: ?string,
+ *   developerRegisteredYear: ?int,
+ *   developerLogoUrl: ?string,
+ *   finishingOptions: list<string>,
+ *   wallType: ?string,
+ *   mortgageMinRate: ?float
+ * }
+ */
+function site_complex_meta_entries(array $row): array
+{
+    $empty = [
+        'complexClass' => null,
+        'isVerified' => false,
+        'developerName' => null,
+        'developerRegisteredYear' => null,
+        'developerLogoUrl' => null,
+        'finishingOptions' => [],
+        'wallType' => null,
+        'mortgageMinRate' => null,
+    ];
+    $raw = $row['complexMeta'] ?? null;
+    if (!is_array($raw)) {
+        return $empty;
+    }
+    $finishing = [];
+    if (is_array($raw['finishingOptions'] ?? null)) {
+        foreach ($raw['finishingOptions'] as $item) {
+            if (is_string($item) && trim($item) !== '') {
+                $finishing[] = trim($item);
+            }
+        }
+    }
+
+    return [
+        'complexClass' => isset($raw['complexClass']) && is_string($raw['complexClass']) && trim($raw['complexClass']) !== ''
+            ? trim($raw['complexClass'])
+            : null,
+        'isVerified' => !empty($raw['isVerified']),
+        'developerName' => isset($raw['developerName']) && is_string($raw['developerName']) && trim($raw['developerName']) !== ''
+            ? trim($raw['developerName'])
+            : null,
+        'developerRegisteredYear' => isset($raw['developerRegisteredYear']) && is_numeric($raw['developerRegisteredYear'])
+            ? (int) $raw['developerRegisteredYear']
+            : null,
+        'developerLogoUrl' => isset($raw['developerLogoUrl']) && is_string($raw['developerLogoUrl']) && trim($raw['developerLogoUrl']) !== ''
+            ? trim($raw['developerLogoUrl'])
+            : null,
+        'finishingOptions' => $finishing,
+        'wallType' => isset($raw['wallType']) && is_string($raw['wallType']) && trim($raw['wallType']) !== ''
+            ? trim($raw['wallType'])
+            : null,
+        'mortgageMinRate' => isset($raw['mortgageMinRate']) && is_numeric($raw['mortgageMinRate'])
+            ? (float) $raw['mortgageMinRate']
+            : null,
+    ];
+}
+
+function site_developer_offers_flats_label(int $count): string
+{
+    $n = max(0, $count);
+    $mod10 = $n % 10;
+    $mod100 = $n % 100;
+    if ($mod10 === 1 && $mod100 !== 11) {
+        return $n . ' предложение';
+    }
+    if ($mod10 >= 2 && $mod10 <= 4 && ($mod100 < 12 || $mod100 > 14)) {
+        return $n . ' предложения';
+    }
+
+    return $n . ' предложений';
 }
 
 /**
@@ -1058,6 +1145,10 @@ function site_render_complex_sidebar(array $row, string $fallbackPriceText): voi
     $readiness = site_complex_readiness_summary($row);
     $offersTotal = site_developer_offers_total($row);
     $hasOffers = $offersTotal > 0;
+    $meta = site_complex_meta_entries($row);
+    $finishing = count($meta['finishingOptions']) > 0
+        ? implode(', ', $meta['finishingOptions'])
+        : '';
     ?>
     <div class="complex-sidebar" data-complex-sidebar>
         <div class="complex-sidebar__actions">
@@ -1073,6 +1164,16 @@ function site_render_complex_sidebar(array $row, string $fallbackPriceText): voi
                 </svg>
             </button>
         </div>
+        <?php if ($meta['complexClass'] !== null || $meta['isVerified']) { ?>
+            <div class="complex-sidebar__badges">
+                <?php if ($meta['complexClass'] !== null) { ?>
+                    <span class="complex-badge complex-badge--class"><?php echo htmlspecialchars($meta['complexClass'], ENT_QUOTES, 'UTF-8'); ?></span>
+                <?php } ?>
+                <?php if ($meta['isVerified']) { ?>
+                    <span class="complex-badge complex-badge--verified">Проверено</span>
+                <?php } ?>
+            </div>
+        <?php } ?>
         <h1 class="complex-sidebar__title"><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></h1>
         <p class="complex-sidebar__price" data-testid="priceRange"><?php echo htmlspecialchars($priceRange, ENT_QUOTES, 'UTF-8'); ?></p>
         <?php if ($readiness !== '') { ?>
@@ -1082,7 +1183,35 @@ function site_render_complex_sidebar(array $row, string $fallbackPriceText): voi
             </p>
         <?php } ?>
         <?php if ($hasOffers) { ?>
-            <p class="complex-sidebar__offers-count"><?php echo (int) $offersTotal; ?> предложений</p>
+            <p class="complex-sidebar__offers-count">
+                <a class="complex-sidebar__offers-link" href="#complex-offers"><?php echo site_developer_offers_flats_label($offersTotal); ?></a>
+            </p>
+        <?php } ?>
+        <?php if ($finishing !== '') { ?>
+            <div class="complex-sidebar__finishing">
+                <span class="complex-sidebar__finishing-label">Варианты отделки</span>
+                <span class="complex-sidebar__finishing-value"><?php echo htmlspecialchars($finishing, ENT_QUOTES, 'UTF-8'); ?></span>
+            </div>
+        <?php } ?>
+        <?php if ($meta['developerName'] !== null) { ?>
+            <div class="complex-sidebar__developer">
+                <?php if ($meta['developerLogoUrl'] !== null) { ?>
+                    <img
+                        class="complex-sidebar__developer-logo"
+                        src="<?php echo htmlspecialchars($meta['developerLogoUrl'], ENT_QUOTES, 'UTF-8'); ?>"
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        referrerpolicy="no-referrer"
+                    >
+                <?php } ?>
+                <div class="complex-sidebar__developer-text">
+                    <span class="complex-sidebar__developer-name"><?php echo htmlspecialchars($meta['developerName'], ENT_QUOTES, 'UTF-8'); ?></span>
+                    <?php if ($meta['developerRegisteredYear'] !== null) { ?>
+                        <span class="complex-sidebar__developer-year">Основан в <?php echo (int) $meta['developerRegisteredYear']; ?> г.</span>
+                    <?php } ?>
+                </div>
+            </div>
         <?php } ?>
         <p class="complex-sidebar__note">Подробности о ЖК уточняйте у менеджера</p>
         <div class="complex-sidebar__cta">
@@ -1097,14 +1226,80 @@ function site_render_complex_sidebar(array $row, string $fallbackPriceText): voi
 
 /**
  * @param array<string, mixed> $row
+ * @param array{hasOffers: bool, hasConstruction: bool} $sections
  */
-function site_render_complex_main_intro(array $row, string $addressText): void
+function site_render_complex_nav(array $row, array $sections): void
+{
+    $tabs = [];
+    if ($sections['hasOffers']) {
+        $tabs[] = ['id' => 'complex-offers', 'label' => 'Квартиры'];
+    }
+    $tabs[] = ['id' => 'complex-mortgage', 'label' => 'Ипотека'];
+    $tabs[] = ['id' => 'complex-about', 'label' => 'О жилом комплексе'];
+    $tabs[] = ['id' => 'complex-map', 'label' => 'Инфраструктура'];
+    if ($sections['hasConstruction']) {
+        $tabs[] = ['id' => 'complex-construction', 'label' => 'Ход строительства'];
+    }
+    if (count($tabs) === 0) {
+        return;
+    }
+    ?>
+    <nav class="complex-nav" data-complex-nav aria-label="Разделы страницы ЖК">
+        <div class="complex-nav__track">
+            <?php foreach ($tabs as $i => $tab) { ?>
+                <a
+                    class="complex-nav__tab<?php echo $i === 0 ? ' is-active' : ''; ?>"
+                    href="#<?php echo htmlspecialchars($tab['id'], ENT_QUOTES, 'UTF-8'); ?>"
+                    data-complex-nav-link
+                ><?php echo htmlspecialchars($tab['label'], ENT_QUOTES, 'UTF-8'); ?></a>
+            <?php } ?>
+        </div>
+    </nav>
+    <?php
+}
+
+/**
+ * @param array<string, mixed> $row
+ */
+function site_render_complex_mortgage_teaser(array $row): void
+{
+    $meta = site_complex_meta_entries($row);
+    $rate = $meta['mortgageMinRate'];
+    ?>
+    <section class="listing-object__section listing-object__section--mortgage" id="complex-mortgage" aria-labelledby="complex-mortgage-title">
+        <h2 class="listing-object__section-title" id="complex-mortgage-title">Ипотека</h2>
+        <div class="complex-mortgage-teaser">
+            <?php if ($rate !== null && $rate > 0) { ?>
+                <p class="complex-mortgage-teaser__rate">Ставка от <?php echo htmlspecialchars(number_format($rate, 1, ',', ''), ENT_QUOTES, 'UTF-8'); ?>%</p>
+            <?php } else { ?>
+                <p class="complex-mortgage-teaser__lead">Подберём ипотечную программу под ваш бюджет</p>
+            <?php } ?>
+            <p class="complex-mortgage-teaser__note">Рассчитайте ежемесячный платёж и оставьте заявку — менеджер свяжется с вами.</p>
+            <div class="complex-mortgage-teaser__actions">
+                <a class="btn btn--primary complex-mortgage-teaser__btn" href="/mortgage/">Рассчитать ипотеку</a>
+                <button type="button" class="listing-object__lead-btn complex-mortgage-teaser__lead" data-lead-open data-lead-topic="mortgage">
+                    Оставить заявку
+                </button>
+            </div>
+        </div>
+    </section>
+    <?php
+}
+
+/**
+ * @param array<string, mixed> $row
+ */
+function site_render_complex_main_intro(array $row, string $addressText, bool $hasMapCoords = false): void
 {
     $areaBounds = site_developer_offers_area_bounds($row);
     $areaLabel = site_fmt_area_range($areaBounds['min'], $areaBounds['max']);
     $floorsLabel = site_complex_floors_label($row);
     $buildings = site_developer_buildings_entries($row);
     $buildingCount = count($buildings);
+    $meta = site_complex_meta_entries($row);
+    $finishing = count($meta['finishingOptions']) > 0
+        ? implode(', ', $meta['finishingOptions'])
+        : '';
     $facts = [];
     if ($areaLabel !== '') {
         $facts[] = ['label' => 'Площади квартир', 'value' => $areaLabel];
@@ -1113,17 +1308,30 @@ function site_render_complex_main_intro(array $row, string $addressText): void
     if ($floorsLabel !== '') {
         $facts[] = ['label' => 'Этажность', 'value' => $floorsLabel];
     }
+    if ($finishing !== '') {
+        $facts[] = ['label' => 'Варианты отделки', 'value' => $finishing];
+    }
     if ($buildingCount > 0) {
         $facts[] = [
             'label' => 'Количество корпусов',
             'value' => $buildingCount . ' корпусов',
         ];
     }
+    if ($meta['wallType'] !== null) {
+        $facts[] = ['label' => 'Тип стен', 'value' => $meta['wallType']];
+    }
     ?>
     <section class="complex-main-intro" aria-label="О жилом комплексе">
         <?php if ($addressText !== '') { ?>
-            <div class="complex-main-intro__address">
-                <span class="complex-main-intro__address-text"><?php echo htmlspecialchars($addressText, ENT_QUOTES, 'UTF-8'); ?></span>
+            <div class="complex-main-intro__address-row">
+                <?php if ($hasMapCoords) { ?>
+                    <a class="complex-main-intro__map-pin" href="#complex-map" aria-label="Показать на карте">
+                        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M12 22c2.25 0 7-8.86 7-13.04C19 5.12 16.14 2 12 2S5 5.12 5 8.96C5 13.14 9.75 22 12 22Zm0-10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" clip-rule="evenodd"/></svg>
+                    </a>
+                <?php } ?>
+                <div class="complex-main-intro__address">
+                    <span class="complex-main-intro__address-text"><?php echo htmlspecialchars($addressText, ENT_QUOTES, 'UTF-8'); ?></span>
+                </div>
             </div>
         <?php } ?>
         <?php if (count($facts) > 0) { ?>
@@ -1157,6 +1365,7 @@ function site_render_developer_offers_section(array $row): void
     ?>
     <section
         class="listing-object__section listing-object__section--developer-offers"
+        id="complex-offers"
         aria-labelledby="listing-developer-offers-title"
         data-developer-offers
     >
@@ -1265,7 +1474,7 @@ function site_render_developer_offers_section(array $row): void
                     <div class="developer-offers__price-wrap">
                         <p class="developer-offers__price"><?php echo htmlspecialchars($priceText, ENT_QUOTES, 'UTF-8'); ?></p>
                         <button type="button" class="developer-offers__link" data-developer-offer-open data-layout-id="<?php echo htmlspecialchars($layoutId, ENT_QUOTES, 'UTF-8'); ?>">
-                            <?php echo (int) $flatsCount; ?> <?php echo $flatsCount === 1 ? 'предложение' : 'предложения'; ?>
+                            <?php echo htmlspecialchars(site_developer_offers_flats_label($flatsCount), ENT_QUOTES, 'UTF-8'); ?>
                         </button>
                     </div>
                 </article>

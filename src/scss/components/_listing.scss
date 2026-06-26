@@ -272,6 +272,98 @@ p.listing-object__address {
   color: var(--page-muted, #6b7280);
 }
 
+.complex-sidebar__offers-link {
+  color: var(--cta-bg);
+  font-weight: 700;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.complex-sidebar__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.65rem;
+}
+
+.complex-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.3;
+
+  &--class {
+    color: #1e40af;
+    background: rgba(59, 130, 246, 0.12);
+  }
+
+  &--verified {
+    color: #15803d;
+    background: rgba(34, 197, 94, 0.12);
+  }
+}
+
+.complex-sidebar__finishing {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0 0 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--featured-card-border, rgba(0, 0, 0, 0.08));
+}
+
+.complex-sidebar__finishing-label {
+  font-size: 0.75rem;
+  color: var(--page-muted, #6b7280);
+}
+
+.complex-sidebar__finishing-value {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.complex-sidebar__developer {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0 0 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--featured-card-border, rgba(0, 0, 0, 0.08));
+}
+
+.complex-sidebar__developer-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid var(--featured-card-border, rgba(0, 0, 0, 0.08));
+}
+
+.complex-sidebar__developer-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.complex-sidebar__developer-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.complex-sidebar__developer-year {
+  font-size: 0.75rem;
+  color: var(--page-muted, #6b7280);
+}
+
 .complex-sidebar__note {
   margin: 0 0 1rem;
   padding: 0.75rem 0.85rem;
@@ -314,8 +406,32 @@ p.listing-object__address {
   box-shadow: var(--featured-card-shadow);
 }
 
-.complex-main-intro__address {
+.complex-main-intro__address-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
   margin-bottom: 1rem;
+}
+
+.complex-main-intro__map-pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  color: var(--page-text);
+  background: rgba(var(--color-accent-rgb), 0.08);
+  text-decoration: none;
+
+  &:hover {
+    background: rgba(var(--color-accent-rgb), 0.14);
+  }
+}
+
+.complex-main-intro__address {
+  min-width: 0;
 }
 
 .complex-main-intro__address-text {
@@ -360,6 +476,88 @@ p.listing-object__address {
   &:hover {
     text-decoration: underline;
   }
+}
+
+.complex-nav {
+  position: sticky;
+  top: calc(var(--header-height, 4rem));
+  z-index: 5;
+  margin: -0.25rem 0 0;
+  padding: 0.5rem 0;
+  background: color-mix(in srgb, var(--page-bg) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--featured-card-border, rgba(0, 0, 0, 0.08));
+}
+
+.complex-nav__track {
+  display: flex;
+  gap: 0.35rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.complex-nav__tab {
+  flex: 0 0 auto;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--page-muted, #6b7280);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    color: var(--page-text);
+    background: rgba(var(--color-accent-rgb), 0.06);
+  }
+
+  &.is-active {
+    color: var(--cta-bg);
+    background: rgba(var(--color-accent-rgb), 0.1);
+  }
+}
+
+.complex-mortgage-teaser {
+  padding: 1.15rem 1.25rem;
+  border: 1px solid var(--featured-card-border);
+  border-radius: 16px;
+  background: var(--featured-card-bg);
+  box-shadow: var(--featured-card-shadow);
+}
+
+.complex-mortgage-teaser__rate {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.complex-mortgage-teaser__lead {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.complex-mortgage-teaser__note {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--page-muted, #6b7280);
+}
+
+.complex-mortgage-teaser__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.complex-mortgage-teaser__btn,
+.complex-mortgage-teaser__lead {
+  min-height: 2.75rem;
 }
 
 @media (max-width: 960px) {

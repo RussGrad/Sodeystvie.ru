@@ -125,15 +125,23 @@ $listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-o
                 </div>
                 <div class="listing-complex__layout">
                     <div class="listing-complex__main">
-                        <?php site_render_complex_main_intro($obj, $addressLine); ?>
+                        <?php
+                        site_render_complex_nav($obj, [
+                            'hasOffers' => $isComplexPage,
+                            'hasConstruction' => count($constructionPreviewPhotos) > 0,
+                        ]);
+                        site_render_complex_main_intro($obj, $addressLine, $hasMapCoords);
+                        ?>
 
                         <?php if ($isComplexPage) {
                             site_render_developer_offers_section($obj);
                         } ?>
 
+                        <?php site_render_complex_mortgage_teaser($obj); ?>
+
                         <?php site_render_listing_object_specs($specSections, 'complex-about'); ?>
 
-                        <section class="listing-object__panel listing-object__panel--map-only" aria-labelledby="listing-map-block-title">
+                        <section class="listing-object__panel listing-object__panel--map-only" id="complex-map" aria-labelledby="listing-map-block-title">
                             <h2 class="listing-object__panel-title" id="listing-map-block-title">Расположение</h2>
                             <div class="listing-object__panel-grid">
                                 <div class="listing-object__panel-col listing-object__panel-col--map">
@@ -167,7 +175,7 @@ $listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-o
                         </section>
 
                         <?php if (count($constructionPreviewPhotos) > 0) { ?>
-                            <section class="listing-object__section listing-object__section--construction" aria-labelledby="listing-construction-title">
+                            <section class="listing-object__section listing-object__section--construction" id="complex-construction" aria-labelledby="listing-construction-title">
                                 <div class="listing-object__section-head">
                                     <div>
                                         <h2 class="listing-object__section-title" id="listing-construction-title">Ход строительства</h2>
@@ -428,6 +436,11 @@ $listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-o
     <script src="https://api-maps.yandex.ru/2.1/?apikey=<?php echo htmlspecialchars($yandexMapsKey, ENT_QUOTES, 'UTF-8'); ?>&amp;lang=ru_RU"></script>
     <script src="/js/ymap-listing-pin.js?v=<?php echo htmlspecialchars($ymapListingPinJsVersion, ENT_QUOTES, 'UTF-8'); ?>"></script>
     <script src="/js/listing-object-map.js?v=<?php echo htmlspecialchars($listingObjectMapJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+<?php } ?>
+<?php if ($isNewbuilding) {
+    $complexNavJsVersion = (string) (@filemtime(__DIR__ . '/../../js/complex-nav.js') ?: time());
+    ?>
+    <script src="/js/complex-nav.js?v=<?php echo htmlspecialchars($complexNavJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
 <?php } ?>
 <?php if ($isComplexPage) {
     $developerOffersJsVersion = (string) (@filemtime(__DIR__ . '/../../js/developer-offers.js') ?: time());
