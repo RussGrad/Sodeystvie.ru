@@ -713,6 +713,11 @@ function site_complex_meta_entries(array $row): array
         'finishingOptions' => [],
         'wallType' => null,
         'mortgageMinRate' => null,
+        'monitoring' => null,
+        'priceHistory' => [],
+        'infrastructures' => [],
+        'reviews' => [],
+        'calculatorDefaults' => null,
     ];
     $raw = $row['complexMeta'] ?? null;
     if (!is_array($raw)) {
@@ -748,6 +753,11 @@ function site_complex_meta_entries(array $row): array
         'mortgageMinRate' => isset($raw['mortgageMinRate']) && is_numeric($raw['mortgageMinRate'])
             ? (float) $raw['mortgageMinRate']
             : null,
+        'monitoring' => is_array($raw['monitoring'] ?? null) ? $raw['monitoring'] : null,
+        'priceHistory' => is_array($raw['priceHistory'] ?? null) ? array_values($raw['priceHistory']) : [],
+        'infrastructures' => is_array($raw['infrastructures'] ?? null) ? array_values($raw['infrastructures']) : [],
+        'reviews' => is_array($raw['reviews'] ?? null) ? array_values($raw['reviews']) : [],
+        'calculatorDefaults' => is_array($raw['calculatorDefaults'] ?? null) ? $raw['calculatorDefaults'] : null,
     ];
 }
 
@@ -1240,6 +1250,9 @@ function site_render_complex_nav(array $row, array $sections): void
     if ($sections['hasConstruction']) {
         $tabs[] = ['id' => 'complex-construction', 'label' => 'Ход строительства'];
     }
+    if (!empty($sections['hasMonitoring'])) {
+        $tabs[] = ['id' => 'complex-monitoring', 'label' => 'Мониторинг'];
+    }
     if (count($tabs) === 0) {
         return;
     }
@@ -1261,29 +1274,282 @@ function site_render_complex_nav(array $row, array $sections): void
 /**
  * @param array<string, mixed> $row
  */
-function site_render_complex_mortgage_teaser(array $row): void
+function site_complex_default_mortgage_price(array $row): ?int
 {
     $meta = site_complex_meta_entries($row);
+    $calc = $meta['calculatorDefaults'];
+    if (is_array($calc) && isset($calc['price']) && is_numeric($calc['price'])) {
+        return (int) $calc['price'];
+    }
+    $bounds = site_developer_offers_price_bounds($row);
+
+    return $bounds['min'];
+}
+
+/**
+ * @param array<string, mixed> $row
+ */
+function site_render_complex_mortgage_calculator(array $row): void
+{
+    $meta = site_complex_meta_entries($row);
+    $defaultPrice = site_complex_default_mortgage_price($row);
+    $defaultDeposit = null;
+    $defaultTerm = 30;
+    $calc = $meta['calculatorDefaults'];
+    if (is_array($calc)) {
+        if (isset($calc['deposit']) && is_numeric($calc['deposit'])) {
+            $defaultDeposit = (int) $calc['deposit'];
+        }
+        if (isset($calc['termYears']) && is_numeric($calc['termYears'])) {
+            $defaultTerm = max(1, min(40, (int) $calc['termYears']));
+        }
+    }
     $rate = $meta['mortgageMinRate'];
+    if ($rate === null || $rate <= 0) {
+        $rate = 16.9;
+    }
+    $depositPercent = 20;
+    if ($defaultPrice !== null && $defaultPrice > 0 && $defaultDeposit !== null) {
+        $depositPercent = (int) round(($defaultDeposit / $defaultPrice) * 100);
+    }
     ?>
     <section class="listing-object__section listing-object__section--mortgage" id="complex-mortgage" aria-labelledby="complex-mortgage-title">
         <h2 class="listing-object__section-title" id="complex-mortgage-title">Ипотека</h2>
-        <div class="complex-mortgage-teaser">
-            <?php if ($rate !== null && $rate > 0) { ?>
-                <p class="complex-mortgage-teaser__rate">Ставка от <?php echo htmlspecialchars(number_format($rate, 1, ',', ''), ENT_QUOTES, 'UTF-8'); ?>%</p>
-            <?php } else { ?>
-                <p class="complex-mortgage-teaser__lead">Подберём ипотечную программу под ваш бюджет</p>
+        <div class="complex-mortgage-calc" data-complex-mortgage-calc>
+            <?php if ($meta['mortgageMinRate'] !== null && $meta['mortgageMinRate'] > 0) { ?>
+                <p class="complex-mortgage-calc__hint">Ставка от <?php echo htmlspecialchars(number_format($meta['mortgageMinRate'], 1, ',', ''), ENT_QUOTES, 'UTF-8'); ?>%</p>
             <?php } ?>
-            <p class="complex-mortgage-teaser__note">Рассчитайте ежемесячный платёж и оставьте заявку — менеджер свяжется с вами.</p>
-            <div class="complex-mortgage-teaser__actions">
-                <a class="btn btn--primary complex-mortgage-teaser__btn" href="/mortgage/">Рассчитать ипотеку</a>
-                <button type="button" class="listing-object__lead-btn complex-mortgage-teaser__lead" data-lead-open data-lead-topic="mortgage">
-                    Оставить заявку
-                </button>
+            <div class="complex-mortgage-calc__grid">
+                <label class="complex-mortgage-calc__field">
+                    <span class="complex-mortgage-calc__label">Стоимость квартиры</span>
+                    <input
+                        class="complex-mortgage-calc__input"
+                        type="text"
+                        inputmode="numeric"
+                        data-mortgage-price
+                        value="<?php echo $defaultPrice !== null ? htmlspecialchars(number_format($defaultPrice, 0, '.', ' '), ENT_QUOTES, 'UTF-8') : ''; ?>"
+                    >
+                </label>
+                <label class="complex-mortgage-calc__field">
+                    <span class="complex-mortgage-calc__label">Первоначальный взнос, %</span>
+                    <input
+                        class="complex-mortgage-calc__input"
+                        type="number"
+                        min="0"
+                        max="100"
+                        data-mortgage-down-percent
+                        value="<?php echo (int) $depositPercent; ?>"
+                    >
+                </label>
+                <label class="complex-mortgage-calc__field">
+                    <span class="complex-mortgage-calc__label">Срок, лет</span>
+                    <input
+                        class="complex-mortgage-calc__input"
+                        type="number"
+                        min="1"
+                        max="40"
+                        data-mortgage-years
+                        value="<?php echo (int) $defaultTerm; ?>"
+                    >
+                </label>
+                <label class="complex-mortgage-calc__field">
+                    <span class="complex-mortgage-calc__label">Ставка, %</span>
+                    <input
+                        class="complex-mortgage-calc__input"
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        data-mortgage-rate
+                        value="<?php echo htmlspecialchars(number_format($rate, 1, '.', ''), ENT_QUOTES, 'UTF-8'); ?>"
+                    >
+                </label>
+            </div>
+            <div class="complex-mortgage-calc__result">
+                <p class="complex-mortgage-calc__monthly">от <span data-mortgage-monthly>—</span> / мес.</p>
+                <p class="complex-mortgage-calc__loan">Сумма кредита: <span data-mortgage-loan>—</span></p>
+            </div>
+            <div class="complex-mortgage-calc__actions">
+                <button type="button" class="listing-object__lead-btn" data-lead-open data-lead-topic="mortgage">Оставить заявку</button>
+                <a class="complex-mortgage-calc__more" href="/mortgage/">Все программы</a>
             </div>
         </div>
     </section>
     <?php
+}
+
+/**
+ * @param array<string, mixed> $row
+ */
+function site_render_complex_price_history(array $row): void
+{
+    $meta = site_complex_meta_entries($row);
+    $history = is_array($meta['priceHistory']) ? $meta['priceHistory'] : [];
+    ?>
+    <section class="listing-object__section" id="complex-price-history" aria-labelledby="complex-price-history-title">
+        <h2 class="listing-object__section-title" id="complex-price-history-title">История цен в ЖК</h2>
+        <?php if (count($history) > 0) { ?>
+            <div class="complex-price-history">
+                <table class="complex-price-history__table">
+                    <thead>
+                        <tr>
+                            <th>Период</th>
+                            <th>Цена</th>
+                            <th>Цена за м²</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($history as $point) {
+                            if (!is_array($point)) {
+                                continue;
+                            }
+                            $date = isset($point['date']) ? trim((string) $point['date']) : '';
+                            $price = isset($point['price']) && is_numeric($point['price'])
+                                ? site_fmt_rub_from((string) (int) $point['price'])
+                                : '—';
+                            $priceM2 = isset($point['pricePerM2']) && is_numeric($point['pricePerM2'])
+                                ? site_fmt_rub_from((string) (int) $point['pricePerM2'])
+                                : '—';
+                            ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($date, ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($price, ENT_QUOTES, 'UTF-8'); ?></td>
+                                <td><?php echo htmlspecialchars($priceM2, ENT_QUOTES, 'UTF-8'); ?></td>
+                            </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php } else { ?>
+            <div class="complex-empty-state">
+                <p>История изменения цен по этому ЖК пока недоступна.</p>
+            </div>
+        <?php } ?>
+    </section>
+    <?php
+}
+
+/**
+ * @param array<string, mixed> $row
+ */
+function site_render_complex_reviews(array $row): void
+{
+    $meta = site_complex_meta_entries($row);
+    $reviews = is_array($meta['reviews']) ? $meta['reviews'] : [];
+    $title = site_newbuilding_page_title($row);
+    ?>
+    <section class="listing-object__section" id="complex-reviews" aria-labelledby="complex-reviews-title">
+        <h2 class="listing-object__section-title" id="complex-reviews-title">Отзывы о <?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></h2>
+        <?php if (count($reviews) > 0) { ?>
+            <div class="complex-reviews">
+                <?php foreach ($reviews as $review) {
+                    if (!is_array($review)) {
+                        continue;
+                    }
+                    $text = isset($review['text']) ? trim((string) $review['text']) : '';
+                    if ($text === '') {
+                        continue;
+                    }
+                    $author = isset($review['author']) ? trim((string) $review['author']) : '';
+                    $rating = isset($review['rating']) && is_numeric($review['rating']) ? (float) $review['rating'] : null;
+                    $date = isset($review['date']) ? trim((string) $review['date']) : '';
+                    ?>
+                    <article class="complex-reviews__item">
+                        <header class="complex-reviews__head">
+                            <?php if ($author !== '') { ?>
+                                <strong class="complex-reviews__author"><?php echo htmlspecialchars($author, ENT_QUOTES, 'UTF-8'); ?></strong>
+                            <?php } ?>
+                            <?php if ($rating !== null) { ?>
+                                <span class="complex-reviews__rating"><?php echo htmlspecialchars(number_format($rating, 1, ',', ''), ENT_QUOTES, 'UTF-8'); ?> / 5</span>
+                            <?php } ?>
+                            <?php if ($date !== '') { ?>
+                                <time class="complex-reviews__date" datetime="<?php echo htmlspecialchars($date, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($date, ENT_QUOTES, 'UTF-8'); ?></time>
+                            <?php } ?>
+                        </header>
+                        <p class="complex-reviews__text"><?php echo nl2br(htmlspecialchars($text, ENT_QUOTES, 'UTF-8')); ?></p>
+                    </article>
+                <?php } ?>
+            </div>
+        <?php } else { ?>
+            <div class="complex-empty-state">
+                <p>Пока нет отзывов об этом жилом комплексе.</p>
+                <button type="button" class="listing-object__lead-btn" data-lead-open>Оставить отзыв</button>
+            </div>
+        <?php } ?>
+    </section>
+    <?php
+}
+
+/**
+ * @param array<string, mixed> $row
+ */
+function site_render_complex_sber_monitoring(array $row): void
+{
+    $meta = site_complex_meta_entries($row);
+    $monitoring = is_array($meta['monitoring']) ? $meta['monitoring'] : null;
+    if ($monitoring === null) {
+        return;
+    }
+    $active = isset($monitoring['isMonitoringActive']) ? (int) $monitoring['isMonitoringActive'] : 0;
+    if ($active <= 0 && empty($monitoring['buildingsReady'])) {
+        return;
+    }
+    ?>
+    <section class="listing-object__section" id="complex-monitoring" aria-labelledby="complex-monitoring-title">
+        <h2 class="listing-object__section-title" id="complex-monitoring-title">Мониторинг строительства от СберБанка</h2>
+        <div class="complex-monitoring">
+            <div class="complex-monitoring__grid">
+                <?php if ($active > 0) { ?>
+                    <div class="complex-monitoring__stat">
+                        <span class="complex-monitoring__value"><?php echo (int) $active; ?></span>
+                        <span class="complex-monitoring__label">корпусов на мониторинге</span>
+                    </div>
+                <?php } ?>
+                <?php if (isset($monitoring['buildingsReady']) && is_numeric($monitoring['buildingsReady'])) { ?>
+                    <div class="complex-monitoring__stat">
+                        <span class="complex-monitoring__value"><?php echo (int) $monitoring['buildingsReady']; ?></span>
+                        <span class="complex-monitoring__label">корпусов сдано</span>
+                    </div>
+                <?php } ?>
+                <?php if (isset($monitoring['buildingsReadyInTime']) && is_numeric($monitoring['buildingsReadyInTime'])) { ?>
+                    <div class="complex-monitoring__stat">
+                        <span class="complex-monitoring__value"><?php echo (int) $monitoring['buildingsReadyInTime']; ?></span>
+                        <span class="complex-monitoring__label">сдано в срок</span>
+                    </div>
+                <?php } ?>
+                <?php if (isset($monitoring['buildingsReadyWithMinorDelay']) && is_numeric($monitoring['buildingsReadyWithMinorDelay'])) { ?>
+                    <div class="complex-monitoring__stat">
+                        <span class="complex-monitoring__value"><?php echo (int) $monitoring['buildingsReadyWithMinorDelay']; ?></span>
+                        <span class="complex-monitoring__label">с небольшой задержкой</span>
+                    </div>
+                <?php } ?>
+            </div>
+            <?php if (!empty($meta['isVerified'])) { ?>
+                <p class="complex-monitoring__verified">Жилой комплекс проверен ДомКлик</p>
+            <?php } ?>
+        </div>
+    </section>
+    <?php
+}
+
+/**
+ * @param array<string, mixed> $row
+ */
+function site_complex_poi_categories(array $row): array
+{
+    $meta = site_complex_meta_entries($row);
+    $categories = [];
+    foreach ($meta['infrastructures'] as $poi) {
+        if (!is_array($poi)) {
+            continue;
+        }
+        $cat = isset($poi['category']) ? trim((string) $poi['category']) : '';
+        if ($cat === '') {
+            $cat = 'other';
+        }
+        $categories[$cat] = true;
+    }
+
+    return array_keys($categories);
 }
 
 /**
@@ -1355,13 +1621,11 @@ function site_render_complex_main_intro(array $row, string $addressText, bool $h
 function site_render_developer_offers_section(array $row): void
 {
     $offers = site_developer_offers_entries($row);
-    if (count($offers) === 0) {
-        return;
-    }
     $buildings = site_developer_buildings_entries($row);
     $complexTitle = site_newbuilding_page_title($row);
     $offersTotal = site_developer_offers_total($row);
     $offersJson = site_developer_offers_client_payload($row);
+    $hasOffers = count($offers) > 0;
     ?>
     <section
         class="listing-object__section listing-object__section--developer-offers"
@@ -1371,9 +1635,19 @@ function site_render_developer_offers_section(array $row): void
     >
         <div class="developer-offers__head">
             <h2 class="listing-object__section-title" id="listing-developer-offers-title">
-                <?php echo (int) $offersTotal; ?> предложений от застройщика в <?php echo htmlspecialchars($complexTitle, ENT_QUOTES, 'UTF-8'); ?>
+                <?php if ($offersTotal > 0) { ?>
+                    <?php echo (int) $offersTotal; ?> предложений от застройщика в <?php echo htmlspecialchars($complexTitle, ENT_QUOTES, 'UTF-8'); ?>
+                <?php } else { ?>
+                    Предложения от застройщика в <?php echo htmlspecialchars($complexTitle, ENT_QUOTES, 'UTF-8'); ?>
+                <?php } ?>
             </h2>
         </div>
+        <?php if (!$hasOffers) { ?>
+            <div class="complex-empty-state">
+                <p>Планировки и цены от застройщика скоро появятся. Оставьте заявку — менеджер уточнит наличие и актуальные предложения.</p>
+                <button type="button" class="listing-object__lead-btn" data-lead-open data-lead-topic="newbuilding">Узнать наличие</button>
+            </div>
+        <?php } else { ?>
         <?php if (count($buildings) > 0) { ?>
             <div class="developer-offers__tabs" role="tablist" aria-label="Корпуса">
                 <button
@@ -1520,6 +1794,7 @@ function site_render_developer_offers_section(array $row): void
                 </div>
             </div>
         </div>
+        <?php } ?>
     </section>
     <?php
 }
@@ -1533,10 +1808,7 @@ function site_render_developer_offers_section(array $row): void
 function site_listing_object_spec_sections(array $row): array
 {
     $ctx = site_listing_spec_context($row);
-    if (
-        $ctx['kind'] === 'newbuilding'
-        && count(site_developer_offers_entries($row)) > 0
-    ) {
+    if ($ctx['kind'] === 'newbuilding') {
         return site_listing_newbuilding_complex_spec_sections($ctx, $row);
     }
 

@@ -77,7 +77,9 @@ $constructionPhotoTotal = site_construction_progress_total_photos($constructionE
 $constructionLastUpdate = site_construction_progress_last_update($constructionEntries);
 $similarComplexes = $isNewbuilding ? site_similar_complexes_entries($obj) : [];
 $developerOffers = $isNewbuilding ? site_developer_offers_entries($obj) : [];
-$isComplexPage = $isNewbuilding && count($developerOffers) > 0;
+$hasDeveloperOffers = count($developerOffers) > 0;
+$isComplexPage = $isNewbuilding;
+$complexMeta = $isNewbuilding ? site_complex_meta_entries($obj) : [];
 if ($isNewbuilding) {
     $headingTitle = site_newbuilding_page_title($obj);
 }
@@ -100,6 +102,7 @@ $markerJson = json_encode([
     'address' => $addressLine,
     'price' => $priceText,
     'photo' => site_map_marker_photo_url($obj),
+    'poi' => $isNewbuilding ? ($complexMeta['infrastructures'] ?? []) : [],
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}';
 
 $metaParts = array_filter([$dealLine, $district], static fn (string $v): bool => $v !== '');
@@ -127,22 +130,46 @@ $listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-o
                     <div class="listing-complex__main">
                         <?php
                         site_render_complex_nav($obj, [
-                            'hasOffers' => $isComplexPage,
+                            'hasOffers' => true,
                             'hasConstruction' => count($constructionPreviewPhotos) > 0,
+                            'hasMonitoring' => is_array($complexMeta['monitoring'] ?? null),
                         ]);
                         site_render_complex_main_intro($obj, $addressLine, $hasMapCoords);
+                        site_render_developer_offers_section($obj);
+                        site_render_complex_mortgage_calculator($obj);
+                        site_render_complex_sber_monitoring($obj);
+                        site_render_listing_object_specs($specSections, 'complex-about');
+                        site_render_complex_price_history($obj);
+                        site_render_complex_reviews($obj);
                         ?>
 
-                        <?php if ($isComplexPage) {
-                            site_render_developer_offers_section($obj);
-                        } ?>
-
-                        <?php site_render_complex_mortgage_teaser($obj); ?>
-
-                        <?php site_render_listing_object_specs($specSections, 'complex-about'); ?>
-
                         <section class="listing-object__panel listing-object__panel--map-only" id="complex-map" aria-labelledby="listing-map-block-title">
-                            <h2 class="listing-object__panel-title" id="listing-map-block-title">Расположение</h2>
+                            <h2 class="listing-object__panel-title" id="listing-map-block-title">Инфраструктура</h2>
+                            <?php
+                            $poiCategories = site_complex_poi_categories($obj);
+                            if (count($poiCategories) > 0) {
+                                $categoryLabels = [
+                                    'metro' => 'Метро',
+                                    'school' => 'Школы',
+                                    'kindergarten' => 'Детские сады',
+                                    'clinic' => 'Медицина',
+                                    'shop' => 'Магазины',
+                                    'cafe' => 'Кафе и рестораны',
+                                    'beauty' => 'Красота',
+                                    'other' => 'Другое',
+                                ];
+                                ?>
+                                <div class="complex-map-filters" data-complex-map-filters>
+                                    <button type="button" class="complex-map-filters__chip is-active" data-poi-filter="all">Все</button>
+                                    <?php foreach ($poiCategories as $cat) {
+                                        $label = $categoryLabels[$cat] ?? ucfirst($cat);
+                                        ?>
+                                        <button type="button" class="complex-map-filters__chip" data-poi-filter="<?php echo htmlspecialchars($cat, ENT_QUOTES, 'UTF-8'); ?>">
+                                            <?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>
+                                        </button>
+                                    <?php } ?>
+                                </div>
+                            <?php } ?>
                             <div class="listing-object__panel-grid">
                                 <div class="listing-object__panel-col listing-object__panel-col--map">
                                     <div class="listing-object__map-block">
@@ -439,10 +466,12 @@ $listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-o
 <?php } ?>
 <?php if ($isNewbuilding) {
     $complexNavJsVersion = (string) (@filemtime(__DIR__ . '/../../js/complex-nav.js') ?: time());
+    $complexMortgageJsVersion = (string) (@filemtime(__DIR__ . '/../../js/complex-mortgage-calc.js') ?: time());
     ?>
     <script src="/js/complex-nav.js?v=<?php echo htmlspecialchars($complexNavJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+    <script src="/js/complex-mortgage-calc.js?v=<?php echo htmlspecialchars($complexMortgageJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
 <?php } ?>
-<?php if ($isComplexPage) {
+<?php if ($hasDeveloperOffers) {
     $developerOffersJsVersion = (string) (@filemtime(__DIR__ . '/../../js/developer-offers.js') ?: time());
     ?>
     <script src="/js/developer-offers.js?v=<?php echo htmlspecialchars($developerOffersJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
