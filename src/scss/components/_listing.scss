@@ -1683,125 +1683,161 @@ p.listing-object__address {
   }
 }
 
-.developer-offers__list {
-  display: grid;
-  gap: 0.65rem;
+.developer-offers__layout {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--featured-card-border, rgba(0, 0, 0, 0.08));
+  border-radius: 16px;
+  background: var(--featured-card-bg, #fff);
+  overflow: hidden;
 }
 
-.developer-offers__row {
-  display: grid;
-  grid-template-columns: 72px minmax(120px, 1.2fr) repeat(3, minmax(72px, 0.8fr)) minmax(140px, 1fr);
-  gap: 0.75rem 1rem;
-  align-items: center;
-  padding: 0.85rem 1rem;
-  border-radius: 14px;
-  border: 1px solid var(--featured-card-border, rgba(0, 0, 0, 0.08));
-  background: var(--featured-card-bg, #fff);
-  cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+.developer-offers__card {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid var(--featured-card-border, rgba(0, 0, 0, 0.08));
+  transition: background 0.15s ease;
+
+  &:last-child {
+    border-bottom: 0;
+  }
 
   &:hover,
   &:focus-visible {
-    border-color: var(--cta-bg, #0d9488);
-    box-shadow: 0 4px 18px rgba(13, 62, 54, 0.08);
+    background: rgba(13, 148, 136, 0.04);
     outline: none;
   }
+}
 
-  @media (max-width: 900px) {
-    grid-template-columns: 64px 1fr 1fr;
-    grid-template-areas:
-      "plan meta meta"
-      "plan area floor"
-      "plan completion price";
+.developer-offers__card-body {
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  align-items: stretch;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 0.85rem;
   }
 }
 
-.developer-offers__plan-img,
-.developer-offers__plan-placeholder {
-  width: 72px;
-  height: 72px;
-  border-radius: 10px;
-  object-fit: cover;
-  background: #f3f4f6;
+.developer-offers__card-plan {
+  flex-shrink: 0;
+}
 
-  @media (max-width: 900px) {
-    grid-area: plan;
-    width: 64px;
-    height: 64px;
+.developer-offers__card-plan-img,
+.developer-offers__card-plan-placeholder {
+  display: block;
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: #f8fafc;
+
+  @media (max-width: 720px) {
+    width: 72px;
+    height: 72px;
   }
 }
 
-.developer-offers__meta {
+.developer-offers__card-plan-placeholder {
+  border: 1px dashed rgba(0, 0, 0, 0.08);
+}
+
+.developer-offers__card-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.developer-offers__card-grid {
+  display: grid;
+  grid-template-columns: minmax(120px, 1.4fr) repeat(3, minmax(72px, 1fr)) minmax(130px, 1.1fr);
+  gap: 0.5rem 1rem;
+  align-items: start;
+
   @media (max-width: 900px) {
-    grid-area: meta;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem 0.75rem;
   }
 }
 
-.developer-offers__rooms {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 800;
-}
-
-.developer-offers__building {
-  margin: 0.2rem 0 0;
-  font-size: 0.82rem;
-  color: var(--page-muted, #6b7280);
-}
-
-.developer-offers__col {
+.developer-offers__card-row {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+  min-width: 0;
+
+  &--head {
+    @media (max-width: 900px) {
+      grid-column: 1 / -1;
+    }
+  }
 
   @media (max-width: 900px) {
-    &--area { grid-area: area; }
-    &--floor { grid-area: floor; }
-    &--completion { grid-area: completion; }
+    &:nth-child(2) { grid-column: 1; }
+    &:nth-child(3) { grid-column: 2; }
+    &:nth-child(4) { grid-column: 1; }
+    &:nth-child(5) { grid-column: 2; }
   }
 }
 
-.developer-offers__col-label {
-  font-size: 0.72rem;
+.developer-offers__card-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.25;
+
+  &--rooms {
+    font-size: 1rem;
+    font-weight: 800;
+  }
+}
+
+.developer-offers__card-muted {
+  font-size: 0.82rem;
+  color: var(--page-muted, #6b7280);
+  line-height: 1.3;
+}
+
+.developer-offers__card-floor-total {
+  font-weight: 400;
   color: var(--page-muted, #6b7280);
 }
 
-.developer-offers__col-value {
-  font-size: 0.9rem;
-  font-weight: 700;
-}
-
-.developer-offers__price-wrap {
-  text-align: right;
+.developer-offers__card-price {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
 
   @media (max-width: 900px) {
-    grid-area: price;
-    text-align: left;
+    grid-column: 1 / -1;
+    justify-content: flex-start;
   }
 }
 
-.developer-offers__price {
+.developer-offers__card-price-value {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 900;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
-.developer-offers__link {
-  display: inline;
-  margin: 0.2rem 0 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
+.developer-offers__card-flats {
+  align-self: flex-end;
   font-size: 0.82rem;
   font-weight: 700;
   color: var(--cta-bg, #0d9488);
   text-decoration: underline;
   text-underline-offset: 0.12em;
-  cursor: pointer;
 
-  &:hover {
-    color: var(--cta-bg-hover, #0f766e);
+  @media (max-width: 900px) {
+    align-self: flex-start;
   }
 }
 

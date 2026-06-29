@@ -30,7 +30,7 @@
   }
 
   const tabs = root.querySelectorAll('[data-building-filter]');
-  const rows = root.querySelectorAll('.developer-offers__row');
+  const rows = root.querySelectorAll('.developer-offers__card');
 
   tabs.forEach((tab) => {
     tab.addEventListener('click', () => {
@@ -107,7 +107,15 @@
     if (titleEl) titleEl.textContent = typeof offer.title === 'string' ? offer.title : '';
     if (priceEl) {
       const price = offer.price != null ? Number(offer.price) : null;
-      priceEl.textContent = price != null ? formatRubFrom(price) : 'Цена по запросу';
+      const priceMax = offer.priceMax != null ? Number(offer.priceMax) : null;
+      const flatsCount = Number(offer.flatsCount) || 1;
+      if (price != null && flatsCount === 1 && (priceMax == null || priceMax <= price)) {
+        priceEl.textContent = formatRub(price);
+      } else if (price != null) {
+        priceEl.textContent = formatRubFrom(price);
+      } else {
+        priceEl.textContent = 'Цена по запросу';
+      }
     }
     if (priceM2El) {
       const price = offer.price != null ? Number(offer.price) : null;
@@ -184,7 +192,7 @@
   root.addEventListener('keydown', (e) => {
     const target = e.target;
     if (!(target instanceof Element)) return;
-    const row = target.closest('[data-developer-offer-open][role="button"]');
+    const row = target.closest('.developer-offers__card[data-developer-offer-open]');
     if (!row || (e.key !== 'Enter' && e.key !== ' ')) return;
     e.preventDefault();
     const layoutId = row.getAttribute('data-layout-id') || '';

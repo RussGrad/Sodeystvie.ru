@@ -903,6 +903,34 @@ function site_developer_offer_area_text(?float $area): ?string
     return rtrim(rtrim(number_format($area, 2, '.', ''), '0'), '.') . ' м²';
 }
 
+function site_developer_offer_area_text_ru(?float $area): ?string
+{
+    if ($area === null || $area <= 0) {
+        return null;
+    }
+
+    $formatted = number_format($area, 2, ',', '');
+    $formatted = rtrim(rtrim($formatted, '0'), ',');
+
+    return $formatted . ' м²';
+}
+
+/**
+ * @param int|null $price
+ * @param int|null $priceMax
+ */
+function site_developer_offer_price_text(?int $price, ?int $priceMax, int $flatsCount): string
+{
+    if ($price === null) {
+        return '—';
+    }
+    if ($flatsCount > 1 || ($priceMax !== null && $priceMax > $price)) {
+        return site_fmt_rub_from((string) $price);
+    }
+
+    return site_fmt_rub((string) $price);
+}
+
 /**
  * @param array<string, mixed> $row
  */
@@ -1682,14 +1710,13 @@ function site_render_developer_offers_section(array $row): void
                 <?php } ?>
             </div>
         <?php } ?>
-        <div class="developer-offers__list">
+        <div class="developer-offers__layout" data-testid="room-layout">
             <?php foreach ($offers as $offer) {
                 $buildingId = $offer['buildingId'] ?? null;
                 $rooms = $offer['rooms'] ?? null;
                 $roomLabel = site_developer_offer_room_label(is_int($rooms) ? $rooms : null);
-                $area = site_developer_offer_area_text(
-                    isset($offer['area']) && is_numeric($offer['area']) ? (float) $offer['area'] : null,
-                );
+                $areaValue = isset($offer['area']) && is_numeric($offer['area']) ? (float) $offer['area'] : null;
+                $area = site_developer_offer_area_text_ru($areaValue);
                 $floorText = site_developer_offer_floor_text(
                     $offer['floor'] ?? null,
                     $offer['floorMax'] ?? null,
@@ -1699,59 +1726,78 @@ function site_render_developer_offers_section(array $row): void
                     $offer['completionQuarter'] ?? null,
                     $offer['completionYear'] ?? null,
                 );
-                $priceText = isset($offer['price']) ? site_fmt_rub_from((string) $offer['price']) : '—';
-                $planUrl = isset($offer['planImageUrl']) ? trim((string) $offer['planImageUrl']) : '';
+                $price = isset($offer['price']) && is_numeric($offer['price']) ? (int) $offer['price'] : null;
+                $priceMax = isset($offer['priceMax']) && is_numeric($offer['priceMax']) ? (int) $offer['priceMax'] : null;
                 $flatsCount = (int) ($offer['flatsCount'] ?? 1);
+                $priceText = site_developer_offer_price_text($price, $priceMax, $flatsCount);
+                $planUrl = isset($offer['planImageUrl']) ? trim((string) $offer['planImageUrl']) : '';
                 $layoutId = (string) ($offer['layoutId'] ?? '');
+                $flatsLabel = site_developer_offers_flats_label($flatsCount);
+                $floorParts = $floorText !== '' ? explode(' / ', $floorText, 2) : [];
                 ?>
-                <article
-                    class="developer-offers__row"
+                <a
+                    class="developer-offers__card"
+                    href="#complex-offers"
                     data-building-id="<?php echo $buildingId !== null ? (int) $buildingId : ''; ?>"
                     data-layout-id="<?php echo htmlspecialchars($layoutId, ENT_QUOTES, 'UTF-8'); ?>"
                     data-developer-offer-open
-                    role="button"
-                    tabindex="0"
-                    aria-label="<?php echo htmlspecialchars($roomLabel . ($area !== null ? ', ' . $area : ''), ENT_QUOTES, 'UTF-8'); ?>"
                 >
-                    <div class="developer-offers__plan">
-                        <?php if ($planUrl !== '') { ?>
-                            <img
-                                class="developer-offers__plan-img"
-                                src="<?php echo htmlspecialchars($planUrl, ENT_QUOTES, 'UTF-8'); ?>"
-                                alt="Планировка"
-                                loading="lazy"
-                                decoding="async"
-                                referrerpolicy="no-referrer"
-                            >
-                        <?php } else { ?>
-                            <div class="developer-offers__plan-placeholder" aria-hidden="true"></div>
-                        <?php } ?>
+                    <div class="developer-offers__card-body">
+                        <div class="developer-offers__card-plan">
+                            <?php if ($planUrl !== '') { ?>
+                                <picture>
+                                    <img
+                                        class="developer-offers__card-plan-img"
+                                        src="<?php echo htmlspecialchars($planUrl, ENT_QUOTES, 'UTF-8'); ?>"
+                                        alt="Фото планировки"
+                                        loading="lazy"
+                                        decoding="async"
+                                        referrerpolicy="no-referrer"
+                                    >
+                                </picture>
+                            <?php } else { ?>
+                                <div class="developer-offers__card-plan-placeholder" aria-hidden="true"></div>
+                            <?php } ?>
+                        </div>
+                        <div class="developer-offers__card-info">
+                            <div class="developer-offers__card-grid">
+                                <div class="developer-offers__card-row developer-offers__card-row--head">
+                                    <div class="developer-offers__card-value developer-offers__card-value--rooms" data-testid="rooms">
+                                        <?php echo htmlspecialchars($roomLabel, ENT_QUOTES, 'UTF-8'); ?>
+                                    </div>
+                                    <?php if (!empty($offer['buildingName'])) { ?>
+                                        <div class="developer-offers__card-muted"><?php echo htmlspecialchars((string) $offer['buildingName'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                    <?php } ?>
+                                </div>
+                                <div class="developer-offers__card-row">
+                                    <div class="developer-offers__card-muted">Площадь</div>
+                                    <div class="developer-offers__card-value"><?php echo $area !== null ? htmlspecialchars($area, ENT_QUOTES, 'UTF-8') : '—'; ?></div>
+                                </div>
+                                <div class="developer-offers__card-row">
+                                    <div class="developer-offers__card-muted">Этаж</div>
+                                    <div class="developer-offers__card-value" data-testid="floorsInfo">
+                                        <?php if (count($floorParts) === 2) { ?>
+                                            <?php echo htmlspecialchars($floorParts[0], ENT_QUOTES, 'UTF-8'); ?>
+                                            <span class="developer-offers__card-floor-total"> / <?php echo htmlspecialchars($floorParts[1], ENT_QUOTES, 'UTF-8'); ?></span>
+                                        <?php } else { ?>
+                                            <?php echo $floorText !== '' ? htmlspecialchars($floorText, ENT_QUOTES, 'UTF-8') : '—'; ?>
+                                        <?php } ?>
+                                    </div>
+                                </div>
+                                <div class="developer-offers__card-row">
+                                    <div class="developer-offers__card-muted">Сдача</div>
+                                    <div class="developer-offers__card-value"><?php echo $completion !== '' ? htmlspecialchars($completion, ENT_QUOTES, 'UTF-8') : '—'; ?></div>
+                                </div>
+                                <div class="developer-offers__card-price">
+                                    <p class="developer-offers__card-price-value" data-testid="price"><?php echo htmlspecialchars($priceText, ENT_QUOTES, 'UTF-8'); ?></p>
+                                </div>
+                            </div>
+                            <div class="developer-offers__card-flats" data-testid="not-mobile-flats">
+                                <?php echo htmlspecialchars($flatsLabel, ENT_QUOTES, 'UTF-8'); ?>
+                            </div>
+                        </div>
                     </div>
-                    <div class="developer-offers__meta">
-                        <p class="developer-offers__rooms"><?php echo htmlspecialchars($roomLabel, ENT_QUOTES, 'UTF-8'); ?></p>
-                        <?php if (!empty($offer['buildingName'])) { ?>
-                            <p class="developer-offers__building"><?php echo htmlspecialchars((string) $offer['buildingName'], ENT_QUOTES, 'UTF-8'); ?></p>
-                        <?php } ?>
-                    </div>
-                    <div class="developer-offers__col developer-offers__col--area">
-                        <span class="developer-offers__col-label">Площадь</span>
-                        <span class="developer-offers__col-value"><?php echo $area !== null ? htmlspecialchars($area, ENT_QUOTES, 'UTF-8') : '—'; ?></span>
-                    </div>
-                    <div class="developer-offers__col developer-offers__col--floor">
-                        <span class="developer-offers__col-label">Этаж</span>
-                        <span class="developer-offers__col-value"><?php echo $floorText !== '' ? htmlspecialchars($floorText, ENT_QUOTES, 'UTF-8') : '—'; ?></span>
-                    </div>
-                    <div class="developer-offers__col developer-offers__col--completion">
-                        <span class="developer-offers__col-label">Сдача</span>
-                        <span class="developer-offers__col-value"><?php echo $completion !== '' ? htmlspecialchars($completion, ENT_QUOTES, 'UTF-8') : '—'; ?></span>
-                    </div>
-                    <div class="developer-offers__price-wrap">
-                        <p class="developer-offers__price"><?php echo htmlspecialchars($priceText, ENT_QUOTES, 'UTF-8'); ?></p>
-                        <button type="button" class="developer-offers__link" data-developer-offer-open data-layout-id="<?php echo htmlspecialchars($layoutId, ENT_QUOTES, 'UTF-8'); ?>">
-                            <?php echo htmlspecialchars(site_developer_offers_flats_label($flatsCount), ENT_QUOTES, 'UTF-8'); ?>
-                        </button>
-                    </div>
-                </article>
+                </a>
             <?php } ?>
         </div>
         <?php if ($offersTotal > count($offers)) { ?>
