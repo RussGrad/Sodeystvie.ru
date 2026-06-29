@@ -21,10 +21,14 @@ function site_about_team_image_exists(): bool
  */
 function site_about_stats(): array
 {
-    $rating = number_format((float) site_env('SITE_REVIEWS_RATING', '4.9'), 1, '.', '');
-    $reviewsCount = (int) site_env('SITE_REVIEWS_COUNT', '250');
+    require_once __DIR__ . '/site-reviews.php';
+    $summary = site_reviews_summary();
+    $rating = !empty($summary['hasRating'])
+        ? number_format((float) $summary['rating'], 1, '.', '')
+        : '—';
+    $reviewsCount = (int) ($summary['count'] ?? 0);
     $reviewsLabel = $reviewsCount > 0
-        ? number_format($reviewsCount, 0, '.', ' ') . '+ отзывов'
+        ? number_format($reviewsCount, 0, '.', ' ') . ' оценок'
         : 'отзывы клиентов';
 
     return [

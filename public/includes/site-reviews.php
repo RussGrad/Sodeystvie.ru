@@ -11,6 +11,119 @@ function site_reviews_data_path(): string
     return dirname(__DIR__) . '/data/reviews.json';
 }
 
+function site_reviews_domclick_data_path(): string
+{
+    return dirname(__DIR__) . '/data/reviews-domclick.json';
+}
+
+/**
+ * @return array{summary: ?array{rating: ?float, count: ?int, title: ?string}, reviews: list<array<string, mixed>>}
+ */
+function site_reviews_domclick_pack(): array
+{
+    static $cache = null;
+    if ($cache !== null) {
+        return $cache;
+    }
+
+    $empty = ['summary' => null, 'reviews' => []];
+    $path = site_reviews_domclick_data_path();
+    if (!is_readable($path)) {
+        $cache = $empty;
+
+        return $cache;
+    }
+
+    $raw = file_get_contents($path);
+    if ($raw === false) {
+        $cache = $empty;
+
+        return $cache;
+    }
+
+    $decoded = json_decode($raw, true);
+    if (!is_array($decoded)) {
+        $cache = $empty;
+
+        return $cache;
+    }
+
+    $summary = null;
+    if (isset($decoded['summary']) && is_array($decoded['summary'])) {
+        $s = $decoded['summary'];
+        $summary = [
+            'rating' => isset($s['rating']) && is_numeric($s['rating']) ? (float) $s['rating'] : null,
+            'count' => isset($s['count']) && is_numeric($s['count']) ? (int) $s['count'] : null,
+            'title' => isset($s['title']) && is_string($s['title']) && trim($s['title']) !== ''
+                ? trim($s['title'])
+                : null,
+        ];
+    }
+
+    $reviews = [];
+    foreach ($decoded['reviews'] ?? [] as $row) {
+        if (!is_array($row)) {
+            continue;
+        }
+        $normalized = site_reviews_normalize_row($row, 'domclick');
+        if ($normalized !== null) {
+            $reviews[] = $normalized;
+        }
+    }
+
+    usort($reviews, static function (array $a, array $b): int {
+        return strcmp($b['date'], $a['date']);
+    });
+
+    $cache = ['summary' => $summary, 'reviews' => $reviews];
+
+    return $cache;
+}
+
+/**
+ * @param array<string, mixed> $row
+ * @return ?array{id: string, author: string, date: string, rating: int, text: string, source: string, demo: bool, reply: ?array{author: ?string, text: string, date: ?string}}
+ */
+function site_reviews_normalize_row(array $row, string $defaultSource = 'yandex'): ?array
+{
+    $id = isset($row['id']) ? trim((string) $row['id']) : '';
+    $author = isset($row['author']) ? trim((string) $row['author']) : '';
+    $text = isset($row['text']) ? trim((string) $row['text']) : '';
+    if ($id === '' || $author === '' || $text === '') {
+        return null;
+    }
+    $rating = isset($row['rating']) && is_numeric($row['rating']) ? (int) $row['rating'] : 5;
+    $rating = max(1, min(5, $rating));
+    $date = isset($row['date']) ? trim((string) $row['date']) : '';
+    $source = isset($row['source']) && trim((string) $row['source']) !== ''
+        ? trim((string) $row['source'])
+        : $defaultSource;
+    $demo = !empty($row['demo']);
+
+    $reply = null;
+    if (isset($row['reply']) && is_array($row['reply'])) {
+        $replyText = isset($row['reply']['text']) ? trim((string) $row['reply']['text']) : '';
+        if ($replyText !== '') {
+            $reply = [
+                'author' => isset($row['reply']['author']) ? trim((string) $row['reply']['author']) : null,
+                'text' => $replyText,
+                'date' => isset($row['reply']['date']) ? trim((string) $row['reply']['date']) : null,
+            ];
+        }
+    }
+
+    return [
+        'id' => $id,
+        'author' => $author,
+        'date' => $date,
+        'rating' => $rating,
+        'text' => $text,
+        'source' => $source,
+        'demo' => $demo,
+        'reply' => $reply,
+    ];
+}
+
 /**
  * @return list<array{id: string, author: string, date: string, rating: int, text: string, source: string}>
  */
@@ -21,53 +134,31 @@ function site_reviews_all(): array
         return $cache;
     }
 
-    $path = site_reviews_data_path();
-    if (!is_readable($path)) {
-        $cache = [];
-
-        return $cache;
-    }
-
-    $raw = file_get_contents($path);
-    if ($raw === false) {
-        $cache = [];
-
-        return $cache;
-    }
-
-    $decoded = json_decode($raw, true);
-    if (!is_array($decoded)) {
-        $cache = [];
-
-        return $cache;
-    }
-
     $out = [];
-    foreach ($decoded as $row) {
-        if (!is_array($row)) {
-            continue;
-        }
-        $id = isset($row['id']) ? trim((string) $row['id']) : '';
-        $author = isset($row['author']) ? trim((string) $row['author']) : '';
-        $text = isset($row['text']) ? trim((string) $row['text']) : '';
-        if ($id === '' || $author === '' || $text === '') {
-            continue;
-        }
-        $rating = isset($row['rating']) && is_numeric($row['rating']) ? (int) $row['rating'] : 5;
-        $rating = max(1, min(5, $rating));
-        $date = isset($row['date']) ? trim((string) $row['date']) : '';
-        $source = isset($row['source']) ? trim((string) $row['source']) : 'yandex';
-        $demo = !empty($row['demo']);
+    foreach (site_reviews_domclick_pack()['reviews'] as $review) {
+        $out[] = $review;
+    }
 
-        $out[] = [
-            'id' => $id,
-            'author' => $author,
-            'date' => $date,
-            'rating' => $rating,
-            'text' => $text,
-            'source' => $source,
-            'demo' => $demo,
-        ];
+    $path = site_reviews_data_path();
+    if (is_readable($path)) {
+        $raw = file_get_contents($path);
+        if ($raw !== false) {
+            $decoded = json_decode($raw, true);
+            if (is_array($decoded)) {
+                foreach ($decoded as $row) {
+                    if (!is_array($row)) {
+                        continue;
+                    }
+                    if (!empty($row['demo'])) {
+                        continue;
+                    }
+                    $normalized = site_reviews_normalize_row($row);
+                    if ($normalized !== null) {
+                        $out[] = $normalized;
+                    }
+                }
+            }
+        }
     }
 
     usort($out, static function (array $a, array $b): int {
@@ -84,15 +175,55 @@ function site_reviews_all(): array
  */
 function site_reviews_summary(): array
 {
-    $ratingRaw = site_content_setting('reviews_rating', '');
-    $rating = $ratingRaw !== '' ? (float) $ratingRaw : (float) site_env('SITE_REVIEWS_RATING', '4.9');
-    $rating = max(1.0, min(5.0, round($rating, 1)));
-    $countRaw = site_content_setting('reviews_count', '');
-    $count = $countRaw !== '' ? (int) $countRaw : (int) site_env('SITE_REVIEWS_COUNT', '250');
-    $count = max(0, $count);
+    $all = site_reviews_all();
+    $domclick = site_reviews_domclick_pack()['summary'];
+
+    $rating = null;
+    $count = null;
+
+    if (is_array($domclick)) {
+        if (isset($domclick['rating']) && is_numeric($domclick['rating'])) {
+            $rating = (float) $domclick['rating'];
+        }
+        if (isset($domclick['count']) && is_numeric($domclick['count'])) {
+            $count = (int) $domclick['count'];
+        }
+    }
+
+    if ($rating === null && count($all) > 0) {
+        $sum = 0;
+        foreach ($all as $review) {
+            $sum += (int) ($review['rating'] ?? 5);
+        }
+        $rating = round($sum / count($all), 1);
+    }
+    if ($count === null) {
+        $count = count($all);
+    }
+
+    if ($rating === null) {
+        $ratingRaw = site_content_setting('reviews_rating', '');
+        $rating = $ratingRaw !== '' ? (float) $ratingRaw : null;
+        if ($rating === null) {
+            $envRating = trim(site_env('SITE_REVIEWS_RATING', ''));
+            $rating = $envRating !== '' ? (float) $envRating : null;
+        }
+    }
+    if ($count === null || $count === 0) {
+        $countRaw = site_content_setting('reviews_count', '');
+        $count = $countRaw !== '' ? (int) $countRaw : null;
+        if ($count === null) {
+            $envCount = trim(site_env('SITE_REVIEWS_COUNT', ''));
+            $count = $envCount !== '' ? (int) $envCount : 0;
+        }
+    }
+
+    $rating = $rating !== null ? max(1.0, min(5.0, round($rating, 1))) : null;
+    $count = max(0, (int) ($count ?? 0));
+
     $countLabel = $count > 0
-        ? number_format($count, 0, '.', ' ') . '+ отзывов'
-        : 'отзывы клиентов';
+        ? number_format($count, 0, '.', ' ') . ' оценок'
+        : (count($all) > 0 ? count($all) . ' отзывов на сайте' : 'отзывы клиентов');
     if (site_reviews_all_demo()) {
         $countLabel = 'проверочные карточки';
     }
@@ -103,6 +234,7 @@ function site_reviews_summary(): array
         'countLabel' => $countLabel,
         'yandexUrl' => trim(site_env('SITE_YANDEX_ORG_URL', '')),
         'isDemo' => site_reviews_all_demo(),
+        'hasRating' => $rating !== null && $count > 0,
     ];
 }
 
@@ -431,6 +563,24 @@ function site_render_review_card(array $review, bool $compact = false): void
             <?php } ?>
             <span class="review-card__source"><?php echo htmlspecialchars(site_reviews_source_label($review['source']), ENT_QUOTES, 'UTF-8'); ?></span>
         </footer>
+        <?php
+        $reply = isset($review['reply']) && is_array($review['reply']) ? $review['reply'] : null;
+        if (is_array($reply) && !empty($reply['text']) && !$compact) {
+            $replyAuthor = isset($reply['author']) ? trim((string) $reply['author']) : '';
+            $replyDate = isset($reply['date']) ? trim((string) $reply['date']) : '';
+            ?>
+            <div class="review-card__reply">
+                <?php if ($replyAuthor !== '') { ?>
+                    <strong class="review-card__reply-author"><?php echo htmlspecialchars($replyAuthor, ENT_QUOTES, 'UTF-8'); ?></strong>
+                <?php } ?>
+                <?php if ($replyDate !== '') { ?>
+                    <time class="review-card__reply-date" datetime="<?php echo htmlspecialchars($replyDate, ENT_QUOTES, 'UTF-8'); ?>">
+                        <?php echo htmlspecialchars(site_reviews_format_date($replyDate), ENT_QUOTES, 'UTF-8'); ?>
+                    </time>
+                <?php } ?>
+                <p class="review-card__reply-text"><?php echo nl2br(htmlspecialchars((string) $reply['text'], ENT_QUOTES, 'UTF-8')); ?></p>
+            </div>
+        <?php } ?>
     </article>
     <?php
 }

@@ -21,13 +21,15 @@ if (count($reviewsHome) === 0 && count($platforms) === 0) {
                 <h2 class="reviews__title" id="reviews-title">Отзывы клиентов</h2>
                 <p class="reviews__lead">Реальные истории покупки, продажи и аренды недвижимости в Иркутске.</p>
             </div>
+            <?php if (!empty($summary['hasRating'])) { ?>
             <div class="reviews__summary">
                 <p class="reviews__rating" aria-label="Средняя оценка <?php echo htmlspecialchars((string) $summary['rating'], ENT_QUOTES, 'UTF-8'); ?> из 5">
-                    <span class="reviews__rating-value"><?php echo htmlspecialchars(number_format($summary['rating'], 1, '.', ''), ENT_QUOTES, 'UTF-8'); ?></span>
-                    <?php echo site_reviews_render_stars((int) round($summary['rating']), 'review-stars review-stars--summary'); ?>
+                    <span class="reviews__rating-value"><?php echo htmlspecialchars(number_format((float) $summary['rating'], 1, '.', ''), ENT_QUOTES, 'UTF-8'); ?></span>
+                    <?php echo site_reviews_render_stars((int) round((float) $summary['rating']), 'review-stars review-stars--summary'); ?>
                 </p>
                 <p class="reviews__count"><?php echo htmlspecialchars($summary['countLabel'], ENT_QUOTES, 'UTF-8'); ?></p>
             </div>
+            <?php } ?>
         </header>
 
         <?php site_render_reviews_demo_notice(); ?>

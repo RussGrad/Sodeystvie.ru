@@ -21,11 +21,13 @@ require __DIR__ . '/../includes/header.php';
         </header>
 
         <section class="reviews-page__summary" aria-label="Сводная оценка">
+            <?php if (!empty($summary['hasRating'])) { ?>
             <div class="reviews-page__score">
-                <span class="reviews-page__score-value"><?php echo htmlspecialchars(number_format($summary['rating'], 1, '.', ''), ENT_QUOTES, 'UTF-8'); ?></span>
-                <?php echo site_reviews_render_stars((int) round($summary['rating']), 'review-stars review-stars--lg'); ?>
+                <span class="reviews-page__score-value"><?php echo htmlspecialchars(number_format((float) $summary['rating'], 1, '.', ''), ENT_QUOTES, 'UTF-8'); ?></span>
+                <?php echo site_reviews_render_stars((int) round((float) $summary['rating']), 'review-stars review-stars--lg'); ?>
                 <p class="reviews-page__score-caption"><?php echo htmlspecialchars($summary['countLabel'], ENT_QUOTES, 'UTF-8'); ?></p>
             </div>
+            <?php } ?>
         </section>
 
         <?php site_render_reviews_demo_notice(); ?>

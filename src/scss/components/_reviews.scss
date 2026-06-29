@@ -127,6 +127,35 @@
     border-radius: 999px;
   }
 
+  &__reply {
+    margin-top: 0.15rem;
+    padding: 0.85rem 0.95rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--services-text);
+    background: rgba(var(--color-accent-rgb), 0.06);
+    border-left: 3px solid rgba(var(--color-accent-rgb), 0.35);
+    border-radius: 0 8px 8px 0;
+  }
+
+  &__reply-author {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-size: 0.8125rem;
+    color: var(--services-title);
+  }
+
+  &__reply-date {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.75rem;
+    color: var(--header-muted);
+  }
+
+  &__reply-text {
+    margin: 0;
+  }
+
   &--compact {
     .review-card__text p {
       display: -webkit-box;
