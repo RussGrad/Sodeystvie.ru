@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Отзывы клиентов: JSON в public/data/reviews.json + сводка из .env.
+ * Отзывы клиентов: public/data/reviews-domclick.json, public/data/reviews.json + сводка.
  */
 
 function site_reviews_data_path(): string
@@ -17,7 +17,7 @@ function site_reviews_domclick_data_path(): string
 }
 
 /**
- * @return array{summary: ?array{rating: ?float, count: ?int, title: ?string}, reviews: list<array<string, mixed>>}
+ * @return array{summary: ?array{rating: ?float, count: ?int, title: ?string}, reviews: list<array<string, mixed>>, sourceUrl: ?string}
  */
 function site_reviews_domclick_pack(): array
 {
@@ -26,7 +26,7 @@ function site_reviews_domclick_pack(): array
         return $cache;
     }
 
-    $empty = ['summary' => null, 'reviews' => []];
+    $empty = ['summary' => null, 'reviews' => [], 'sourceUrl' => null];
     $path = site_reviews_domclick_data_path();
     if (!is_readable($path)) {
         $cache = $empty;
@@ -75,7 +75,14 @@ function site_reviews_domclick_pack(): array
         return strcmp($b['date'], $a['date']);
     });
 
-    $cache = ['summary' => $summary, 'reviews' => $reviews];
+    $sourceUrl = isset($decoded['sourceUrl']) && is_string($decoded['sourceUrl'])
+        ? trim($decoded['sourceUrl'])
+        : null;
+    if ($sourceUrl === '') {
+        $sourceUrl = null;
+    }
+
+    $cache = ['summary' => $summary, 'reviews' => $reviews, 'sourceUrl' => $sourceUrl];
 
     return $cache;
 }
@@ -287,6 +294,71 @@ function site_reviews_source_label(string $source): string
     };
 }
 
+function site_reviews_source_platform_id(string $source): string
+{
+    return match (strtolower(trim($source))) {
+        '2gis', '2гис' => '2gis',
+        'google' => 'google',
+        'avito', 'авито' => 'avito',
+        'domclick', 'домклик' => 'domclick',
+        default => 'yandex',
+    };
+}
+
+function site_reviews_source_url(string $source): string
+{
+    static $urls = null;
+    if ($urls === null) {
+        $urls = [
+            'yandex' => trim(site_env('SITE_YANDEX_ORG_URL', '')),
+            '2gis' => trim(site_env('SITE_2GIS_ORG_URL', '')),
+            'domclick' => trim(site_env('SITE_DOMCLICK_REVIEWS_URL', '')),
+            'avito' => trim(site_env('SITE_AVITO_REVIEWS_URL', '')),
+        ];
+
+        $domclickUrl = site_reviews_domclick_pack()['sourceUrl'] ?? null;
+        if (
+            ($urls['domclick'] === '' || !site_reviews_is_safe_external_url($urls['domclick']))
+            && is_string($domclickUrl)
+            && $domclickUrl !== ''
+            && site_reviews_is_safe_external_url($domclickUrl)
+        ) {
+            $urls['domclick'] = $domclickUrl;
+        }
+    }
+
+    $platformId = site_reviews_source_platform_id($source);
+    $url = $urls[$platformId] ?? '';
+    if ($url !== '' && site_reviews_is_safe_external_url($url)) {
+        return $url;
+    }
+
+    return '';
+}
+
+function site_render_review_source_badge(string $source): void
+{
+    $label = site_reviews_source_label($source);
+    $url = site_reviews_source_url($source);
+    if ($url !== '') {
+        $title = 'Читать отзывы на ' . $label;
+        ?>
+        <a
+            class="review-card__source review-card__source--link"
+            href="<?php echo htmlspecialchars($url, ENT_QUOTES, 'UTF-8'); ?>"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="<?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?>"
+        ><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></a>
+        <?php
+
+        return;
+    }
+    ?>
+    <span class="review-card__source"><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></span>
+    <?php
+}
+
 /**
  * @return list<array{id: string, label: string, url: string, widgetSrc: string, cta: string}>
  */
@@ -386,6 +458,8 @@ function site_reviews_allowed_hosts(): array
         '2gis.com',
         'widgets.2gis.com',
         'domclick.ru',
+        'agencies.domclick.ru',
+        'irkutsk.domclick.ru',
         'avito.ru',
         'www.avito.ru',
         'm.avito.ru',
@@ -561,7 +635,7 @@ function site_render_review_card(array $review, bool $compact = false): void
                     <?php echo htmlspecialchars(site_reviews_format_date($review['date']), ENT_QUOTES, 'UTF-8'); ?>
                 </time>
             <?php } ?>
-            <span class="review-card__source"><?php echo htmlspecialchars(site_reviews_source_label($review['source']), ENT_QUOTES, 'UTF-8'); ?></span>
+            <?php site_render_review_source_badge($review['source']); ?>
         </footer>
         <?php
         $reply = isset($review['reply']) && is_array($review['reply']) ? $review['reply'] : null;

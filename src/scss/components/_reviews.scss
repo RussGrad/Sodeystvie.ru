@@ -125,6 +125,25 @@
     color: var(--color-accent);
     background: rgba(var(--color-accent-rgb), 0.1);
     border-radius: 999px;
+
+    &--link {
+      text-decoration: none;
+      transition:
+        background var(--duration-fast) var(--ease-smooth),
+        color var(--duration-fast) var(--ease-smooth),
+        box-shadow var(--duration-fast) var(--ease-smooth);
+
+      &:hover {
+        color: var(--cta-text);
+        background: var(--color-accent);
+        box-shadow: 0 2px 8px rgba(var(--color-accent-rgb), 0.25);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: 2px;
+      }
+    }
   }
 
   &__reply {
