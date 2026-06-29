@@ -305,28 +305,43 @@ function site_reviews_source_platform_id(string $source): string
     };
 }
 
-function site_reviews_source_url(string $source): string
+/**
+ * @return array<string, string>
+ */
+function site_reviews_platform_urls_map(): array
 {
-    static $urls = null;
-    if ($urls === null) {
-        $urls = [
-            'yandex' => trim(site_env('SITE_YANDEX_ORG_URL', '')),
-            '2gis' => trim(site_env('SITE_2GIS_ORG_URL', '')),
-            'domclick' => trim(site_env('SITE_DOMCLICK_REVIEWS_URL', '')),
-            'avito' => trim(site_env('SITE_AVITO_REVIEWS_URL', '')),
-        ];
-
-        $domclickUrl = site_reviews_domclick_pack()['sourceUrl'] ?? null;
-        if (
-            ($urls['domclick'] === '' || !site_reviews_is_safe_external_url($urls['domclick']))
-            && is_string($domclickUrl)
-            && $domclickUrl !== ''
-            && site_reviews_is_safe_external_url($domclickUrl)
-        ) {
-            $urls['domclick'] = $domclickUrl;
-        }
+    static $cache = null;
+    if ($cache !== null) {
+        return $cache;
     }
 
+    $cache = [
+        'yandex' => trim(site_env('SITE_YANDEX_ORG_URL', '')),
+        '2gis' => trim(site_env('SITE_2GIS_ORG_URL', '')),
+        'domclick' => trim(site_env('SITE_DOMCLICK_REVIEWS_URL', '')),
+        'avito' => trim(site_env('SITE_AVITO_REVIEWS_URL', '')),
+    ];
+
+    $domclickUrl = site_reviews_domclick_pack()['sourceUrl'] ?? null;
+    if (
+        ($cache['domclick'] === '' || !site_reviews_is_safe_external_url($cache['domclick']))
+        && is_string($domclickUrl)
+        && $domclickUrl !== ''
+        && site_reviews_is_safe_external_url($domclickUrl)
+    ) {
+        $cache['domclick'] = $domclickUrl;
+    }
+
+    return $cache;
+}
+
+function site_reviews_source_url(string $source, ?string $overrideUrl = null): string
+{
+    if (is_string($overrideUrl) && $overrideUrl !== '' && site_reviews_is_safe_external_url($overrideUrl)) {
+        return $overrideUrl;
+    }
+
+    $urls = site_reviews_platform_urls_map();
     $platformId = site_reviews_source_platform_id($source);
     $url = $urls[$platformId] ?? '';
     if ($url !== '' && site_reviews_is_safe_external_url($url)) {
@@ -336,19 +351,19 @@ function site_reviews_source_url(string $source): string
     return '';
 }
 
-function site_render_review_source_badge(string $source): void
+function site_render_review_source_badge(string $source, ?string $overrideUrl = null): void
 {
     $label = site_reviews_source_label($source);
-    $url = site_reviews_source_url($source);
+    $url = site_reviews_source_url($source, $overrideUrl);
     if ($url !== '') {
-        $title = 'Читать отзывы на ' . $label;
+        $title = 'Открыть отзывы на ' . $label;
         ?>
         <a
             class="review-card__source review-card__source--link"
             href="<?php echo htmlspecialchars($url, ENT_QUOTES, 'UTF-8'); ?>"
-            target="_blank"
             rel="noopener noreferrer"
             title="<?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?>"
+            aria-label="<?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?>"
         ><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></a>
         <?php
 
@@ -373,36 +388,33 @@ function site_reviews_platforms(): array
         [
             'id' => 'yandex',
             'label' => 'Яндекс',
-            'url' => trim(site_env('SITE_YANDEX_ORG_URL', '')),
             'widgetEnv' => 'SITE_YANDEX_REVIEWS_WIDGET_SRC',
             'cta' => 'Отзывы на Яндекс.Картах',
         ],
         [
             'id' => '2gis',
             'label' => '2ГИС',
-            'url' => trim(site_env('SITE_2GIS_ORG_URL', '')),
             'widgetEnv' => 'SITE_2GIS_REVIEWS_WIDGET_SRC',
             'cta' => 'Отзывы в 2ГИС',
         ],
         [
             'id' => 'domclick',
             'label' => 'Домклик',
-            'url' => trim(site_env('SITE_DOMCLICK_REVIEWS_URL', '')),
             'widgetEnv' => 'SITE_DOMCLICK_REVIEWS_WIDGET_SRC',
             'cta' => 'Отзывы на Домклик',
         ],
         [
             'id' => 'avito',
             'label' => 'Авито',
-            'url' => trim(site_env('SITE_AVITO_REVIEWS_URL', '')),
             'widgetEnv' => 'SITE_AVITO_REVIEWS_WIDGET_SRC',
             'cta' => 'Отзывы на Авито',
         ],
     ];
 
+    $urls = site_reviews_platform_urls_map();
     $out = [];
     foreach ($defs as $def) {
-        $url = $def['url'];
+        $url = $urls[$def['id']] ?? '';
         if ($url === '' || !site_reviews_is_safe_external_url($url)) {
             continue;
         }
@@ -635,7 +647,10 @@ function site_render_review_card(array $review, bool $compact = false): void
                     <?php echo htmlspecialchars(site_reviews_format_date($review['date']), ENT_QUOTES, 'UTF-8'); ?>
                 </time>
             <?php } ?>
-            <?php site_render_review_source_badge($review['source']); ?>
+            <?php
+            $reviewSourceUrl = isset($review['sourceUrl']) ? trim((string) $review['sourceUrl']) : '';
+            site_render_review_source_badge($review['source'], $reviewSourceUrl !== '' ? $reviewSourceUrl : null);
+            ?>
         </footer>
         <?php
         $reply = isset($review['reply']) && is_array($review['reply']) ? $review['reply'] : null;

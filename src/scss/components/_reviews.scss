@@ -96,6 +96,8 @@
   }
 
   &__footer {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -116,8 +118,14 @@
   }
 
   &__source {
+    position: relative;
+    z-index: 2;
     margin-left: auto;
-    padding: 0.15rem 0.45rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 1.75rem;
+    padding: 0.25rem 0.55rem;
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.02em;
@@ -125,6 +133,8 @@
     color: var(--color-accent);
     background: rgba(var(--color-accent-rgb), 0.1);
     border-radius: 999px;
+    cursor: pointer;
+    pointer-events: auto;
 
     &--link {
       text-decoration: none;
@@ -137,6 +147,10 @@
         color: var(--cta-text);
         background: var(--color-accent);
         box-shadow: 0 2px 8px rgba(var(--color-accent-rgb), 0.25);
+      }
+
+      &:active {
+        transform: translateY(1px);
       }
 
       &:focus-visible {
