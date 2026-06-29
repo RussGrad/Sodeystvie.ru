@@ -717,6 +717,7 @@ function site_complex_meta_entries(array $row): array
         'priceHistory' => [],
         'infrastructures' => [],
         'reviews' => [],
+        'reviewsSummary' => null,
         'calculatorDefaults' => null,
     ];
     $raw = $row['complexMeta'] ?? null;
@@ -757,8 +758,21 @@ function site_complex_meta_entries(array $row): array
         'priceHistory' => is_array($raw['priceHistory'] ?? null) ? array_values($raw['priceHistory']) : [],
         'infrastructures' => is_array($raw['infrastructures'] ?? null) ? array_values($raw['infrastructures']) : [],
         'reviews' => is_array($raw['reviews'] ?? null) ? array_values($raw['reviews']) : [],
+        'reviewsSummary' => is_array($raw['reviewsSummary'] ?? null) ? $raw['reviewsSummary'] : null,
         'calculatorDefaults' => is_array($raw['calculatorDefaults'] ?? null) ? $raw['calculatorDefaults'] : null,
     ];
+}
+
+function site_complex_reviews_rating_stars(?float $rating): string
+{
+    if ($rating === null || $rating <= 0) {
+        return '';
+    }
+    $full = (int) round($rating);
+    $full = max(0, min(5, $full));
+    $stars = str_repeat('★', $full) . str_repeat('☆', 5 - $full);
+
+    return $stars;
 }
 
 function site_developer_offers_flats_label(int $count): string
@@ -1463,11 +1477,28 @@ function site_render_complex_reviews(array $row): void
 {
     $meta = site_complex_meta_entries($row);
     $reviews = is_array($meta['reviews']) ? $meta['reviews'] : [];
+    $summary = is_array($meta['reviewsSummary'] ?? null) ? $meta['reviewsSummary'] : null;
     $title = site_newbuilding_page_title($row);
+    $sectionTitle = isset($summary['title']) && is_string($summary['title']) && trim($summary['title']) !== ''
+        ? trim($summary['title'])
+        : 'Отзывы о ' . $title;
+    $summaryRating = isset($summary['rating']) && is_numeric($summary['rating']) ? (float) $summary['rating'] : null;
+    $summaryCount = isset($summary['count']) && is_numeric($summary['count']) ? (int) $summary['count'] : count($reviews);
     ?>
     <section class="listing-object__section" id="complex-reviews" aria-labelledby="complex-reviews-title">
-        <h2 class="listing-object__section-title" id="complex-reviews-title">Отзывы о <?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></h2>
+        <h2 class="listing-object__section-title" id="complex-reviews-title"><?php echo htmlspecialchars($sectionTitle, ENT_QUOTES, 'UTF-8'); ?></h2>
         <?php if (count($reviews) > 0) { ?>
+            <?php if ($summaryRating !== null || $summaryCount > 0) { ?>
+                <div class="complex-reviews__summary">
+                    <?php if ($summaryRating !== null) { ?>
+                        <div class="complex-reviews__summary-grade"><?php echo htmlspecialchars(number_format($summaryRating, 1, ',', ''), ENT_QUOTES, 'UTF-8'); ?></div>
+                        <div class="complex-reviews__summary-stars" aria-hidden="true"><?php echo htmlspecialchars(site_complex_reviews_rating_stars($summaryRating), ENT_QUOTES, 'UTF-8'); ?></div>
+                    <?php } ?>
+                    <?php if ($summaryCount > 0) { ?>
+                        <div class="complex-reviews__summary-count"><?php echo (int) $summaryCount; ?> оценок</div>
+                    <?php } ?>
+                </div>
+            <?php } ?>
             <div class="complex-reviews">
                 <?php foreach ($reviews as $review) {
                     if (!is_array($review)) {
@@ -1480,6 +1511,7 @@ function site_render_complex_reviews(array $row): void
                     $author = isset($review['author']) ? trim((string) $review['author']) : '';
                     $rating = isset($review['rating']) && is_numeric($review['rating']) ? (float) $review['rating'] : null;
                     $date = isset($review['date']) ? trim((string) $review['date']) : '';
+                    $reply = isset($review['reply']) && is_array($review['reply']) ? $review['reply'] : null;
                     ?>
                     <article class="complex-reviews__item">
                         <header class="complex-reviews__head">
@@ -1487,13 +1519,27 @@ function site_render_complex_reviews(array $row): void
                                 <strong class="complex-reviews__author"><?php echo htmlspecialchars($author, ENT_QUOTES, 'UTF-8'); ?></strong>
                             <?php } ?>
                             <?php if ($rating !== null) { ?>
-                                <span class="complex-reviews__rating"><?php echo htmlspecialchars(number_format($rating, 1, ',', ''), ENT_QUOTES, 'UTF-8'); ?> / 5</span>
+                                <span class="complex-reviews__rating" aria-label="Оценка <?php echo htmlspecialchars(number_format($rating, 1, ',', ''), ENT_QUOTES, 'UTF-8'); ?> из 5"><?php echo htmlspecialchars(site_complex_reviews_rating_stars($rating), ENT_QUOTES, 'UTF-8'); ?></span>
                             <?php } ?>
                             <?php if ($date !== '') { ?>
-                                <time class="complex-reviews__date" datetime="<?php echo htmlspecialchars($date, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($date, ENT_QUOTES, 'UTF-8'); ?></time>
+                                <time class="complex-reviews__date"><?php echo htmlspecialchars($date, ENT_QUOTES, 'UTF-8'); ?></time>
                             <?php } ?>
                         </header>
                         <p class="complex-reviews__text"><?php echo nl2br(htmlspecialchars($text, ENT_QUOTES, 'UTF-8')); ?></p>
+                        <?php if (is_array($reply) && !empty($reply['text'])) {
+                            $replyAuthor = isset($reply['author']) ? trim((string) $reply['author']) : '';
+                            $replyDate = isset($reply['date']) ? trim((string) $reply['date']) : '';
+                            ?>
+                            <div class="complex-reviews__reply">
+                                <?php if ($replyAuthor !== '') { ?>
+                                    <strong class="complex-reviews__reply-author"><?php echo htmlspecialchars($replyAuthor, ENT_QUOTES, 'UTF-8'); ?></strong>
+                                <?php } ?>
+                                <?php if ($replyDate !== '') { ?>
+                                    <span class="complex-reviews__reply-date"><?php echo htmlspecialchars($replyDate, ENT_QUOTES, 'UTF-8'); ?></span>
+                                <?php } ?>
+                                <p class="complex-reviews__reply-text"><?php echo nl2br(htmlspecialchars((string) $reply['text'], ENT_QUOTES, 'UTF-8')); ?></p>
+                            </div>
+                        <?php } ?>
                     </article>
                 <?php } ?>
             </div>
