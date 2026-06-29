@@ -13,7 +13,7 @@ if ($id === '' || !site_validate_crm_object_id($id)) {
 }
 
 $apiUrl = site_crm_listings_url($id);
-$obj = site_http_get_json_cached($apiUrl, 10, 900);
+$obj = site_http_get_json_cached($apiUrl, 10, 60);
 $error = isset($obj['_error']) ? (string) $obj['_error'] : null;
 
 if (!$error && is_array($obj)) {

@@ -2066,8 +2066,8 @@ function site_crm_listing_enrich_row(array $row): array
         return $row;
     }
 
-    // Один запрос на объект (кэш 15 мин), без отдельного /description (на старом API — 404).
-    $detail = site_http_get_json_cached(site_crm_listings_url($id), 8, 900);
+    // Один запрос на объект (кэш 1 мин для быстрого появления предложений после импорта в CRM).
+    $detail = site_http_get_json_cached(site_crm_listings_url($id), 8, 60);
     if (!is_array($detail) || isset($detail['_error'])) {
         return $row;
     }
