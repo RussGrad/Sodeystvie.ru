@@ -15,8 +15,6 @@ $platforms = site_reviews_platforms();
 if (count($platforms) === 0) {
     return;
 }
-
-$widgetPlatforms = site_reviews_platforms_with_widgets();
 ?>
 <div class="review-platforms-wrap<?php echo $reviewPlatformsCompact ? ' review-platforms-wrap--compact' : ''; ?>">
     <?php if (!$reviewPlatformsCompact) { ?>
@@ -28,7 +26,7 @@ $widgetPlatforms = site_reviews_platforms_with_widgets();
 
     <?php site_render_review_platform_links($platforms); ?>
 
-    <?php if ($reviewPlatformsWidgets && count($widgetPlatforms) > 0) {
-        site_render_review_platform_widgets($widgetPlatforms);
+    <?php if ($reviewPlatformsWidgets && count($platforms) > 0) {
+        site_render_review_platform_invites($platforms);
     } ?>
 </div>

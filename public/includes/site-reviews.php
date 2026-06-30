@@ -662,9 +662,6 @@ function site_reviews_platforms(): array
         }
 
         $widgetSrc = trim(site_env($def['widgetEnv'], ''));
-        if ($widgetSrc === '' && $def['id'] === 'yandex') {
-            $widgetSrc = site_reviews_yandex_widget_from_org($url);
-        }
         if ($widgetSrc !== '' && !site_reviews_is_safe_widget_src($widgetSrc)) {
             $widgetSrc = '';
         }
@@ -788,6 +785,143 @@ function site_render_review_platform_links(array $platforms, string $listClass =
         <?php } ?>
     </ul>
     <?php
+}
+
+/**
+ * @return array{rating: ?float, count: int}
+ */
+function site_reviews_platform_stats(string $platformId): array
+{
+    $pack = site_reviews_external_pack($platformId);
+    $count = site_reviews_platform_total_count($platformId);
+    $rating = null;
+
+    if (isset($pack['summary']['rating']) && is_numeric($pack['summary']['rating'])) {
+        $rating = (float) $pack['summary']['rating'];
+    }
+
+    if ($rating === null && count($pack['reviews']) > 0) {
+        $sum = 0;
+        foreach ($pack['reviews'] as $review) {
+            $sum += (int) ($review['rating'] ?? 5);
+        }
+        $rating = round($sum / count($pack['reviews']), 1);
+    }
+
+    return [
+        'rating' => $rating !== null ? max(1.0, min(5.0, round($rating, 1))) : null,
+        'count' => $count,
+    ];
+}
+
+function site_reviews_platform_leave_review_url(string $platformId, string $url): string
+{
+    $id = strtolower(trim($platformId));
+    if ($id === 'yandex') {
+        if (preg_match('#(https://yandex\.ru/maps/org/[^/]+/\d+)#', $url, $match) === 1) {
+            return $match[1] . '/reviews/';
+        }
+
+        return rtrim($url, '/') . '/reviews/';
+    }
+    if ($id === '2gis' && !str_contains($url, '/tab/reviews')) {
+        return rtrim($url, '/') . '/tab/reviews';
+    }
+
+    return $url;
+}
+
+/**
+ * @param list<array{id: string, label: string, url: string, widgetSrc: string, cta: string}> $platforms
+ */
+function site_render_review_platform_invites(array $platforms): void
+{
+    if (count($platforms) === 0) {
+        return;
+    }
+
+    $brand = function_exists('site_brand_full') ? site_brand_full() : 'Содействие';
+    ?>
+    <section class="review-invites" aria-labelledby="review-invites-title">
+        <header class="review-invites__header">
+            <h2 class="review-invites__title" id="review-invites-title">Поделитесь впечатлением</h2>
+            <p class="review-invites__lead">
+                Работали с <?php echo htmlspecialchars($brand, ENT_QUOTES, 'UTF-8'); ?>? Оставьте отзыв на удобной площадке —
+                это помогает другим клиентам и занимает пару минут.
+            </p>
+        </header>
+        <div class="review-invites__grid">
+            <?php foreach ($platforms as $platform) {
+                $platformId = (string) $platform['id'];
+                $mod = ' review-invite--' . preg_replace('/[^a-z0-9_-]/', '', $platformId);
+                $stats = site_reviews_platform_stats($platformId);
+                $rating = $stats['rating'];
+                $count = $stats['count'];
+                $leaveUrl = site_reviews_platform_leave_review_url($platformId, $platform['url']);
+                $readUrl = $platform['url'];
+                $countLabel = $count > 0
+                    ? number_format($count, 0, '.', ' ') . ' ' . site_reviews_plural_reviews($count)
+                    : 'Пока мало отзывов — будьте первыми';
+                ?>
+                <article class="review-invite<?php echo htmlspecialchars($mod, ENT_QUOTES, 'UTF-8'); ?>">
+                    <div class="review-invite__top">
+                        <div class="review-invite__brand">
+                            <?php site_render_review_platform_icon($platformId); ?>
+                            <span class="review-invite__name"><?php echo htmlspecialchars($platform['label'], ENT_QUOTES, 'UTF-8'); ?></span>
+                        </div>
+                        <?php if ($rating !== null) { ?>
+                            <div class="review-invite__score" aria-label="Оценка <?php echo htmlspecialchars((string) $rating, ENT_QUOTES, 'UTF-8'); ?> из 5">
+                                <span class="review-invite__score-value"><?php echo htmlspecialchars(number_format($rating, 1, '.', ''), ENT_QUOTES, 'UTF-8'); ?></span>
+                                <?php echo site_reviews_render_stars((int) round($rating), 'review-stars review-stars--invite'); ?>
+                            </div>
+                        <?php } ?>
+                    </div>
+                    <p class="review-invite__count"><?php echo htmlspecialchars($countLabel, ENT_QUOTES, 'UTF-8'); ?></p>
+                    <p class="review-invite__text">
+                        <?php if ($platformId === 'yandex') { ?>
+                            Расскажите о покупке, продаже или аренде — ваш отзыв появится на Яндекс.Картах.
+                        <?php } elseif ($platformId === '2gis') { ?>
+                            Поделитесь опытом сделки — отзыв увидят тысячи пользователей 2ГИС в Иркутске.
+                        <?php } elseif ($platformId === 'domclick') { ?>
+                            Оцените работу риелтора после сделки — это важно для клиентов СберБанка.
+                        <?php } else { ?>
+                            Помогите другим выбрать надёжное агентство — оставьте честный отзыв.
+                        <?php } ?>
+                    </p>
+                    <div class="review-invite__actions">
+                        <a
+                            class="review-invite__btn review-invite__btn--primary"
+                            href="<?php echo htmlspecialchars($leaveUrl, ENT_QUOTES, 'UTF-8'); ?>"
+                            rel="noopener noreferrer"
+                        >Оставить отзыв</a>
+                        <a
+                            class="review-invite__btn review-invite__btn--ghost"
+                            href="<?php echo htmlspecialchars($readUrl, ENT_QUOTES, 'UTF-8'); ?>"
+                            rel="noopener noreferrer"
+                        >Читать отзывы</a>
+                    </div>
+                </article>
+            <?php } ?>
+        </div>
+    </section>
+    <?php
+}
+
+function site_reviews_plural_reviews(int $count): string
+{
+    $n = abs($count) % 100;
+    $n1 = $n % 10;
+    if ($n > 10 && $n < 20) {
+        return 'отзывов';
+    }
+    if ($n1 > 1 && $n1 < 5) {
+        return 'отзыва';
+    }
+    if ($n1 === 1) {
+        return 'отзыв';
+    }
+
+    return 'отзывов';
 }
 
 /**
