@@ -48,7 +48,7 @@ if (count($reviewsHome) === 0 && count($platforms) === 0) {
             </div>
 
             <div class="reviews__actions">
-                <?php site_render_reviews_source_cta(null); ?>
+                <?php site_render_reviews_platform_ctas(null); ?>
                 <a class="reviews__all-link reviews__all-link--secondary" href="/reviews/">Отзывы и площадки</a>
             </div>
         <?php } elseif (count($platforms) > 0) { ?>

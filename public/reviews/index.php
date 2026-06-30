@@ -43,8 +43,8 @@ require __DIR__ . '/../includes/header.php';
             <h2 class="reviews-page__local-heading">Отзывы на сайте</h2>
             <p class="reviews-page__local-lead">
                 Показаны последние <?php echo (int) count($reviewsPreview); ?> отзыва.
-                <?php if (site_reviews_more_on_source() !== null) { ?>
-                    Остальные — на площадке-источнике.
+                <?php if (site_reviews_has_platform_ctas()) { ?>
+                    Остальные — на площадках ниже.
                 <?php } ?>
             </p>
             <div class="reviews-page__list">
@@ -52,7 +52,7 @@ require __DIR__ . '/../includes/header.php';
                     site_render_review_card($review, false);
                 } ?>
             </div>
-            <?php site_render_reviews_source_cta('reviews-page__actions'); ?>
+            <?php site_render_reviews_platform_ctas('reviews-page__actions'); ?>
         <?php } elseif (count($platforms) === 0) { ?>
             <p class="reviews-page__empty">Отзывы скоро появятся здесь. Добавьте ссылки на площадки в <code>public/.env</code>.</p>
         <?php } ?>

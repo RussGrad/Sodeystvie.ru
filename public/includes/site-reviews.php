@@ -13,39 +13,65 @@ function site_reviews_data_path(): string
 
 function site_reviews_domclick_data_path(): string
 {
-    return dirname(__DIR__) . '/data/reviews-domclick.json';
+    return site_reviews_external_data_path('domclick');
+}
+
+/**
+ * @return list<string>
+ */
+function site_reviews_platform_ids(): array
+{
+    return ['domclick', 'yandex', '2gis', 'avito'];
+}
+
+function site_reviews_external_data_path(string $platformId): string
+{
+    $id = preg_replace('/[^a-z0-9_-]/', '', strtolower($platformId));
+
+    return dirname(__DIR__) . '/data/reviews-' . $id . '.json';
+}
+
+function site_reviews_platforms_meta_path(): string
+{
+    return dirname(__DIR__) . '/data/reviews-platforms.json';
 }
 
 /**
  * @return array{summary: ?array{rating: ?float, count: ?int, title: ?string}, reviews: list<array<string, mixed>>, sourceUrl: ?string}
  */
-function site_reviews_domclick_pack(): array
+function site_reviews_external_pack(string $platformId): array
 {
-    static $cache = null;
-    if ($cache !== null) {
-        return $cache;
+    static $cache = [];
+    if (isset($cache[$platformId])) {
+        return $cache[$platformId];
     }
 
     $empty = ['summary' => null, 'reviews' => [], 'sourceUrl' => null];
-    $path = site_reviews_domclick_data_path();
-    if (!is_readable($path)) {
-        $cache = $empty;
+    if (!in_array($platformId, site_reviews_platform_ids(), true)) {
+        $cache[$platformId] = $empty;
 
-        return $cache;
+        return $cache[$platformId];
+    }
+
+    $path = site_reviews_external_data_path($platformId);
+    if (!is_readable($path)) {
+        $cache[$platformId] = $empty;
+
+        return $cache[$platformId];
     }
 
     $raw = file_get_contents($path);
     if ($raw === false) {
-        $cache = $empty;
+        $cache[$platformId] = $empty;
 
-        return $cache;
+        return $cache[$platformId];
     }
 
     $decoded = json_decode($raw, true);
     if (!is_array($decoded)) {
-        $cache = $empty;
+        $cache[$platformId] = $empty;
 
-        return $cache;
+        return $cache[$platformId];
     }
 
     $summary = null;
@@ -65,7 +91,7 @@ function site_reviews_domclick_pack(): array
         if (!is_array($row)) {
             continue;
         }
-        $normalized = site_reviews_normalize_row($row, 'domclick');
+        $normalized = site_reviews_normalize_row($row, $platformId);
         if ($normalized !== null) {
             $reviews[] = $normalized;
         }
@@ -82,9 +108,17 @@ function site_reviews_domclick_pack(): array
         $sourceUrl = null;
     }
 
-    $cache = ['summary' => $summary, 'reviews' => $reviews, 'sourceUrl' => $sourceUrl];
+    $cache[$platformId] = ['summary' => $summary, 'reviews' => $reviews, 'sourceUrl' => $sourceUrl];
 
-    return $cache;
+    return $cache[$platformId];
+}
+
+/**
+ * @return array{summary: ?array{rating: ?float, count: ?int, title: ?string}, reviews: list<array<string, mixed>>, sourceUrl: ?string}
+ */
+function site_reviews_domclick_pack(): array
+{
+    return site_reviews_external_pack('domclick');
 }
 
 /**
@@ -142,8 +176,10 @@ function site_reviews_all(): array
     }
 
     $out = [];
-    foreach (site_reviews_domclick_pack()['reviews'] as $review) {
-        $out[] = $review;
+    foreach (site_reviews_platform_ids() as $platformId) {
+        foreach (site_reviews_external_pack($platformId)['reviews'] as $review) {
+            $out[] = $review;
+        }
     }
 
     $path = site_reviews_data_path();
@@ -268,72 +304,166 @@ function site_reviews_preview(?array $reviews = null): array
 
 /**
  * @return ?array{url: string, label: string, moreCount: int, cta: string}
+ * @deprecated Используйте site_reviews_platform_more_ctas()
  */
 function site_reviews_more_on_source(): ?array
 {
-    $previewLimit = site_reviews_preview_limit();
-    $all = site_reviews_all();
-    $summary = site_reviews_summary();
-    $shown = min($previewLimit, count($all));
-    $totalOnSource = max(count($all), (int) ($summary['count'] ?? 0));
-    $moreCount = max(0, $totalOnSource - $shown);
+    $ctas = site_reviews_platform_more_ctas();
 
-    if ($moreCount <= 0) {
-        return null;
+    return count($ctas) > 0 ? $ctas[0] : null;
+}
+
+/**
+ * @return array<string, int>
+ */
+function site_reviews_shown_count_by_platform(?array $reviews = null): array
+{
+    $counts = array_fill_keys(site_reviews_platform_ids(), 0);
+    foreach (site_reviews_preview($reviews) as $review) {
+        $platformId = site_reviews_source_platform_id((string) ($review['source'] ?? ''));
+        if (isset($counts[$platformId])) {
+            $counts[$platformId]++;
+        }
     }
 
-    $urls = site_reviews_platform_urls_map();
-    $sourceId = 'domclick';
-    $url = $urls['domclick'] ?? '';
-    if ($url === '' || !site_reviews_is_safe_external_url($url)) {
-        $sourceId = '';
-        $url = '';
-        foreach (['yandex', '2gis', 'avito', 'domclick'] as $id) {
-            $candidate = $urls[$id] ?? '';
-            if ($candidate !== '' && site_reviews_is_safe_external_url($candidate)) {
-                $sourceId = $id;
-                $url = $candidate;
-                break;
+    return $counts;
+}
+
+function site_reviews_platform_count_env_key(string $platformId): string
+{
+    return match ($platformId) {
+        'yandex' => 'SITE_YANDEX_REVIEWS_COUNT',
+        '2gis' => 'SITE_2GIS_REVIEWS_COUNT',
+        'domclick' => 'SITE_DOMCLICK_REVIEWS_COUNT',
+        'avito' => 'SITE_AVITO_REVIEWS_COUNT',
+        default => '',
+    };
+}
+
+function site_reviews_platform_total_count(string $platformId): int
+{
+    $pack = site_reviews_external_pack($platformId);
+    $fromPack = isset($pack['summary']['count']) && is_numeric($pack['summary']['count'])
+        ? (int) $pack['summary']['count']
+        : 0;
+    $fromReviews = count($pack['reviews']);
+    $total = max($fromPack, $fromReviews);
+
+    $envKey = site_reviews_platform_count_env_key($platformId);
+    if ($envKey !== '') {
+        $envRaw = trim(site_env($envKey, ''));
+        if ($envRaw !== '' && is_numeric($envRaw)) {
+            $total = max($total, (int) $envRaw);
+        }
+    }
+
+    static $meta = null;
+    if ($meta === null) {
+        $meta = [];
+        $path = site_reviews_platforms_meta_path();
+        if (is_readable($path)) {
+            $raw = file_get_contents($path);
+            if ($raw !== false) {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded)) {
+                    $meta = $decoded;
+                }
             }
         }
     }
-    if ($url === '' || $sourceId === '') {
-        return null;
+
+    if (isset($meta[$platformId]) && is_array($meta[$platformId])) {
+        $metaCount = $meta[$platformId]['count'] ?? null;
+        if (is_numeric($metaCount)) {
+            $total = max($total, (int) $metaCount);
+        }
     }
 
-    $label = site_reviews_source_label($sourceId);
-    $cta = $moreCount === 1
-        ? 'Ещё 1 отзыв на ' . $label
-        : 'Ещё ' . number_format($moreCount, 0, '.', ' ') . ' отзывов на ' . $label;
-
-    return [
-        'url' => $url,
-        'label' => $label,
-        'moreCount' => $moreCount,
-        'cta' => $cta,
-    ];
+    return max(0, $total);
 }
 
-function site_render_reviews_source_cta(?string $wrapClass = 'reviews__actions'): void
+function site_reviews_platform_more_cta_text(string $platformId, string $label, int $shownCount, int $totalCount): string
 {
-    $more = site_reviews_more_on_source();
-    if ($more === null) {
+    $more = $totalCount > 0 ? max(0, $totalCount - $shownCount) : 0;
+
+    if ($shownCount > 0 && $more > 0) {
+        return $more === 1
+            ? 'Ещё 1 отзыв на ' . $label
+            : 'Ещё ' . number_format($more, 0, '.', ' ') . ' отзывов на ' . $label;
+    }
+
+    if ($totalCount > 0) {
+        return $totalCount === 1
+            ? '1 отзыв на ' . $label
+            : number_format($totalCount, 0, '.', ' ') . ' отзывов на ' . $label;
+    }
+
+    return 'Читать отзывы на ' . $label;
+}
+
+/**
+ * @return list<array{id: string, url: string, label: string, cta: string, moreCount: int}>
+ */
+function site_reviews_platform_more_ctas(): array
+{
+    $shown = site_reviews_shown_count_by_platform();
+    $ctas = [];
+
+    foreach (site_reviews_platforms() as $platform) {
+        $platformId = (string) $platform['id'];
+        $total = site_reviews_platform_total_count($platformId);
+        $shownCount = $shown[$platformId] ?? 0;
+        $more = $total > 0 ? max(0, $total - $shownCount) : 0;
+
+        $ctas[] = [
+            'id' => $platformId,
+            'url' => $platform['url'],
+            'label' => $platform['label'],
+            'cta' => site_reviews_platform_more_cta_text($platformId, $platform['label'], $shownCount, $total),
+            'moreCount' => $more,
+        ];
+    }
+
+    return $ctas;
+}
+
+function site_reviews_has_platform_ctas(): bool
+{
+    return count(site_reviews_platform_more_ctas()) > 0;
+}
+
+function site_render_reviews_platform_ctas(?string $wrapClass = 'reviews__actions'): void
+{
+    $ctas = site_reviews_platform_more_ctas();
+    if (count($ctas) === 0) {
         return;
     }
 
-    $link = '<a'
-        . ' class="reviews__source-link"'
-        . ' href="' . htmlspecialchars($more['url'], ENT_QUOTES, 'UTF-8') . '"'
-        . ' rel="noopener noreferrer"'
-        . '>' . htmlspecialchars($more['cta'], ENT_QUOTES, 'UTF-8') . '</a>';
+    $links = '';
+    foreach ($ctas as $cta) {
+        $mod = ' reviews__source-link--' . preg_replace('/[^a-z0-9_-]/', '', $cta['id']);
+        $links .= '<a'
+            . ' class="reviews__source-link' . htmlspecialchars($mod, ENT_QUOTES, 'UTF-8') . '"'
+            . ' href="' . htmlspecialchars($cta['url'], ENT_QUOTES, 'UTF-8') . '"'
+            . ' rel="noopener noreferrer"'
+            . '>' . htmlspecialchars($cta['cta'], ENT_QUOTES, 'UTF-8') . '</a>';
+    }
 
     if ($wrapClass === null || $wrapClass === '') {
-        echo $link;
+        echo $links;
 
         return;
     }
 
-    echo '<div class="' . htmlspecialchars($wrapClass, ENT_QUOTES, 'UTF-8') . '">' . $link . '</div>';
+    echo '<div class="' . htmlspecialchars($wrapClass, ENT_QUOTES, 'UTF-8') . '">' . $links . '</div>';
+}
+
+/**
+ * @deprecated Используйте site_render_reviews_platform_ctas()
+ */
+function site_render_reviews_source_cta(?string $wrapClass = 'reviews__actions'): void
+{
+    site_render_reviews_platform_ctas($wrapClass);
 }
 
 function site_reviews_all_demo(): bool
@@ -413,14 +543,35 @@ function site_reviews_platform_urls_map(): array
         'avito' => trim(site_env('SITE_AVITO_REVIEWS_URL', '')),
     ];
 
-    $domclickUrl = site_reviews_domclick_pack()['sourceUrl'] ?? null;
-    if (
-        ($cache['domclick'] === '' || !site_reviews_is_safe_external_url($cache['domclick']))
-        && is_string($domclickUrl)
-        && $domclickUrl !== ''
-        && site_reviews_is_safe_external_url($domclickUrl)
-    ) {
-        $cache['domclick'] = $domclickUrl;
+    foreach (site_reviews_platform_ids() as $platformId) {
+        $packUrl = site_reviews_external_pack($platformId)['sourceUrl'] ?? null;
+        if (
+            ($cache[$platformId] === '' || !site_reviews_is_safe_external_url($cache[$platformId]))
+            && is_string($packUrl)
+            && $packUrl !== ''
+            && site_reviews_is_safe_external_url($packUrl)
+        ) {
+            $cache[$platformId] = $packUrl;
+        }
+    }
+
+    $metaPath = site_reviews_platforms_meta_path();
+    if (is_readable($metaPath)) {
+        $raw = file_get_contents($metaPath);
+        if ($raw !== false) {
+            $decoded = json_decode($raw, true);
+            if (is_array($decoded)) {
+                foreach (site_reviews_platform_ids() as $platformId) {
+                    if ($cache[$platformId] !== '' && site_reviews_is_safe_external_url($cache[$platformId])) {
+                        continue;
+                    }
+                    $metaUrl = $decoded[$platformId]['sourceUrl'] ?? null;
+                    if (is_string($metaUrl) && $metaUrl !== '' && site_reviews_is_safe_external_url($metaUrl)) {
+                        $cache[$platformId] = $metaUrl;
+                    }
+                }
+            }
+        }
     }
 
     return $cache;

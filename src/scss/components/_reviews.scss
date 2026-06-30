@@ -329,6 +329,22 @@
     &:active {
       transform: translateY(0) scale(0.98);
     }
+
+    &--yandex {
+      background: linear-gradient(180deg, #fc3f1d 0%, #e03518 100%);
+    }
+
+    &--2gis {
+      background: linear-gradient(180deg, #2e8b57 0%, #267348 100%);
+    }
+
+    &--domclick {
+      background: linear-gradient(180deg, #0066ff 0%, #0052cc 100%);
+    }
+
+    &--avito {
+      background: linear-gradient(180deg, #00aaff 0%, #0088cc 100%);
+    }
   }
 
   &__all-link {
