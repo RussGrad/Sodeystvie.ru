@@ -42,14 +42,11 @@ require __DIR__ . '/../includes/header.php';
         <?php if (count($reviewsPreview) > 0) { ?>
             <h2 class="reviews-page__local-heading">Отзывы на сайте</h2>
             <p class="reviews-page__local-lead">
-                Показаны последние <?php echo (int) count($reviewsPreview); ?> отзыва.
-                <?php if (site_reviews_has_platform_ctas()) { ?>
-                    Остальные — на площадках ниже.
-                <?php } ?>
+                Показаны последние <?php echo (int) count($reviewsPreview); ?> отзыва — нажмите на карточку, чтобы открыть на площадке.
             </p>
             <div class="reviews-page__list">
                 <?php foreach ($reviewsPreview as $review) {
-                    site_render_review_card($review, false);
+                    site_render_review_card($review);
                 } ?>
             </div>
             <?php site_render_reviews_platform_ctas('reviews-page__actions'); ?>

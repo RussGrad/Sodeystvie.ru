@@ -43,7 +43,7 @@ if (count($reviewsHome) === 0 && count($platforms) === 0) {
         <?php if (count($reviewsHome) > 0) { ?>
             <div class="reviews__grid">
                 <?php foreach ($reviewsHome as $review) {
-                    site_render_review_card($review, true);
+                    site_render_review_card($review);
                 } ?>
             </div>
 

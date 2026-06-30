@@ -283,12 +283,12 @@ function site_reviews_summary(): array
 
 function site_reviews_preview_limit(): int
 {
-    $raw = trim(site_env('SITE_REVIEWS_PREVIEW_LIMIT', '3'));
+    $raw = trim(site_env('SITE_REVIEWS_PREVIEW_LIMIT', '4'));
     if ($raw === '') {
-        return 3;
+        return 4;
     }
 
-    return max(2, min(6, (int) $raw));
+    return max(2, min(8, (int) $raw));
 }
 
 /**
@@ -867,51 +867,49 @@ function site_reviews_render_stars(int $rating, string $class = 'review-stars'):
 /**
  * @param array{id: string, author: string, date: string, rating: int, text: string, source: string} $review
  */
-function site_render_review_card(array $review, bool $compact = false): void
+function site_render_review_card(array $review, bool $compact = true): void
 {
     $isDemo = !empty($review['demo']);
-    $cardClass = 'review-card'
+    $source = (string) ($review['source'] ?? '');
+    $reviewSourceUrl = isset($review['sourceUrl']) ? trim((string) $review['sourceUrl']) : '';
+    $sourceUrl = site_reviews_source_url($source, $reviewSourceUrl !== '' ? $reviewSourceUrl : null);
+    $sourceId = site_reviews_source_platform_id($source);
+    $sourceLabel = site_reviews_source_label($source);
+
+    $cardClass = 'review-card review-card--modern'
+        . ' review-card--source-' . preg_replace('/[^a-z0-9_-]/', '', $sourceId)
         . ($compact ? ' review-card--compact' : '')
-        . ($isDemo ? ' review-card--demo' : '');
+        . ($isDemo ? ' review-card--demo' : '')
+        . ($sourceUrl !== '' ? ' review-card--link' : '');
+
+    $tag = $sourceUrl !== '' ? 'a' : 'article';
+    $attrs = $sourceUrl !== ''
+        ? ' href="' . htmlspecialchars($sourceUrl, ENT_QUOTES, 'UTF-8') . '" rel="noopener noreferrer"'
+        . ' title="Читать отзыв на ' . htmlspecialchars($sourceLabel, ENT_QUOTES, 'UTF-8') . '"'
+        : '';
     ?>
-    <article class="<?php echo $cardClass; ?>">
+    <<?php echo $tag; ?> class="<?php echo $cardClass; ?>"<?php echo $attrs; ?>>
         <?php if ($isDemo) { ?>
             <span class="review-card__demo-badge">Демо</span>
         <?php } ?>
-        <?php echo site_reviews_render_stars($review['rating']); ?>
+        <header class="review-card__head">
+            <div class="review-card__meta">
+                <cite class="review-card__author"><?php echo htmlspecialchars($review['author'], ENT_QUOTES, 'UTF-8'); ?></cite>
+                <?php if ($review['date'] !== '') { ?>
+                    <time class="review-card__date" datetime="<?php echo htmlspecialchars($review['date'], ENT_QUOTES, 'UTF-8'); ?>">
+                        <?php echo htmlspecialchars(site_reviews_format_date($review['date']), ENT_QUOTES, 'UTF-8'); ?>
+                    </time>
+                <?php } ?>
+            </div>
+            <span class="review-card__source-pill"><?php echo htmlspecialchars($sourceLabel, ENT_QUOTES, 'UTF-8'); ?></span>
+        </header>
+        <?php echo site_reviews_render_stars($review['rating'], 'review-stars review-stars--card'); ?>
         <blockquote class="review-card__text">
             <p><?php echo htmlspecialchars($review['text'], ENT_QUOTES, 'UTF-8'); ?></p>
         </blockquote>
-        <footer class="review-card__footer">
-            <cite class="review-card__author"><?php echo htmlspecialchars($review['author'], ENT_QUOTES, 'UTF-8'); ?></cite>
-            <?php if ($review['date'] !== '') { ?>
-                <time class="review-card__date" datetime="<?php echo htmlspecialchars($review['date'], ENT_QUOTES, 'UTF-8'); ?>">
-                    <?php echo htmlspecialchars(site_reviews_format_date($review['date']), ENT_QUOTES, 'UTF-8'); ?>
-                </time>
-            <?php } ?>
-            <?php
-            $reviewSourceUrl = isset($review['sourceUrl']) ? trim((string) $review['sourceUrl']) : '';
-            site_render_review_source_badge($review['source'], $reviewSourceUrl !== '' ? $reviewSourceUrl : null);
-            ?>
-        </footer>
-        <?php
-        $reply = isset($review['reply']) && is_array($review['reply']) ? $review['reply'] : null;
-        if (is_array($reply) && !empty($reply['text']) && !$compact) {
-            $replyAuthor = isset($reply['author']) ? trim((string) $reply['author']) : '';
-            $replyDate = isset($reply['date']) ? trim((string) $reply['date']) : '';
-            ?>
-            <div class="review-card__reply">
-                <?php if ($replyAuthor !== '') { ?>
-                    <strong class="review-card__reply-author"><?php echo htmlspecialchars($replyAuthor, ENT_QUOTES, 'UTF-8'); ?></strong>
-                <?php } ?>
-                <?php if ($replyDate !== '') { ?>
-                    <time class="review-card__reply-date" datetime="<?php echo htmlspecialchars($replyDate, ENT_QUOTES, 'UTF-8'); ?>">
-                        <?php echo htmlspecialchars(site_reviews_format_date($replyDate), ENT_QUOTES, 'UTF-8'); ?>
-                    </time>
-                <?php } ?>
-                <p class="review-card__reply-text"><?php echo nl2br(htmlspecialchars((string) $reply['text'], ENT_QUOTES, 'UTF-8')); ?></p>
-            </div>
+        <?php if ($sourceUrl !== '') { ?>
+            <span class="review-card__cta">На <?php echo htmlspecialchars($sourceLabel, ENT_QUOTES, 'UTF-8'); ?></span>
         <?php } ?>
-    </article>
+    </<?php echo $tag; ?>>
     <?php
 }
