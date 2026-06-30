@@ -6,7 +6,7 @@ require_once __DIR__ . '/site-reviews.php';
 
 $reviewsAll = site_reviews_all();
 $summary = site_reviews_summary();
-$reviewsHome = array_slice($reviewsAll, 0, 3);
+$reviewsHome = site_reviews_preview($reviewsAll);
 $platforms = site_reviews_platforms();
 
 if (count($reviewsHome) === 0 && count($platforms) === 0) {
@@ -48,11 +48,12 @@ if (count($reviewsHome) === 0 && count($platforms) === 0) {
             </div>
 
             <div class="reviews__actions">
-                <a class="reviews__all-link" href="/reviews/">Все отзывы</a>
+                <?php site_render_reviews_source_cta(null); ?>
+                <a class="reviews__all-link reviews__all-link--secondary" href="/reviews/">Отзывы и площадки</a>
             </div>
         <?php } elseif (count($platforms) > 0) { ?>
             <div class="reviews__actions">
-                <a class="reviews__all-link" href="/reviews/">Страница отзывов</a>
+                <a class="reviews__all-link" href="/reviews/">Отзывы и площадки</a>
             </div>
         <?php } ?>
     </div>

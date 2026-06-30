@@ -245,6 +245,97 @@ function site_reviews_summary(): array
     ];
 }
 
+function site_reviews_preview_limit(): int
+{
+    $raw = trim(site_env('SITE_REVIEWS_PREVIEW_LIMIT', '3'));
+    if ($raw === '') {
+        return 3;
+    }
+
+    return max(2, min(6, (int) $raw));
+}
+
+/**
+ * @param ?list<array<string, mixed>> $reviews
+ * @return list<array<string, mixed>>
+ */
+function site_reviews_preview(?array $reviews = null): array
+{
+    $all = $reviews ?? site_reviews_all();
+
+    return array_slice($all, 0, site_reviews_preview_limit());
+}
+
+/**
+ * @return ?array{url: string, label: string, moreCount: int, cta: string}
+ */
+function site_reviews_more_on_source(): ?array
+{
+    $previewLimit = site_reviews_preview_limit();
+    $all = site_reviews_all();
+    $summary = site_reviews_summary();
+    $shown = min($previewLimit, count($all));
+    $totalOnSource = max(count($all), (int) ($summary['count'] ?? 0));
+    $moreCount = max(0, $totalOnSource - $shown);
+
+    if ($moreCount <= 0) {
+        return null;
+    }
+
+    $urls = site_reviews_platform_urls_map();
+    $sourceId = 'domclick';
+    $url = $urls['domclick'] ?? '';
+    if ($url === '' || !site_reviews_is_safe_external_url($url)) {
+        $sourceId = '';
+        $url = '';
+        foreach (['yandex', '2gis', 'avito', 'domclick'] as $id) {
+            $candidate = $urls[$id] ?? '';
+            if ($candidate !== '' && site_reviews_is_safe_external_url($candidate)) {
+                $sourceId = $id;
+                $url = $candidate;
+                break;
+            }
+        }
+    }
+    if ($url === '' || $sourceId === '') {
+        return null;
+    }
+
+    $label = site_reviews_source_label($sourceId);
+    $cta = $moreCount === 1
+        ? 'Ещё 1 отзыв на ' . $label
+        : 'Ещё ' . number_format($moreCount, 0, '.', ' ') . ' отзывов на ' . $label;
+
+    return [
+        'url' => $url,
+        'label' => $label,
+        'moreCount' => $moreCount,
+        'cta' => $cta,
+    ];
+}
+
+function site_render_reviews_source_cta(?string $wrapClass = 'reviews__actions'): void
+{
+    $more = site_reviews_more_on_source();
+    if ($more === null) {
+        return;
+    }
+
+    $link = '<a'
+        . ' class="reviews__source-link"'
+        . ' href="' . htmlspecialchars($more['url'], ENT_QUOTES, 'UTF-8') . '"'
+        . ' rel="noopener noreferrer"'
+        . '>' . htmlspecialchars($more['cta'], ENT_QUOTES, 'UTF-8') . '</a>';
+
+    if ($wrapClass === null || $wrapClass === '') {
+        echo $link;
+
+        return;
+    }
+
+    echo '<div class="' . htmlspecialchars($wrapClass, ENT_QUOTES, 'UTF-8') . '">' . $link . '</div>';
+}
+
 function site_reviews_all_demo(): bool
 {
     $all = site_reviews_all();

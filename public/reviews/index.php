@@ -8,6 +8,7 @@ require_once __DIR__ . '/../includes/site-reviews.php';
 $pageTitle = site_format_page_title('Отзывы');
 $currentNav = 'reviews';
 $reviewsAll = site_reviews_all();
+$reviewsPreview = site_reviews_preview($reviewsAll);
 $summary = site_reviews_summary();
 $platforms = site_reviews_platforms();
 
@@ -38,13 +39,20 @@ require __DIR__ . '/../includes/header.php';
         require __DIR__ . '/../includes/review-platforms.php';
         ?>
 
-        <?php if (count($reviewsAll) > 0) { ?>
+        <?php if (count($reviewsPreview) > 0) { ?>
             <h2 class="reviews-page__local-heading">Отзывы на сайте</h2>
+            <p class="reviews-page__local-lead">
+                Показаны последние <?php echo (int) count($reviewsPreview); ?> отзыва.
+                <?php if (site_reviews_more_on_source() !== null) { ?>
+                    Остальные — на площадке-источнике.
+                <?php } ?>
+            </p>
             <div class="reviews-page__list">
-                <?php foreach ($reviewsAll as $review) {
+                <?php foreach ($reviewsPreview as $review) {
                     site_render_review_card($review, false);
                 } ?>
             </div>
+            <?php site_render_reviews_source_cta('reviews-page__actions'); ?>
         <?php } elseif (count($platforms) === 0) { ?>
             <p class="reviews-page__empty">Отзывы скоро появятся здесь. Добавьте ссылки на площадки в <code>public/.env</code>.</p>
         <?php } ?>
