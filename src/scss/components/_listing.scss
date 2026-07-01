@@ -54,6 +54,24 @@
   color: var(--page-text);
 }
 
+.listing-object__offer-status {
+  display: inline-block;
+  margin: 0.55rem 0 0;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--featured-badge-deposit-text);
+  background: var(--featured-badge-deposit);
+  border-radius: 6px;
+}
+
+.listing-object--complex .listing-object__offer-status,
+.listing-complex__intro .listing-object__offer-status {
+  color: var(--featured-badge-reserved-text);
+  background: var(--featured-badge-reserved);
+}
+
 .listing-object__address {
   display: inline-block;
   margin: 0.45rem 0 0;

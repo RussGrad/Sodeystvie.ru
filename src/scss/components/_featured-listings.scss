@@ -256,6 +256,26 @@
     max-width: calc(100% - 1.3rem);
     white-space: normal;
   }
+
+  &--reserved {
+    background: var(--featured-badge-reserved);
+    color: var(--featured-badge-reserved-text);
+    text-transform: none;
+    font-size: 0.625rem;
+    line-height: 1.25;
+    max-width: calc(100% - 1.3rem);
+    white-space: normal;
+  }
+
+  &--deposit {
+    background: var(--featured-badge-deposit);
+    color: var(--featured-badge-deposit-text);
+    text-transform: none;
+    font-size: 0.625rem;
+    line-height: 1.25;
+    max-width: calc(100% - 1.3rem);
+    white-space: normal;
+  }
 }
 
 .featured-card__body {

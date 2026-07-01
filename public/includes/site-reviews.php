@@ -36,6 +36,11 @@ function site_reviews_platforms_meta_path(): string
     return dirname(__DIR__) . '/data/reviews-platforms.json';
 }
 
+function site_reviews_agency_data_path(): string
+{
+    return dirname(__DIR__) . '/data/reviews-agency.json';
+}
+
 function site_reviews_agent_data_path(): string
 {
     return dirname(__DIR__) . '/data/reviews-agent.json';
@@ -44,7 +49,7 @@ function site_reviews_agent_data_path(): string
 /**
  * @return array<string, mixed>
  */
-function site_reviews_agent_profile(): array
+function site_reviews_agency_profile(): array
 {
     static $cache = null;
     if ($cache !== null) {
@@ -52,24 +57,27 @@ function site_reviews_agent_profile(): array
     }
 
     $defaults = [
-        'name' => 'Игорь Руссков',
-        'role' => 'Руководитель агентства',
         'agency' => 'АН Содействие',
+        'tagline' => 'Команда риэлторов, юристов и ипотечных брокеров',
         'city' => 'Иркутск',
         'verified' => true,
         'domclickUrl' => 'https://agencies.domclick.ru/agent/1034773',
-        'rating' => 5.0,
         'stats' => [],
         'impression' => '',
         'about' => '',
         'photo' => null,
     ];
 
-    $path = site_reviews_agent_data_path();
+    $path = site_reviews_agency_data_path();
     if (!is_readable($path)) {
-        $cache = $defaults;
+        $legacyPath = site_reviews_agent_data_path();
+        if (is_readable($legacyPath)) {
+            $path = $legacyPath;
+        } else {
+            $cache = $defaults;
 
-        return $cache;
+            return $cache;
+        }
     }
 
     $raw = file_get_contents($path);
@@ -86,9 +94,82 @@ function site_reviews_agent_profile(): array
         return $cache;
     }
 
+    if (isset($decoded['name']) && !isset($decoded['agency'])) {
+        $decoded['agency'] = $decoded['name'];
+        $decoded['tagline'] = (string) ($decoded['role'] ?? $defaults['tagline']);
+    }
+
     $cache = array_merge($defaults, $decoded);
 
     return $cache;
+}
+
+/**
+ * @return array<string, mixed>
+ */
+function site_reviews_agent_profile(): array
+{
+    return site_reviews_agency_profile();
+}
+
+/**
+ * @return list<array{value: string, label: string}>
+ */
+function site_reviews_agency_metrics(): array
+{
+    require_once __DIR__ . '/site-team.php';
+
+    $teamCount = count(site_team_all());
+    $totalReviews = site_reviews_total_across_platforms();
+    $aggregateRating = site_reviews_aggregate_rating();
+    $metrics = [];
+
+    if ($teamCount > 0) {
+        $metrics[] = [
+            'value' => (string) $teamCount,
+            'label' => site_reviews_plural_specialists($teamCount),
+        ];
+    }
+
+    if ($totalReviews > 0) {
+        $metrics[] = [
+            'value' => number_format($totalReviews, 0, '.', ' '),
+            'label' => site_reviews_plural_reviews($totalReviews) . ' на площадках',
+        ];
+    }
+
+    if ($aggregateRating !== null) {
+        $metrics[] = [
+            'value' => number_format($aggregateRating, 1, '.', ''),
+            'label' => 'средняя оценка',
+        ];
+    }
+
+    if (defined('SITE_FOUNDED_YEAR')) {
+        $metrics[] = [
+            'value' => (string) (int) SITE_FOUNDED_YEAR,
+            'label' => 'на рынке с',
+        ];
+    }
+
+    return $metrics;
+}
+
+function site_reviews_plural_specialists(int $count): string
+{
+    $n = abs($count) % 100;
+    $n1 = $n % 10;
+    if ($n > 10 && $n < 20) {
+        return 'специалистов в команде';
+    }
+    if ($n1 > 1 && $n1 < 5) {
+        return 'специалиста в команде';
+    }
+    if ($n1 === 1) {
+        return 'специалист в команде';
+    }
+
+    return 'специалистов в команде';
 }
 
 function site_reviews_total_across_platforms(): int
@@ -99,6 +180,49 @@ function site_reviews_total_across_platforms(): int
     }
 
     return max(0, $sum);
+}
+
+function site_reviews_aggregate_rating(): ?float
+{
+    $total = 0;
+    $weighted = 0.0;
+    foreach (site_reviews_platform_ids() as $platformId) {
+        $count = site_reviews_platform_total_count($platformId);
+        $stats = site_reviews_platform_stats($platformId);
+        if ($count > 0 && $stats['rating'] !== null) {
+            $weighted += $stats['rating'] * $count;
+            $total += $count;
+        }
+    }
+    if ($total === 0) {
+        return null;
+    }
+
+    return round($weighted / $total, 1);
+}
+
+/**
+ * @return list<array{id: string, label: string, count: int, rating: ?float, pct: int}>
+ */
+function site_reviews_platform_breakdown(): array
+{
+    $platforms = site_reviews_platforms();
+    $total = site_reviews_total_across_platforms();
+    $out = [];
+    foreach ($platforms as $platform) {
+        $id = (string) $platform['id'];
+        $count = site_reviews_platform_total_count($id);
+        $stats = site_reviews_platform_stats($id);
+        $out[] = [
+            'id' => $id,
+            'label' => $platform['label'],
+            'count' => $count,
+            'rating' => $stats['rating'],
+            'pct' => $total > 0 ? (int) round(($count / $total) * 100) : 0,
+        ];
+    }
+
+    return $out;
 }
 
 function site_reviews_agent_initials(string $name): string
@@ -121,18 +245,112 @@ function site_reviews_agent_initials(string $name): string
 /**
  * @param list<array{id: string, label: string, url: string, widgetSrc: string, cta: string}> $platforms
  */
-function site_render_reviews_agent_profile(array $platforms): void
+function site_render_reviews_dashboard(array $platforms): void
 {
-    $agent = site_reviews_agent_profile();
-    $name = (string) ($agent['name'] ?? 'Игорь Руссков');
-    $rating = isset($agent['rating']) && is_numeric($agent['rating']) ? (float) $agent['rating'] : 5.0;
-    $rating = max(1.0, min(5.0, round($rating, 1)));
-    $totalReviews = site_reviews_total_across_platforms();
-    $reviewCountLabel = $totalReviews > 0
-        ? 'На основе ' . number_format($totalReviews, 0, '.', ' ') . ' ' . site_reviews_plural_reviews($totalReviews)
-        : 'На основе отзывов клиентов';
+    ?>
+    <div class="reviews-dashboard">
+        <?php
+        site_render_reviews_agency_intro();
+        site_render_reviews_team_strip();
+        site_render_reviews_hub($platforms);
+        ?>
+    </div>
+    <?php
+}
 
-    $photoPath = isset($agent['photo']) && is_string($agent['photo']) ? trim($agent['photo']) : '';
+/**
+ * @param list<array{id: string, label: string, url: string, widgetSrc: string, cta: string}> $platforms
+ */
+function site_render_reviews_hub(array $platforms): void
+{
+    if (count($platforms) === 0) {
+        return;
+    }
+
+    $agency = site_reviews_agency_profile();
+    $aggregateRating = site_reviews_aggregate_rating();
+    $totalReviews = site_reviews_total_across_platforms();
+    $breakdown = site_reviews_platform_breakdown();
+    ?>
+    <section class="reviews-hub" aria-labelledby="reviews-hub-title">
+        <div class="reviews-hub__panel">
+            <div class="reviews-hub__summary">
+                <p class="reviews-hub__eyebrow" id="reviews-hub-title">Сводная оценка</p>
+                <?php if ($aggregateRating !== null) { ?>
+                    <div class="reviews-hub__score" aria-label="Средняя оценка <?php echo htmlspecialchars((string) $aggregateRating, ENT_QUOTES, 'UTF-8'); ?> из 5">
+                        <span class="reviews-hub__score-value"><?php echo htmlspecialchars(number_format($aggregateRating, 1, '.', ''), ENT_QUOTES, 'UTF-8'); ?></span>
+                        <?php echo site_reviews_render_stars((int) round($aggregateRating), 'review-stars review-stars--hub'); ?>
+                    </div>
+                <?php } ?>
+                <p class="reviews-hub__score-caption">
+                    <?php echo $totalReviews > 0
+                        ? number_format($totalReviews, 0, '.', ' ') . ' ' . site_reviews_plural_reviews($totalReviews) . ' на площадках'
+                        : 'Отзывы клиентов'; ?>
+                </p>
+                <?php if (count($breakdown) > 0) { ?>
+                    <ul class="reviews-hub__breakdown">
+                        <?php foreach ($breakdown as $row) {
+                            if ($row['count'] <= 0) {
+                                continue;
+                            }
+                            $mod = ' reviews-hub__bar-row--' . preg_replace('/[^a-z0-9_-]/', '', $row['id']);
+                            ?>
+                            <li class="reviews-hub__bar-row<?php echo htmlspecialchars($mod, ENT_QUOTES, 'UTF-8'); ?>">
+                                <span class="reviews-hub__bar-label"><?php echo htmlspecialchars($row['label'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                <span class="reviews-hub__bar-track" aria-hidden="true"><span class="reviews-hub__bar-fill" style="width: <?php echo (int) $row['pct']; ?>%"></span></span>
+                                <span class="reviews-hub__bar-count"><?php echo (int) $row['count']; ?></span>
+                            </li>
+                        <?php } ?>
+                    </ul>
+                <?php } ?>
+            </div>
+
+            <div class="reviews-hub__sentiment">
+                <p class="reviews-hub__eyebrow">Впечатление клиентов</p>
+                <p class="reviews-hub__sentiment-text"><?php echo htmlspecialchars((string) ($agency['impression'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></p>
+            </div>
+        </div>
+
+        <div class="reviews-hub__platforms">
+            <p class="reviews-hub__platforms-lead">Поделитесь опытом на удобной площадке</p>
+            <div class="reviews-hub__platforms-row">
+                <?php foreach ($platforms as $platform) {
+                    $platformId = (string) $platform['id'];
+                    $mod = ' reviews-hub__platform--' . preg_replace('/[^a-z0-9_-]/', '', $platformId);
+                    $leaveUrl = site_reviews_platform_leave_review_url($platformId, $platform['url']);
+                    ?>
+                    <a
+                        class="reviews-hub__platform<?php echo htmlspecialchars($mod, ENT_QUOTES, 'UTF-8'); ?>"
+                        href="<?php echo htmlspecialchars($leaveUrl, ENT_QUOTES, 'UTF-8'); ?>"
+                        rel="noopener noreferrer"
+                        aria-label="Оставить отзыв на <?php echo htmlspecialchars($platform['label'], ENT_QUOTES, 'UTF-8'); ?>"
+                    >
+                        <?php site_render_review_platform_icon($platformId, 'compact'); ?>
+                        <span class="reviews-hub__platform-label"><?php echo htmlspecialchars($platform['label'], ENT_QUOTES, 'UTF-8'); ?></span>
+                        <span class="reviews-hub__platform-cta" aria-hidden="true">→</span>
+                    </a>
+                <?php } ?>
+            </div>
+        </div>
+    </section>
+    <?php
+}
+
+/**
+ * Блок агентства на странице отзывов.
+ */
+function site_render_reviews_agency_intro(): void
+{
+    $agency = site_reviews_agency_profile();
+    $agencyName = (string) ($agency['agency'] ?? site_brand_full());
+    $tagline = trim((string) ($agency['tagline'] ?? ''));
+    $rating = site_reviews_aggregate_rating();
+    if ($rating === null && isset($agency['rating']) && is_numeric($agency['rating'])) {
+        $rating = (float) $agency['rating'];
+    }
+    $rating = $rating !== null ? max(1.0, min(5.0, round($rating, 1))) : null;
+
+    $photoPath = isset($agency['photo']) && is_string($agency['photo']) ? trim($agency['photo']) : '';
     if ($photoPath === '' && function_exists('site_about_team_image_exists') && site_about_team_image_exists()) {
         $photoPath = site_about_team_image_path();
     } elseif ($photoPath !== '' && !str_starts_with($photoPath, '/')) {
@@ -140,118 +358,166 @@ function site_render_reviews_agent_profile(array $platforms): void
     }
     $hasPhoto = $photoPath !== '' && is_readable(dirname(__DIR__) . $photoPath);
 
-    $domclickUrl = (string) ($agent['domclickUrl'] ?? '');
+    $domclickUrl = (string) ($agency['domclickUrl'] ?? '');
     if ($domclickUrl !== '' && !site_reviews_is_safe_external_url($domclickUrl)) {
         $domclickUrl = '';
     }
+
+    $metrics = site_reviews_agency_metrics();
+    $hasVerified = !empty($agency['verified']);
     ?>
-    <section class="review-agent" aria-labelledby="review-agent-title">
+    <section class="review-agent review-agent--agency" aria-labelledby="reviews-agency-title">
         <div class="review-agent__card">
-            <header class="review-agent__head">
-                <div class="review-agent__avatar" aria-hidden="true">
-                    <?php if ($hasPhoto) { ?>
-                        <img
-                            class="review-agent__avatar-img"
-                            src="<?php echo htmlspecialchars($photoPath, ENT_QUOTES, 'UTF-8'); ?>"
-                            alt=""
-                            width="72"
-                            height="72"
-                            loading="lazy"
-                        >
-                    <?php } else { ?>
-                        <span class="review-agent__avatar-initials"><?php echo htmlspecialchars(site_reviews_agent_initials($name), ENT_QUOTES, 'UTF-8'); ?></span>
-                    <?php } ?>
-                </div>
-                <div class="review-agent__intro">
-                    <h2 class="review-agent__name" id="review-agent-title">
-                        <?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>
-                        <span class="review-agent__rating-badge" aria-label="Оценка <?php echo htmlspecialchars((string) $rating, ENT_QUOTES, 'UTF-8'); ?> из 5">
-                            <?php echo site_reviews_render_stars((int) round($rating), 'review-stars review-stars--agent'); ?>
-                            <span class="review-agent__rating-value"><?php echo htmlspecialchars(number_format($rating, 1, '.', ''), ENT_QUOTES, 'UTF-8'); ?></span>
-                        </span>
-                    </h2>
-                    <p class="review-agent__city">Работает в <?php echo htmlspecialchars((string) ($agent['city'] ?? 'Иркутск'), ENT_QUOTES, 'UTF-8'); ?></p>
-                    <p class="review-agent__agency">
-                        <?php if ($domclickUrl !== '') { ?>
-                            <a class="review-agent__agency-link" href="<?php echo htmlspecialchars($domclickUrl, ENT_QUOTES, 'UTF-8'); ?>" rel="noopener noreferrer"><?php echo htmlspecialchars((string) ($agent['agency'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></a>
-                        <?php } else { ?>
-                            <span><?php echo htmlspecialchars((string) ($agent['agency'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></span>
-                        <?php } ?>
-                        <span class="review-agent__role"><?php echo htmlspecialchars((string) ($agent['role'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></span>
-                    </p>
-                </div>
-                <?php if (!empty($agent['verified'])) { ?>
-                    <span class="review-agent__verified">
-                        <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8.2 14.6 4.4 10.8l1.4-1.4 2.4 2.4 6-6 1.4 1.4z"/></svg>
-                        Профиль подтверждён
-                    </span>
-                <?php } ?>
-            </header>
-
-            <?php if (is_array($agent['stats'] ?? null) && count($agent['stats']) > 0) { ?>
-                <div class="review-agent__stats">
-                    <?php foreach ($agent['stats'] as $stat) {
-                        if (!is_array($stat)) {
-                            continue;
-                        }
-                        $value = isset($stat['value']) ? trim((string) $stat['value']) : '';
-                        $label = isset($stat['label']) ? trim((string) $stat['label']) : '';
-                        if ($value === '') {
-                            continue;
-                        }
-                        ?>
-                        <div class="review-agent__stat">
-                            <strong class="review-agent__stat-value"><?php echo htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); ?></strong>
-                            <?php if ($label !== '') { ?>
-                                <span class="review-agent__stat-label"><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></span>
-                            <?php } ?>
-                        </div>
-                    <?php } ?>
-                </div>
-            <?php } ?>
-
-            <div class="review-agent__impressions">
-                <header class="review-agent__impressions-head">
-                    <span class="review-agent__impressions-title">
-                        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8l-4 3v-3H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
-                        Впечатление клиентов
-                    </span>
-                    <span class="review-agent__impressions-count"><?php echo htmlspecialchars($reviewCountLabel, ENT_QUOTES, 'UTF-8'); ?></span>
-                </header>
-                <p class="review-agent__impressions-text"><?php echo htmlspecialchars((string) ($agent['impression'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></p>
-            </div>
-
-            <?php if (count($platforms) > 0) { ?>
-                <div class="review-agent__actions">
-                    <p class="review-agent__actions-lead">Работали с нами? Оставьте отзыв — это помогает другим клиентам:</p>
-                    <div class="review-agent__actions-row">
-                        <?php foreach ($platforms as $platform) {
-                            $platformId = (string) $platform['id'];
-                            $mod = ' review-agent__action--' . preg_replace('/[^a-z0-9_-]/', '', $platformId);
-                            $leaveUrl = site_reviews_platform_leave_review_url($platformId, $platform['url']);
-                            ?>
-                            <a
-                                class="review-agent__action<?php echo htmlspecialchars($mod, ENT_QUOTES, 'UTF-8'); ?>"
-                                href="<?php echo htmlspecialchars($leaveUrl, ENT_QUOTES, 'UTF-8'); ?>"
-                                rel="noopener noreferrer"
+            <div class="review-agent__layout">
+                <header class="review-agent__identity">
+                    <div class="review-agent__avatar review-agent__avatar--office" aria-hidden="true">
+                        <?php if ($hasPhoto) { ?>
+                            <img
+                                class="review-agent__avatar-img review-agent__avatar-img--office"
+                                src="<?php echo htmlspecialchars($photoPath, ENT_QUOTES, 'UTF-8'); ?>"
+                                alt=""
+                                width="112"
+                                height="80"
+                                loading="lazy"
                             >
-                                <?php site_render_review_platform_icon($platformId); ?>
-                                <span>Оставить отзыв на <?php echo htmlspecialchars($platform['label'], ENT_QUOTES, 'UTF-8'); ?></span>
-                            </a>
+                        <?php } else { ?>
+                            <span class="review-agent__avatar-initials"><?php echo htmlspecialchars(mb_substr($agencyName, 0, 1), ENT_QUOTES, 'UTF-8'); ?></span>
                         <?php } ?>
                     </div>
-                </div>
-            <?php } ?>
+                    <div class="review-agent__intro">
+                        <h2 class="review-agent__name" id="reviews-agency-title">
+                            <?php echo htmlspecialchars($agencyName, ENT_QUOTES, 'UTF-8'); ?>
+                        </h2>
+                        <?php if ($tagline !== '') { ?>
+                            <p class="review-agent__tagline"><?php echo htmlspecialchars($tagline, ENT_QUOTES, 'UTF-8'); ?></p>
+                        <?php } ?>
+                        <?php if ($rating !== null) { ?>
+                            <p class="review-agent__rating-line" aria-label="Средняя оценка <?php echo htmlspecialchars((string) $rating, ENT_QUOTES, 'UTF-8'); ?> из 5">
+                                <?php echo site_reviews_render_stars((int) round($rating), 'review-stars review-stars--agent'); ?>
+                                <span class="review-agent__rating-value"><?php echo htmlspecialchars(number_format($rating, 1, '.', ''), ENT_QUOTES, 'UTF-8'); ?></span>
+                            </p>
+                        <?php } ?>
+                        <p class="review-agent__city"><?php echo htmlspecialchars((string) ($agency['city'] ?? 'Иркутск'), ENT_QUOTES, 'UTF-8'); ?></p>
+                        <?php if ($domclickUrl !== '') { ?>
+                            <p class="review-agent__agency">
+                                <a class="review-agent__agency-link" href="<?php echo htmlspecialchars($domclickUrl, ENT_QUOTES, 'UTF-8'); ?>" rel="noopener noreferrer">Профиль на Домклик</a>
+                            </p>
+                        <?php } ?>
+                    </div>
+                </header>
 
-            <?php if (trim((string) ($agent['about'] ?? '')) !== '') { ?>
+                <?php if ($hasVerified || count($metrics) > 0) { ?>
+                    <div class="review-agent__metrics">
+                        <?php if ($hasVerified) { ?>
+                            <div class="review-agent__metric review-agent__metric--verified">
+                                <span class="review-agent__verified">
+                                    <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8.2 14.6 4.4 10.8l1.4-1.4 2.4 2.4 6-6 1.4 1.4z"/></svg>
+                                    Агентство подтверждено
+                                </span>
+                            </div>
+                        <?php } ?>
+                        <?php foreach ($metrics as $stat) {
+                            $value = trim((string) ($stat['value'] ?? ''));
+                            $label = trim((string) ($stat['label'] ?? ''));
+                            if ($value === '') {
+                                continue;
+                            }
+                            ?>
+                            <div class="review-agent__metric">
+                                <span class="review-agent__stat-value"><?php echo htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); ?></span>
+                                <?php if ($label !== '') { ?>
+                                    <span class="review-agent__stat-label"><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></span>
+                                <?php } ?>
+                            </div>
+                        <?php } ?>
+                    </div>
+                <?php } ?>
+            </div>
+
+            <?php if (trim((string) ($agency['about'] ?? '')) !== '') { ?>
                 <details class="review-agent__about">
-                    <summary class="review-agent__about-summary">О себе</summary>
-                    <p class="review-agent__about-text"><?php echo htmlspecialchars((string) $agent['about'], ENT_QUOTES, 'UTF-8'); ?></p>
+                    <summary class="review-agent__about-summary">О компании</summary>
+                    <p class="review-agent__about-text"><?php echo htmlspecialchars((string) $agency['about'], ENT_QUOTES, 'UTF-8'); ?></p>
                 </details>
             <?php } ?>
         </div>
     </section>
     <?php
+}
+
+function site_render_reviews_team_strip(): void
+{
+    require_once __DIR__ . '/site-team.php';
+
+    $team = site_team_all();
+    if (count($team) === 0) {
+        return;
+    }
+    ?>
+    <section class="reviews-team" aria-labelledby="reviews-team-title">
+        <header class="reviews-team__header">
+            <div class="reviews-team__intro">
+                <h2 class="reviews-team__title" id="reviews-team-title">Наша команда</h2>
+                <p class="reviews-team__lead">Состав команды подтягивается из CRM. Отзывы — о работе агентства и специалистов.</p>
+            </div>
+            <a class="reviews-team__more" href="/about/#team">Вся команда</a>
+        </header>
+        <div class="reviews-team__grid">
+            <?php foreach ($team as $member) {
+                site_render_reviews_team_card($member);
+            } ?>
+        </div>
+    </section>
+    <?php
+}
+
+/**
+ * @param array{id: string, name: string, role: string, experience: string, photo: string, telegram: string, whatsapp: string} $member
+ */
+function site_render_reviews_team_card(array $member): void
+{
+    $photo = trim((string) ($member['photo'] ?? ''));
+    $hasLocalPhoto = $photo !== '' && function_exists('site_team_member_photo_is_local')
+        && site_team_member_photo_is_local($photo)
+        && is_readable(dirname(__DIR__) . $photo);
+    $hasRemotePhoto = $photo !== '' && !$hasLocalPhoto;
+    ?>
+    <article class="reviews-team-card">
+        <div class="reviews-team-card__avatar" aria-hidden="true">
+            <?php if ($hasLocalPhoto || $hasRemotePhoto) { ?>
+                <img
+                    class="reviews-team-card__photo"
+                    src="<?php echo htmlspecialchars($photo, ENT_QUOTES, 'UTF-8'); ?>"
+                    alt=""
+                    width="48"
+                    height="48"
+                    loading="lazy"
+                >
+            <?php } else { ?>
+                <span class="reviews-team-card__initials"><?php echo htmlspecialchars(site_team_initials($member['name']), ENT_QUOTES, 'UTF-8'); ?></span>
+            <?php } ?>
+        </div>
+        <div class="reviews-team-card__body">
+            <h3 class="reviews-team-card__name"><?php echo htmlspecialchars($member['name'], ENT_QUOTES, 'UTF-8'); ?></h3>
+            <?php if ($member['role'] !== '') { ?>
+                <p class="reviews-team-card__role"><?php echo htmlspecialchars($member['role'], ENT_QUOTES, 'UTF-8'); ?></p>
+            <?php } ?>
+            <?php if ($member['experience'] !== '') { ?>
+                <p class="reviews-team-card__exp"><?php echo htmlspecialchars($member['experience'], ENT_QUOTES, 'UTF-8'); ?></p>
+            <?php } ?>
+        </div>
+    </article>
+    <?php
+}
+
+/**
+ * @deprecated Используйте site_render_reviews_agency_intro()
+ * @param list<array{id: string, label: string, url: string, widgetSrc: string, cta: string}> $platforms
+ */
+function site_render_reviews_agent_profile(array $platforms): void
+{
+    site_render_reviews_agency_intro();
+    site_render_reviews_team_strip();
 }
 
 /**
@@ -955,20 +1221,39 @@ function site_reviews_platforms_with_widgets(): array
     ));
 }
 
-function site_render_review_platform_icon(string $platformId): void
+function site_render_review_platform_icon(string $platformId, string $variant = 'brand'): void
 {
     $id = strtolower(trim($platformId));
-    echo '<span class="review-platform__icon" aria-hidden="true">';
-    if ($id === 'yandex') {
-        echo '<svg viewBox="0 0 24 24" width="28" height="28"><circle cx="12" cy="12" r="12" fill="#FC3F1D"/><text x="12" y="16" text-anchor="middle" fill="#fff" font-size="13" font-weight="700" font-family="Arial,sans-serif">Я</text></svg>';
+    $class = 'review-platform__icon';
+    if ($variant === 'muted') {
+        $class .= ' review-platform__icon--muted';
+    } elseif ($variant === 'compact') {
+        $class .= ' review-platform__icon--compact';
+    }
+    $size = $variant === 'compact' ? 20 : 28;
+    echo '<span class="' . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . '" aria-hidden="true">';
+    if ($variant === 'muted') {
+        if ($id === 'yandex') {
+            echo '<svg viewBox="0 0 24 24" width="' . $size . '" height="' . $size . '"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.5"/><text x="12" y="16" text-anchor="middle" fill="currentColor" font-size="11" font-weight="600" font-family="system-ui,sans-serif">Я</text></svg>';
+        } elseif ($id === '2gis') {
+            echo '<svg viewBox="0 0 24 24" width="' . $size . '" height="' . $size . '"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.5"/><text x="12" y="16" text-anchor="middle" fill="currentColor" font-size="9" font-weight="600" font-family="system-ui,sans-serif">2Г</text></svg>';
+        } elseif ($id === 'domclick') {
+            echo '<svg viewBox="0 0 24 24" width="' . $size . '" height="' . $size . '"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.5"/><text x="12" y="16" text-anchor="middle" fill="currentColor" font-size="9" font-weight="600" font-family="system-ui,sans-serif">Д</text></svg>';
+        } elseif ($id === 'avito') {
+            echo '<svg viewBox="0 0 24 24" width="' . $size . '" height="' . $size . '"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.5"/><text x="12" y="16" text-anchor="middle" fill="currentColor" font-size="9" font-weight="600" font-family="system-ui,sans-serif">А</text></svg>';
+        } else {
+            echo '<svg viewBox="0 0 24 24" width="' . $size . '" height="' . $size . '"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
+        }
+    } elseif ($id === 'yandex') {
+        echo '<svg viewBox="0 0 24 24" width="' . $size . '" height="' . $size . '"><circle cx="12" cy="12" r="12" fill="#FC3F1D"/><text x="12" y="16" text-anchor="middle" fill="#fff" font-size="13" font-weight="700" font-family="Arial,sans-serif">Я</text></svg>';
     } elseif ($id === '2gis') {
-        echo '<svg viewBox="0 0 24 24" width="28" height="28"><circle cx="12" cy="12" r="12" fill="#2E8B57"/><text x="12" y="16" text-anchor="middle" fill="#fff" font-size="11" font-weight="700" font-family="Arial,sans-serif">2</text></svg>';
+        echo '<svg viewBox="0 0 24 24" width="' . $size . '" height="' . $size . '"><circle cx="12" cy="12" r="12" fill="#2E8B57"/><text x="12" y="16" text-anchor="middle" fill="#fff" font-size="11" font-weight="700" font-family="Arial,sans-serif">2</text></svg>';
     } elseif ($id === 'domclick') {
-        echo '<svg viewBox="0 0 24 24" width="28" height="28"><circle cx="12" cy="12" r="12" fill="#0066FF"/><text x="12" y="16" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="Arial,sans-serif">Д</text></svg>';
+        echo '<svg viewBox="0 0 24 24" width="' . $size . '" height="' . $size . '"><circle cx="12" cy="12" r="12" fill="#0066FF"/><text x="12" y="16" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="Arial,sans-serif">Д</text></svg>';
     } elseif ($id === 'avito') {
-        echo '<svg viewBox="0 0 24 24" width="28" height="28"><circle cx="12" cy="12" r="12" fill="#00AAFF"/><text x="12" y="16" text-anchor="middle" fill="#fff" font-size="11" font-weight="700" font-family="Arial,sans-serif">А</text></svg>';
+        echo '<svg viewBox="0 0 24 24" width="' . $size . '" height="' . $size . '"><circle cx="12" cy="12" r="12" fill="#00AAFF"/><text x="12" y="16" text-anchor="middle" fill="#fff" font-size="11" font-weight="700" font-family="Arial,sans-serif">А</text></svg>';
     } else {
-        echo '<svg viewBox="0 0 24 24" width="28" height="28"><circle cx="12" cy="12" r="12" fill="#888"/></svg>';
+        echo '<svg viewBox="0 0 24 24" width="' . $size . '" height="' . $size . '"><circle cx="12" cy="12" r="12" fill="#888"/></svg>';
     }
     echo '</span>';
 }
@@ -1253,14 +1538,16 @@ function site_render_review_card(array $review, bool $compact = true): void
                     </time>
                 <?php } ?>
             </div>
-            <span class="review-card__source-pill"><?php echo htmlspecialchars($sourceLabel, ENT_QUOTES, 'UTF-8'); ?></span>
+            <span class="review-card__source-icon" title="<?php echo htmlspecialchars($sourceLabel, ENT_QUOTES, 'UTF-8'); ?>" aria-label="<?php echo htmlspecialchars($sourceLabel, ENT_QUOTES, 'UTF-8'); ?>">
+                <?php site_render_review_platform_icon($sourceId, 'muted'); ?>
+            </span>
         </header>
         <?php echo site_reviews_render_stars($review['rating'], 'review-stars review-stars--card'); ?>
         <blockquote class="review-card__text">
             <p><?php echo htmlspecialchars($review['text'], ENT_QUOTES, 'UTF-8'); ?></p>
         </blockquote>
         <?php if ($sourceUrl !== '') { ?>
-            <span class="review-card__cta">На <?php echo htmlspecialchars($sourceLabel, ENT_QUOTES, 'UTF-8'); ?></span>
+            <span class="review-card__cta">Читать полностью</span>
         <?php } ?>
     </<?php echo $tag; ?>>
     <?php

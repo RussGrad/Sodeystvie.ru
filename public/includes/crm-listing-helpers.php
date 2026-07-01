@@ -1201,6 +1201,7 @@ function site_render_complex_sidebar(array $row, string $fallbackPriceText): voi
     $finishing = count($meta['finishingOptions']) > 0
         ? implode(', ', $meta['finishingOptions'])
         : '';
+    $siteOfferBadge = isset($row['siteOfferBadge']) ? trim((string) $row['siteOfferBadge']) : '';
     ?>
     <div class="complex-sidebar" data-complex-sidebar>
         <div class="complex-sidebar__actions">
@@ -1227,6 +1228,9 @@ function site_render_complex_sidebar(array $row, string $fallbackPriceText): voi
             </div>
         <?php } ?>
         <h1 class="complex-sidebar__title"><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></h1>
+        <?php if ($siteOfferBadge !== '') { ?>
+            <p class="listing-object__offer-status"><?php echo htmlspecialchars($siteOfferBadge, ENT_QUOTES, 'UTF-8'); ?></p>
+        <?php } ?>
         <p class="complex-sidebar__price" data-testid="priceRange"><?php echo htmlspecialchars($priceRange, ENT_QUOTES, 'UTF-8'); ?></p>
         <?php if ($readiness !== '') { ?>
             <p class="complex-sidebar__status">
@@ -2610,10 +2614,19 @@ function site_render_featured_listing_card(array $row): void
     $areaText = $areaTotal ? rtrim(rtrim(number_format($areaTotal, 2, '.', ''), '0'), '.') . ' м²' : '—';
     $href = '/catalog/object/?id=' . rawurlencode($id);
     $hasDiscount = site_listing_has_discount($priceOldRaw, $priceRaw);
-    $badgeClass = $hasDiscount ? 'featured-card__badge--sale' : 'featured-card__badge--new';
-    $badgeText = $hasDiscount
-        ? site_listing_discount_badge_text($priceOldRaw, $priceRaw)
-        : 'Топ';
+    $siteOfferBadge = isset($row['siteOfferBadge']) ? trim((string) $row['siteOfferBadge']) : '';
+    if ($siteOfferBadge !== '') {
+        $badgeClass = $objectType === 'newbuilding'
+            ? 'featured-card__badge--reserved'
+            : 'featured-card__badge--deposit';
+        $badgeText = $siteOfferBadge;
+    } elseif ($hasDiscount) {
+        $badgeClass = 'featured-card__badge--sale';
+        $badgeText = site_listing_discount_badge_text($priceOldRaw, $priceRaw);
+    } else {
+        $badgeClass = 'featured-card__badge--new';
+        $badgeText = 'Топ';
+    }
     ?>
     <li class="featured__cell">
         <article class="featured-card">

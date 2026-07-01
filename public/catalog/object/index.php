@@ -69,6 +69,7 @@ $priceM2 = $isNewbuilding ? null : site_fmt_m2($areaTotal, $priceRaw);
 $addressLine = site_listing_address_line($obj);
 $district = isset($obj['districtValue']) ? trim((string) $obj['districtValue']) : '';
 $dealLine = site_deal_line_public_label(isset($obj['dealLineValue']) ? (string) $obj['dealLineValue'] : null);
+$siteOfferBadge = isset($obj['siteOfferBadge']) ? trim((string) $obj['siteOfferBadge']) : '';
 $description = isset($obj['description']) ? trim((string) $obj['description']) : '';
 $specSections = site_listing_object_spec_sections($obj);
 $constructionEntries = $isNewbuilding ? site_construction_progress_entries($obj) : [];
@@ -299,6 +300,9 @@ $listingObjectMapJsVersion = (string) (@filemtime(__DIR__ . '/../../js/listing-o
             <header class="listing-object__top">
                 <div class="listing-object__intro">
                     <h1 class="listing-object__title"><?php echo htmlspecialchars($headingTitle, ENT_QUOTES, 'UTF-8'); ?></h1>
+                    <?php if ($siteOfferBadge !== '') { ?>
+                        <p class="listing-object__offer-status"><?php echo htmlspecialchars($siteOfferBadge, ENT_QUOTES, 'UTF-8'); ?></p>
+                    <?php } ?>
                     <?php if ($addressLine !== '') { ?>
                         <?php if ($mapsExternalUrl !== '') { ?>
                             <a class="listing-object__address" href="<?php echo htmlspecialchars($mapsExternalUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer"><?php echo htmlspecialchars($addressLine, ENT_QUOTES, 'UTF-8'); ?></a>

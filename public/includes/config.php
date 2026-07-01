@@ -310,6 +310,20 @@ function site_crm_site_chat_url(): string
     return site_crm_api_base_resolved() . site_crm_site_chat_path();
 }
 
+/** Путь команды агентства для витрины (GET, ключ PUBLIC_SITE_API_KEY). */
+function site_crm_team_path(): string
+{
+    $path = site_env('CRM_TEAM_PATH', '/api/public/team');
+    $path = '/' . trim($path, '/');
+
+    return $path;
+}
+
+function site_crm_team_url(): string
+{
+    return site_crm_api_base_resolved() . site_crm_team_path();
+}
+
 function site_public_site_api_key(): string
 {
     return site_env('PUBLIC_SITE_API_KEY', '');
