@@ -255,10 +255,12 @@
   line-height: 1.2;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  box-shadow: var(--featured-badge-shadow);
-  backdrop-filter: blur(4px);
+  border-radius: 10px;
+  border: 1px solid var(--featured-badge-glass-border);
+  box-shadow: var(--featured-badge-shadow), var(--featured-badge-glass-highlight);
+  -webkit-backdrop-filter: blur(12px) saturate(165%);
+  backdrop-filter: blur(12px) saturate(165%);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
 
   @media (min-width: 768px) {
     top: 0.65rem;
