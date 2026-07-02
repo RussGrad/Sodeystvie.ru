@@ -2438,6 +2438,8 @@ function site_catalog_filters_from_request(): array
         'region' => $str('region'),
         'city' => $str('city'),
         'objectType' => $str('type') !== '' ? $str('type') : $str('objectType'),
+        'operation' => $str('operation'),
+        'rent_mode' => $str('rent_mode'),
         'rooms' => $str('rooms'),
         'price' => $str('price'),
         'area_min' => $str('area_min'),
@@ -2624,7 +2626,7 @@ function site_render_featured_listing_card(array $row): void
     } elseif ($hasDiscount) {
         $badgeClass = 'featured-card__badge--exclusive';
         $badgeText = 'Эксклюзивное предложение';
-        $discountPct = site_listing_discount_percent($priceOldRaw, $priceRaw);
+    $discountPct = site_listing_discount_percent($priceOldRaw, $priceRaw);
         if ($discountPct !== null && $discountPct > 0) {
             $badgeSub = 'Цена ниже на ' . $discountPct . '%';
         }
@@ -2673,7 +2675,7 @@ function site_render_featured_listing_card(array $row): void
  */
 function site_catalog_filters_has_local(array $filters): bool
 {
-    foreach (['rooms', 'price', 'area_min', 'area_max', 'price_min', 'price_max'] as $key) {
+    foreach (['operation', 'rent_mode', 'rooms', 'price', 'area_min', 'area_max', 'price_min', 'price_max'] as $key) {
         if (($filters[$key] ?? '') !== '') {
             return true;
         }
@@ -2688,6 +2690,39 @@ function site_catalog_filters_has_local(array $filters): bool
  */
 function site_catalog_row_matches_filters(array $row, array $filters): bool
 {
+    $dealRaw = isset($row['dealLineValue']) ? trim((string) $row['dealLineValue']) : '';
+    $dealText = mb_strtolower($dealRaw, 'UTF-8');
+    $descText = mb_strtolower(trim((string) ($row['description'] ?? '')), 'UTF-8');
+    $op = $filters['operation'] ?? '';
+    if ($op !== '') {
+        $isSale = $dealText === '' || mb_strpos($dealText, 'продаж', 0, 'UTF-8') !== false;
+        $isBuy = mb_strpos($dealText, 'покуп', 0, 'UTF-8') !== false;
+        $isRent = mb_strpos($dealText, 'аренд', 0, 'UTF-8') !== false;
+        if ($op === 'sale' && !$isSale) {
+            return false;
+        }
+        if ($op === 'buy' && !$isBuy) {
+            return false;
+        }
+        if ($op === 'rent' && !$isRent) {
+            return false;
+        }
+    }
+
+    $rentMode = $filters['rent_mode'] ?? '';
+    if ($rentMode !== '') {
+        $rentHaystack = $dealText . ' ' . $descText;
+        $isDaily = mb_strpos($rentHaystack, 'посуточ', 0, 'UTF-8') !== false
+            || mb_strpos($rentHaystack, 'сутк', 0, 'UTF-8') !== false;
+        $isRent = mb_strpos($dealText, 'аренд', 0, 'UTF-8') !== false;
+        if ($rentMode === 'daily' && !($isRent && $isDaily)) {
+            return false;
+        }
+        if ($rentMode === 'long' && !($isRent && !$isDaily)) {
+            return false;
+        }
+    }
+
     $roomsFilter = $filters['rooms'] ?? '';
     if ($roomsFilter !== '') {
         $rooms = isset($row['rooms']) && is_numeric($row['rooms']) ? (int) $row['rooms'] : null;
