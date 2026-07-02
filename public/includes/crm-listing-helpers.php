@@ -2615,16 +2615,21 @@ function site_render_featured_listing_card(array $row): void
     $href = '/catalog/object/?id=' . rawurlencode($id);
     $hasDiscount = site_listing_has_discount($priceOldRaw, $priceRaw);
     $siteOfferBadge = isset($row['siteOfferBadge']) ? trim((string) $row['siteOfferBadge']) : '';
+    $badgeSub = '';
     if ($siteOfferBadge !== '') {
         $badgeClass = $objectType === 'newbuilding'
             ? 'featured-card__badge--reserved'
             : 'featured-card__badge--deposit';
         $badgeText = $siteOfferBadge;
     } elseif ($hasDiscount) {
-        $badgeClass = 'featured-card__badge--sale';
-        $badgeText = site_listing_discount_badge_text($priceOldRaw, $priceRaw);
+        $badgeClass = 'featured-card__badge--exclusive';
+        $badgeText = 'Эксклюзивное предложение';
+        $discountPct = site_listing_discount_percent($priceOldRaw, $priceRaw);
+        if ($discountPct !== null && $discountPct > 0) {
+            $badgeSub = 'Цена ниже на ' . $discountPct . '%';
+        }
     } else {
-        $badgeClass = 'featured-card__badge--new';
+        $badgeClass = 'featured-card__badge--top';
         $badgeText = 'Топ';
     }
     ?>
@@ -2635,7 +2640,12 @@ function site_render_featured_listing_card(array $row): void
                     <?php if ($coverPhoto !== '') {
                         echo site_crm_photo_img($coverPhoto, $cardTitle, 'featured-card__photo', '', 'featured');
                     } ?>
-                    <span class="featured-card__badge <?php echo htmlspecialchars($badgeClass, ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($badgeText, ENT_QUOTES, 'UTF-8'); ?></span>
+                    <span class="featured-card__badge <?php echo htmlspecialchars($badgeClass, ENT_QUOTES, 'UTF-8'); ?>">
+                        <span class="featured-card__badge-main"><?php echo htmlspecialchars($badgeText, ENT_QUOTES, 'UTF-8'); ?></span>
+                        <?php if ($badgeSub !== '') { ?>
+                            <span class="featured-card__badge-sub"><?php echo htmlspecialchars($badgeSub, ENT_QUOTES, 'UTF-8'); ?></span>
+                        <?php } ?>
+                    </span>
                 </div>
                 <div class="featured-card__body">
                     <h3 class="featured-card__title"><?php echo htmlspecialchars($cardTitle, ENT_QUOTES, 'UTF-8'); ?></h3>

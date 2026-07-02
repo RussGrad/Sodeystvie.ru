@@ -211,7 +211,20 @@
     content: "";
     position: absolute;
     inset: 0;
+    z-index: 1;
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%);
+    pointer-events: none;
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 1;
+    height: 42%;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.52) 0%, rgba(0, 0, 0, 0) 100%);
     pointer-events: none;
   }
 }
@@ -228,54 +241,92 @@
 
 .featured-card__badge {
   position: absolute;
-  top: 0.65rem;
-  left: 0.65rem;
+  top: 0.55rem;
+  left: 0.55rem;
   z-index: 2;
-  padding: 0.25rem 0.55rem;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.12rem;
+  max-width: calc(100% - 1.1rem);
+  padding: 0.38rem 0.62rem;
   font-size: 0.6875rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: var(--featured-badge-shadow);
+  backdrop-filter: blur(4px);
+
+  @media (min-width: 768px) {
+    top: 0.65rem;
+    left: 0.65rem;
+    padding: 0.42rem 0.72rem;
+    font-size: 0.75rem;
+  }
+}
+
+.featured-card__badge-main {
+  display: block;
+}
+
+.featured-card__badge-sub {
+  display: block;
+  font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.02em;
+  text-transform: none;
+  opacity: 0.92;
+
+  @media (min-width: 768px) {
+    font-size: 0.6875rem;
+  }
+}
+
+.featured-card__badge--top,
+.featured-card__badge--new {
+  background: var(--featured-badge-top-bg);
+  color: var(--featured-badge-top-text);
   text-transform: uppercase;
-  border-radius: 6px;
+}
+
+.featured-card__badge--resale {
+  background: var(--featured-badge-new);
   color: var(--featured-title);
+}
 
-  &--new {
-    background: var(--featured-badge-new);
-  }
+.featured-card__badge--exclusive,
+.featured-card__badge--sale {
+  background: var(--featured-badge-exclusive-bg);
+  color: var(--featured-badge-exclusive-text);
+  text-transform: none;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+  white-space: normal;
 
-  &--resale {
-    background: var(--featured-badge-resale);
+  .featured-card__badge-sub {
+    color: var(--featured-badge-exclusive-sub);
   }
+}
 
-  &--sale {
-    background: var(--featured-badge-sale);
-    color: var(--page-text);
-    text-transform: none;
-    font-size: 0.625rem;
-    line-height: 1.25;
-    max-width: calc(100% - 1.3rem);
-    white-space: normal;
-  }
+.featured-card__badge--reserved {
+  background: var(--featured-badge-reserved-bg);
+  color: var(--featured-badge-reserved-text);
+  text-transform: none;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+  white-space: normal;
+}
 
-  &--reserved {
-    background: var(--featured-badge-reserved);
-    color: var(--featured-badge-reserved-text);
-    text-transform: none;
-    font-size: 0.625rem;
-    line-height: 1.25;
-    max-width: calc(100% - 1.3rem);
-    white-space: normal;
-  }
-
-  &--deposit {
-    background: var(--featured-badge-deposit);
-    color: var(--featured-badge-deposit-text);
-    text-transform: none;
-    font-size: 0.625rem;
-    line-height: 1.25;
-    max-width: calc(100% - 1.3rem);
-    white-space: normal;
-  }
+.featured-card__badge--deposit {
+  background: var(--featured-badge-deposit-bg);
+  color: var(--featured-badge-deposit-text);
+  text-transform: none;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+  white-space: normal;
 }
 
 .featured-card__body {
