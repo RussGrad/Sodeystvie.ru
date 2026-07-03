@@ -76,7 +76,7 @@ function site_reviews_agency_profile(): array
         } else {
             $cache = $defaults;
 
-            return $cache;
+        return $cache;
         }
     }
 
@@ -611,19 +611,19 @@ function site_reviews_domclick_pack(): array
  */
 function site_reviews_normalize_row(array $row, string $defaultSource = 'yandex'): ?array
 {
-    $id = isset($row['id']) ? trim((string) $row['id']) : '';
-    $author = isset($row['author']) ? trim((string) $row['author']) : '';
-    $text = isset($row['text']) ? trim((string) $row['text']) : '';
-    if ($id === '' || $author === '' || $text === '') {
+        $id = isset($row['id']) ? trim((string) $row['id']) : '';
+        $author = isset($row['author']) ? trim((string) $row['author']) : '';
+        $text = isset($row['text']) ? trim((string) $row['text']) : '';
+        if ($id === '' || $author === '' || $text === '') {
         return null;
-    }
-    $rating = isset($row['rating']) && is_numeric($row['rating']) ? (int) $row['rating'] : 5;
-    $rating = max(1, min(5, $rating));
-    $date = isset($row['date']) ? trim((string) $row['date']) : '';
+        }
+        $rating = isset($row['rating']) && is_numeric($row['rating']) ? (int) $row['rating'] : 5;
+        $rating = max(1, min(5, $rating));
+        $date = isset($row['date']) ? trim((string) $row['date']) : '';
     $source = isset($row['source']) && trim((string) $row['source']) !== ''
         ? trim((string) $row['source'])
         : $defaultSource;
-    $demo = !empty($row['demo']);
+        $demo = !empty($row['demo']);
 
     $reply = null;
     if (isset($row['reply']) && is_array($row['reply'])) {
@@ -638,13 +638,13 @@ function site_reviews_normalize_row(array $row, string $defaultSource = 'yandex'
     }
 
     return [
-        'id' => $id,
-        'author' => $author,
-        'date' => $date,
-        'rating' => $rating,
-        'text' => $text,
-        'source' => $source,
-        'demo' => $demo,
+            'id' => $id,
+            'author' => $author,
+            'date' => $date,
+            'rating' => $rating,
+            'text' => $text,
+            'source' => $source,
+            'demo' => $demo,
         'reply' => $reply,
     ];
 }
@@ -729,7 +729,7 @@ function site_reviews_summary(): array
     }
 
     if ($rating === null) {
-        $ratingRaw = site_content_setting('reviews_rating', '');
+    $ratingRaw = site_content_setting('reviews_rating', '');
         $rating = $ratingRaw !== '' ? (float) $ratingRaw : null;
         if ($rating === null) {
             $envRating = trim(site_env('SITE_REVIEWS_RATING', ''));
@@ -737,7 +737,7 @@ function site_reviews_summary(): array
         }
     }
     if ($count === null || $count === 0) {
-        $countRaw = site_content_setting('reviews_count', '');
+    $countRaw = site_content_setting('reviews_count', '');
         $count = $countRaw !== '' ? (int) $countRaw : null;
         if ($count === null) {
             $envCount = trim(site_env('SITE_REVIEWS_COUNT', ''));
@@ -1233,15 +1233,15 @@ function site_render_review_platform_icon(string $platformId, string $variant = 
     $size = $variant === 'compact' ? 20 : 28;
     echo '<span class="' . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . '" aria-hidden="true">';
     if ($variant === 'muted') {
-        if ($id === 'yandex') {
+    if ($id === 'yandex') {
             echo '<svg viewBox="0 0 24 24" width="' . $size . '" height="' . $size . '"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.5"/><text x="12" y="16" text-anchor="middle" fill="currentColor" font-size="11" font-weight="600" font-family="system-ui,sans-serif">Я</text></svg>';
-        } elseif ($id === '2gis') {
+    } elseif ($id === '2gis') {
             echo '<svg viewBox="0 0 24 24" width="' . $size . '" height="' . $size . '"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.5"/><text x="12" y="16" text-anchor="middle" fill="currentColor" font-size="9" font-weight="600" font-family="system-ui,sans-serif">2Г</text></svg>';
-        } elseif ($id === 'domclick') {
+    } elseif ($id === 'domclick') {
             echo '<svg viewBox="0 0 24 24" width="' . $size . '" height="' . $size . '"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.5"/><text x="12" y="16" text-anchor="middle" fill="currentColor" font-size="9" font-weight="600" font-family="system-ui,sans-serif">Д</text></svg>';
-        } elseif ($id === 'avito') {
+    } elseif ($id === 'avito') {
             echo '<svg viewBox="0 0 24 24" width="' . $size . '" height="' . $size . '"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.5"/><text x="12" y="16" text-anchor="middle" fill="currentColor" font-size="9" font-weight="600" font-family="system-ui,sans-serif">А</text></svg>';
-        } else {
+    } else {
             echo '<svg viewBox="0 0 24 24" width="' . $size . '" height="' . $size . '"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
         }
     } elseif ($id === 'yandex') {
@@ -1531,12 +1531,12 @@ function site_render_review_card(array $review, bool $compact = true): void
         <?php } ?>
         <header class="review-card__head">
             <div class="review-card__meta">
-                <cite class="review-card__author"><?php echo htmlspecialchars($review['author'], ENT_QUOTES, 'UTF-8'); ?></cite>
-                <?php if ($review['date'] !== '') { ?>
-                    <time class="review-card__date" datetime="<?php echo htmlspecialchars($review['date'], ENT_QUOTES, 'UTF-8'); ?>">
-                        <?php echo htmlspecialchars(site_reviews_format_date($review['date']), ENT_QUOTES, 'UTF-8'); ?>
-                    </time>
-                <?php } ?>
+            <cite class="review-card__author"><?php echo htmlspecialchars($review['author'], ENT_QUOTES, 'UTF-8'); ?></cite>
+            <?php if ($review['date'] !== '') { ?>
+                <time class="review-card__date" datetime="<?php echo htmlspecialchars($review['date'], ENT_QUOTES, 'UTF-8'); ?>">
+                    <?php echo htmlspecialchars(site_reviews_format_date($review['date']), ENT_QUOTES, 'UTF-8'); ?>
+                </time>
+            <?php } ?>
             </div>
             <span class="review-card__source-icon" title="<?php echo htmlspecialchars($sourceLabel, ENT_QUOTES, 'UTF-8'); ?>" aria-label="<?php echo htmlspecialchars($sourceLabel, ENT_QUOTES, 'UTF-8'); ?>">
                 <?php site_render_review_platform_icon($sourceId, 'muted'); ?>
