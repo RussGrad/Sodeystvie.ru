@@ -2515,6 +2515,16 @@ function site_crm_fetch_featured_listings(int $limit = 8): array
     return site_crm_fetch_listings(max(1, min($limit, 48)), 0, ['featured' => '1']);
 }
 
+/**
+ * @param array<string, mixed> $row
+ */
+function site_listing_is_rent_deal(array $row): bool
+{
+    $dealText = mb_strtolower(trim((string) ($row['dealLineValue'] ?? '')), 'UTF-8');
+
+    return $dealText !== '' && mb_strpos($dealText, 'аренд', 0, 'UTF-8') !== false;
+}
+
 /** newbuild | resale | commercial */
 function site_listing_featured_group(?string $objectType): ?string
 {
@@ -2548,9 +2558,14 @@ function site_listing_in_irkutsk(array $row): bool
 
 /**
  * Featured-объекты, сгруппированные для главной: новостройки / вторичка / коммерция.
+ * Вторичка и коммерция разделены на продажу и аренду.
  *
  * @return array{
- *   groups: array{newbuild: list<array<string, mixed>>, resale: list<array<string, mixed>>, commercial: list<array<string, mixed>>},
+ *   groups: array{
+ *     newbuild: list<array<string, mixed>>,
+ *     resale: array{sale: list<array<string, mixed>>, rent: list<array<string, mixed>>},
+ *     commercial: array{sale: list<array<string, mixed>>, rent: list<array<string, mixed>>}
+ *   },
  *   error: ?string
  * }
  */
@@ -2560,8 +2575,8 @@ function site_crm_fetch_featured_listing_groups(int $limitPerGroup = 8): array
     $crm = site_crm_fetch_featured_listings(48);
     $groups = [
         'newbuild' => [],
-        'resale' => [],
-        'commercial' => [],
+        'resale' => ['sale' => [], 'rent' => []],
+        'commercial' => ['sale' => [], 'rent' => []],
     ];
 
     if ($crm['error'] !== null) {
@@ -2578,13 +2593,22 @@ function site_crm_fetch_featured_listing_groups(int $limitPerGroup = 8): array
         if ($group === null) {
             continue;
         }
-        if ($group === 'newbuild' && !site_listing_in_irkutsk($row)) {
+        if ($group === 'newbuild') {
+            if (!site_listing_in_irkutsk($row)) {
+                continue;
+            }
+            if (count($groups['newbuild']) >= $limitPerGroup) {
+                continue;
+            }
+            $groups['newbuild'][] = $row;
             continue;
         }
-        if (count($groups[$group]) >= $limitPerGroup) {
+
+        $dealKey = site_listing_is_rent_deal($row) ? 'rent' : 'sale';
+        if (count($groups[$group][$dealKey]) >= $limitPerGroup) {
             continue;
         }
-        $groups[$group][] = $row;
+        $groups[$group][$dealKey][] = $row;
     }
 
     return ['groups' => $groups, 'error' => null];

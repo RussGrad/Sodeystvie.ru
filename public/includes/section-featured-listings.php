@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/crm-listing-helpers.php';
 
-$featuredData = site_crm_fetch_featured_listing_groups(8);
+$featuredData = site_crm_fetch_featured_listing_groups(4);
 $groups = $featuredData['groups'];
 $featuredError = $featuredData['error'];
 
@@ -17,7 +17,9 @@ $sections = [
         'lead' => 'Квартиры в новых ЖК с выгодными условиями покупки и потенциалом роста стоимости.',
         'catalogHref' => '/catalog/?type=newbuilding&region=irkutsk',
         'catalogLabel' => 'Все новостройки',
-        'items' => $groups['newbuild'],
+        'subsections' => [
+            ['title' => null, 'catalogHref' => null, 'catalogLabel' => null, 'items' => $groups['newbuild']],
+        ],
     ],
     [
         'id' => 'featured-resale',
@@ -27,7 +29,20 @@ $sections = [
         'lead' => 'Проверенные квартиры и дома — готовые к заселению и выгодные по цене.',
         'catalogHref' => '/catalog/?region=irkutsk',
         'catalogLabel' => 'Вторичка в каталоге',
-        'items' => $groups['resale'],
+        'subsections' => [
+            [
+                'title' => 'Продажа',
+                'catalogHref' => '/catalog/?region=irkutsk&operation=sale',
+                'catalogLabel' => 'Все на продажу',
+                'items' => $groups['resale']['sale'],
+            ],
+            [
+                'title' => 'Аренда',
+                'catalogHref' => '/catalog/?region=irkutsk&operation=rent',
+                'catalogLabel' => 'Все в аренду',
+                'items' => $groups['resale']['rent'],
+            ],
+        ],
     ],
     [
         'id' => 'featured-commercial',
@@ -37,15 +52,30 @@ $sections = [
         'lead' => 'Офисы, торговые и свободные помещения для бизнеса в Иркутске и области.',
         'catalogHref' => '/catalog/?type=commercial&region=irkutsk',
         'catalogLabel' => 'Коммерция в каталоге',
-        'items' => $groups['commercial'],
+        'subsections' => [
+            [
+                'title' => 'Продажа',
+                'catalogHref' => '/catalog/?type=commercial&region=irkutsk&operation=sale',
+                'catalogLabel' => 'Все на продажу',
+                'items' => $groups['commercial']['sale'],
+            ],
+            [
+                'title' => 'Аренда',
+                'catalogHref' => '/catalog/?type=commercial&region=irkutsk&operation=rent',
+                'catalogLabel' => 'Все в аренду',
+                'items' => $groups['commercial']['rent'],
+            ],
+        ],
     ],
 ];
 
 $hasAnyItems = false;
 foreach ($sections as $section) {
-    if (count($section['items']) > 0) {
-        $hasAnyItems = true;
-        break;
+    foreach ($section['subsections'] as $subsection) {
+        if (count($subsection['items']) > 0) {
+            $hasAnyItems = true;
+            break 2;
+        }
     }
 }
 
@@ -77,7 +107,14 @@ foreach ($sections as $section) {
     </section>
 <?php } else {
     foreach ($sections as $section) {
-        if (count($section['items']) === 0) {
+        $sectionHasItems = false;
+        foreach ($section['subsections'] as $subsection) {
+            if (count($subsection['items']) > 0) {
+                $sectionHasItems = true;
+                break;
+            }
+        }
+        if (!$sectionHasItems) {
             continue;
         }
         $sectionMod = trim((string) $section['mod']);
@@ -101,13 +138,35 @@ foreach ($sections as $section) {
                     <?php echo htmlspecialchars((string) $section['catalogLabel'], ENT_QUOTES, 'UTF-8'); ?>
                 </a>
             </header>
-            <ul class="featured__grid">
-                <?php foreach ($section['items'] as $row) {
-                    if (is_array($row)) {
-                        site_render_featured_listing_card($row);
-                    }
-                } ?>
-            </ul>
+            <?php foreach ($section['subsections'] as $subsection) {
+                if (count($subsection['items']) === 0) {
+                    continue;
+                }
+                $subsectionTitle = isset($subsection['title']) ? trim((string) $subsection['title']) : '';
+                $subsectionCatalogHref = isset($subsection['catalogHref']) ? trim((string) $subsection['catalogHref']) : '';
+                $subsectionCatalogLabel = isset($subsection['catalogLabel']) ? trim((string) $subsection['catalogLabel']) : '';
+                ?>
+            <div class="featured__subsection">
+                <?php if ($subsectionTitle !== '') { ?>
+                <div class="featured__subsection-head">
+                    <h3 class="featured__subsection-title"><?php echo htmlspecialchars($subsectionTitle, ENT_QUOTES, 'UTF-8'); ?></h3>
+                    <?php if ($subsectionCatalogHref !== '' && $subsectionCatalogLabel !== '') { ?>
+                    <a class="featured__subsection-link" href="<?php echo htmlspecialchars($subsectionCatalogHref, ENT_QUOTES, 'UTF-8'); ?>">
+                        <?php echo htmlspecialchars($subsectionCatalogLabel, ENT_QUOTES, 'UTF-8'); ?>
+                    </a>
+                    <?php } ?>
+                </div>
+                <?php } ?>
+                <ul class="featured__grid">
+                    <?php foreach ($subsection['items'] as $row) {
+                        if (is_array($row)) {
+                            site_render_featured_listing_card($row);
+                        }
+                    } ?>
+                </ul>
+            </div>
+                <?php
+            } ?>
         </div>
     </section>
         <?php
