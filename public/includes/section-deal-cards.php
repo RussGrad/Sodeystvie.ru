@@ -3,49 +3,80 @@
 declare(strict_types=1);
 
 /**
- * Блок направлений: Продать / Купить / Сдать / Снять (как на референсе).
+ * Блок направлений: Продать / Купить / Сдать / Снять.
  */
-
-require_once __DIR__ . '/site-image.php';
 
 $dealCards = [
     [
+        'variant' => 'sell',
         'title' => 'Продать',
-        'subtitle' => 'КВАРТИРУ',
-        'image' => '/assets/deal-cards/sell.png',
-        'alt' => 'Продажа квартиры с сопровождением риэлтора',
+        'subtitle' => 'Квартиру',
         'action' => 'lead',
         'topic' => 'sell-evaluation',
         'aria' => 'Оставить заявку на продажу квартиры',
     ],
     [
+        'variant' => 'buy',
         'title' => 'Купить',
-        'subtitle' => 'КВАРТИРУ',
-        'image' => '/assets/deal-cards/buy.png',
-        'alt' => 'Подбор квартиры для покупки',
+        'subtitle' => 'Квартиру',
         'action' => 'link',
         'href' => '/catalog/?operation=buy&type=flat',
         'aria' => 'Перейти в каталог покупки квартир',
     ],
     [
+        'variant' => 'rent-out',
         'title' => 'Сдать',
-        'subtitle' => 'КВАРТИРУ',
-        'image' => '/assets/deal-cards/rent-out.png',
-        'alt' => 'Сдача квартиры в аренду',
+        'subtitle' => 'Квартиру',
         'action' => 'lead',
         'topic' => 'rent-out',
         'aria' => 'Оставить заявку на сдачу квартиры',
     ],
     [
+        'variant' => 'rent-in',
         'title' => 'Снять',
-        'subtitle' => 'КВАРТИРУ',
-        'image' => '/assets/deal-cards/rent-in.png',
-        'alt' => 'Аренда квартиры в Иркутске',
+        'subtitle' => 'Квартиру',
         'action' => 'link',
         'href' => '/catalog/?operation=rent&type=flat',
         'aria' => 'Перейти в каталог аренды квартир',
     ],
 ];
+
+/**
+ * @param string $variant
+ */
+function site_render_deal_card_visual(string $variant): void
+{
+    $safe = preg_replace('/[^a-z-]/', '', $variant) ?: 'sell';
+    ?>
+    <div class="deal-cards__visual deal-cards__visual--<?php echo htmlspecialchars($safe, ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="true">
+        <?php if ($safe === 'sell') { ?>
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 34V18l14-8 14 8v16" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M20 34v-8h8v8" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M30 22l6-3M18 22l-6-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        <?php } elseif ($safe === 'buy') { ?>
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="21" cy="21" r="9" stroke="currentColor" stroke-width="2"/>
+                <path d="M28 28l9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M18 21h6M21 18v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        <?php } elseif ($safe === 'rent-out') { ?>
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="28" r="7" stroke="currentColor" stroke-width="2"/>
+                <path d="M23 28h14a3 3 0 0 0 0-6h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M33 22v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        <?php } else { ?>
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 20l16-10 16 10v18H8V20z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M20 38V26h8v12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M8 20h32" stroke="currentColor" stroke-width="2"/>
+            </svg>
+        <?php } ?>
+    </div>
+    <?php
+}
 
 /**
  * @param array<string, string> $card
@@ -54,8 +85,7 @@ function site_render_deal_card_inner(array $card): void
 {
     $title = (string) ($card['title'] ?? '');
     $subtitle = (string) ($card['subtitle'] ?? '');
-    $image = (string) ($card['image'] ?? '');
-    $alt = (string) ($card['alt'] ?? $title);
+    $variant = (string) ($card['variant'] ?? 'sell');
     ?>
     <div class="deal-cards__head">
         <div class="deal-cards__labels">
@@ -69,47 +99,41 @@ function site_render_deal_card_inner(array $card): void
         </span>
     </div>
     <div class="deal-cards__media">
-        <?php
-        if ($image !== '') {
-            echo site_render_static_picture(
-                $image,
-                $alt,
-                'deal-cards__photo',
-                'width="280" height="360" loading="lazy" decoding="async"',
-            );
-        }
-        ?>
+        <?php site_render_deal_card_visual($variant); ?>
     </div>
     <?php
 }
 
 ?>
 <section class="deal-cards" aria-label="Направления работы с недвижимостью">
-    <div class="deal-cards__grid">
-        <?php foreach ($dealCards as $card) {
-            $aria = (string) ($card['aria'] ?? ($card['title'] ?? ''));
-            if (($card['action'] ?? '') === 'lead') {
+    <div class="container">
+        <div class="deal-cards__grid">
+            <?php foreach ($dealCards as $card) {
+                $aria = (string) ($card['aria'] ?? ($card['title'] ?? ''));
+                $variant = htmlspecialchars((string) ($card['variant'] ?? ''), ENT_QUOTES, 'UTF-8');
+                if (($card['action'] ?? '') === 'lead') {
+                    ?>
+                    <button
+                        type="button"
+                        class="deal-cards__item deal-cards__item--<?php echo $variant; ?>"
+                        aria-label="<?php echo htmlspecialchars($aria, ENT_QUOTES, 'UTF-8'); ?>"
+                        data-lead-open
+                        data-lead-topic="<?php echo htmlspecialchars((string) ($card['topic'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+                    >
+                        <?php site_render_deal_card_inner($card); ?>
+                    </button>
+                    <?php
+                    continue;
+                }
                 ?>
-                <button
-                    type="button"
-                    class="deal-cards__item"
+                <a
+                    class="deal-cards__item deal-cards__item--<?php echo $variant; ?>"
+                    href="<?php echo htmlspecialchars((string) ($card['href'] ?? '/catalog/'), ENT_QUOTES, 'UTF-8'); ?>"
                     aria-label="<?php echo htmlspecialchars($aria, ENT_QUOTES, 'UTF-8'); ?>"
-                    data-lead-open
-                    data-lead-topic="<?php echo htmlspecialchars((string) ($card['topic'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
                 >
                     <?php site_render_deal_card_inner($card); ?>
-                </button>
-                <?php
-                continue;
-            }
-            ?>
-            <a
-                class="deal-cards__item"
-                href="<?php echo htmlspecialchars((string) ($card['href'] ?? '/catalog/'), ENT_QUOTES, 'UTF-8'); ?>"
-                aria-label="<?php echo htmlspecialchars($aria, ENT_QUOTES, 'UTF-8'); ?>"
-            >
-                <?php site_render_deal_card_inner($card); ?>
-            </a>
-        <?php } ?>
+                </a>
+            <?php } ?>
+        </div>
     </div>
 </section>
