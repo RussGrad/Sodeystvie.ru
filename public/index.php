@@ -50,6 +50,7 @@ require __DIR__ . '/includes/header.php';
 ?>
 <main class="page-main" id="main">
     <?php require __DIR__ . '/includes/section-hero.php'; ?>
+    <?php require __DIR__ . '/includes/section-deal-cards.php'; ?>
     <?php require __DIR__ . '/includes/section-featured-listings.php'; ?>
     <?php require __DIR__ . '/includes/section-team.php'; ?>
     <?php require __DIR__ . '/includes/section-cases.php'; ?>
