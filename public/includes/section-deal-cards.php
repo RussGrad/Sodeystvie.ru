@@ -142,15 +142,36 @@ function site_render_deal_card_inner(array $card): void
         <div class="deal-cards__leadspace">
             <div class="deal-cards__kicker">
                 <p class="deal-cards__kicker-text">с нами легко</p>
-                <img
+                <svg
                     class="deal-cards__kicker-arrow"
-                    src="/assets/deal-cards/kicker-arrow.png"
-                    width="360"
-                    height="429"
-                    alt=""
+                    viewBox="0 0 360 429"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
                     aria-hidden="true"
-                    decoding="async"
                 >
+                    <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M168 8C188 10 208 28 214 52C220 76 210 98 188 108C166 118 142 108 134 84C126 60 138 36 160 28C182 20 206 32 216 56C226 80 214 108 192 124C170 140 142 162 118 196C98 224 88 256 92 284C96 312 112 336 136 352"
+                            stroke-width="5.5"
+                            opacity="0.92"
+                        />
+                        <path
+                            d="M164 12C184 14 204 32 210 56C216 80 206 102 184 112C162 122 138 112 130 88C122 64 134 40 156 32C178 24 202 36 212 60C222 84 210 112 188 128C166 144 138 166 114 200C94 228 84 260 88 288C92 316 108 340 132 356"
+                            stroke-width="4"
+                            opacity="0.62"
+                        />
+                        <path
+                            d="M132 356L108 378M132 356L152 368"
+                            stroke-width="5.5"
+                            opacity="0.92"
+                        />
+                        <path
+                            d="M128 360L104 382M128 360L148 372"
+                            stroke-width="3.5"
+                            opacity="0.58"
+                        />
+                    </g>
+                </svg>
             </div>
         </div>
         <div class="deal-cards__grid">
