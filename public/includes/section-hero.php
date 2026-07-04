@@ -27,29 +27,29 @@ $heroSlides = array_values(array_filter(
 $heroSlideCount = count($heroSlides);
 $heroSliderEnabled = $heroSlideCount > 1;
 
-/** Средняя цена м² вторички в Иркутске, ₽ — иллюстративный ряд для графика на hero. */
+/** Динамика цен на жильё в России, ₽/м² (источник — пользовательские данные). */
 $heroGrowthBars = [
-    ['year' => '2019', 'value' => 72500],
-    ['year' => '2020', 'value' => 79000],
-    ['year' => '2021', 'value' => 93500],
-    ['year' => '2022', 'value' => 108000],
-    ['year' => '2023', 'value' => 122000],
-    ['year' => '2024', 'value' => 136500],
-    ['year' => '2025', 'value' => 149000],
-    ['year' => '2026', 'value' => 165000, 'projected' => true],
+    ['year' => '2022', 'period' => 'Янв. 2022', 'newbuild' => 141150, 'resale' => 107712],
+    ['year' => '2023', 'period' => 'Янв. 2023', 'newbuild' => 164340, 'resale' => 117350],
+    ['year' => '2024', 'period' => 'Янв. 2024', 'newbuild' => 184761, 'resale' => 125137],
+    ['year' => '2025', 'period' => 'Янв. 2025', 'newbuild' => 191314, 'resale' => 128877],
+    ['year' => '2026', 'period' => 'Сер. 2026', 'newbuild' => 218800, 'resale' => 141500, 'projected' => true],
 ];
 $heroGrowthMax = 1;
 $heroGrowthMin = PHP_INT_MAX;
 foreach ($heroGrowthBars as $bar) {
-    $v = (int) ($bar['value'] ?? 0);
-    $heroGrowthMax = max($heroGrowthMax, $v);
-    $heroGrowthMin = min($heroGrowthMin, $v);
+    foreach (['newbuild', 'resale'] as $key) {
+        $v = (int) ($bar[$key] ?? 0);
+        $heroGrowthMax = max($heroGrowthMax, $v);
+        $heroGrowthMin = min($heroGrowthMin, $v);
+    }
 }
 if ($heroGrowthMin === PHP_INT_MAX) {
     $heroGrowthMin = 0;
 }
 $heroGrowthForecast = $heroGrowthBars[count($heroGrowthBars) - 1];
 $heroGrowthSpan = max(1, $heroGrowthMax - $heroGrowthMin);
+$heroGrowthBarCount = count($heroGrowthBars);
 
 ?>
 <section class="hero" aria-labelledby="hero-title">
@@ -85,37 +85,62 @@ $heroGrowthSpan = max(1, $heroGrowthMax - $heroGrowthMin);
 
     <aside
         class="hero__growth"
-        aria-label="Рост средней стоимости недвижимости в Иркутске"
+        aria-label="Динамика цен на жильё в России"
     >
         <div class="hero-growth">
             <div class="hero-growth__card">
+                <p class="hero-growth__kicker">Динамика цен на жильё в России</p>
                 <strong class="hero-growth__headline">
-                    <?php echo number_format((int) $heroGrowthForecast['value'], 0, '', ' '); ?> ₽
+                    <?php echo number_format((int) $heroGrowthForecast['resale'], 0, '', ' '); ?> ₽
+                    <span class="hero-growth__headline-sep">/</span>
+                    <?php echo number_format((int) $heroGrowthForecast['newbuild'], 0, '', ' '); ?> ₽
                 </strong>
-                <p class="hero-growth__caption">прогноз средней цены м² в Иркутске на <?php echo htmlspecialchars((string) $heroGrowthForecast['year'], ENT_QUOTES, 'UTF-8'); ?> год</p>
+                <p class="hero-growth__caption">вторичка / новостройки за м² · прогноз на <?php echo htmlspecialchars((string) $heroGrowthForecast['period'], ENT_QUOTES, 'UTF-8'); ?></p>
+            </div>
+            <div class="hero-growth__legend" aria-hidden="true">
+                <span class="hero-growth__legend-item">
+                    <span class="hero-growth__swatch hero-growth__swatch--newbuild"></span>
+                    Новостройки
+                </span>
+                <span class="hero-growth__legend-item">
+                    <span class="hero-growth__swatch hero-growth__swatch--resale"></span>
+                    Вторичка
+                </span>
             </div>
             <div class="hero-growth__chart">
-                <div class="hero-growth__bars">
+                <div
+                    class="hero-growth__bars"
+                    style="--hero-growth-cols: <?php echo (int) $heroGrowthBarCount; ?>"
+                >
                     <?php foreach ($heroGrowthBars as $bar) {
-                        $value = (int) ($bar['value'] ?? 0);
                         $year = (string) ($bar['year'] ?? '');
+                        $newbuild = (int) ($bar['newbuild'] ?? 0);
+                        $resale = (int) ($bar['resale'] ?? 0);
                         $projected = !empty($bar['projected']);
-                        $heightPct = round((($value - $heroGrowthMin) / $heroGrowthSpan) * 100, 1);
-                        $heightPct = max(14.0, min(100.0, $heightPct));
+                        $newbuildHeight = max(12.0, min(100.0, round((($newbuild - $heroGrowthMin) / $heroGrowthSpan) * 100, 1)));
+                        $resaleHeight = max(12.0, min(100.0, round((($resale - $heroGrowthMin) / $heroGrowthSpan) * 100, 1)));
                         $colClass = 'hero-growth__col' . ($projected ? ' hero-growth__col--projected' : '');
+                        $prevResale = $projected ? (int) ($heroGrowthBars[count($heroGrowthBars) - 2]['resale'] ?? 1) : 0;
                         ?>
                     <div class="<?php echo htmlspecialchars($colClass, ENT_QUOTES, 'UTF-8'); ?>">
                         <?php if ($projected) { ?>
                         <div class="hero-growth__callout">
                             <span class="hero-growth__callout-icon" aria-hidden="true">📈</span>
-                            <span>+<?php echo (int) round((($value / max(1, (int) $heroGrowthBars[count($heroGrowthBars) - 2]['value'])) - 1) * 100); ?>% рост</span>
+                            <span>+<?php echo (int) round((($resale / max(1, $prevResale)) - 1) * 100); ?>% вторичка</span>
                         </div>
                         <?php } ?>
-                        <span class="hero-growth__value"><?php echo number_format($value, 0, '', ' '); ?></span>
+                        <div class="hero-growth__values">
+                            <span class="hero-growth__value hero-growth__value--newbuild"><?php echo number_format($newbuild, 0, '', ' '); ?></span>
+                            <span class="hero-growth__value hero-growth__value--resale"><?php echo number_format($resale, 0, '', ' '); ?></span>
+                        </div>
                         <div class="hero-growth__bar-track">
                             <div
-                                class="hero-growth__bar"
-                                style="height: <?php echo htmlspecialchars((string) $heightPct, ENT_QUOTES, 'UTF-8'); ?>%"
+                                class="hero-growth__bar hero-growth__bar--newbuild"
+                                style="height: <?php echo htmlspecialchars((string) $newbuildHeight, ENT_QUOTES, 'UTF-8'); ?>%"
+                            ></div>
+                            <div
+                                class="hero-growth__bar hero-growth__bar--resale"
+                                style="height: <?php echo htmlspecialchars((string) $resaleHeight, ENT_QUOTES, 'UTF-8'); ?>%"
                             ></div>
                         </div>
                         <span class="hero-growth__year"><?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8'); ?></span>
