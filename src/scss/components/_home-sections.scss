@@ -66,8 +66,7 @@
     width: clamp(2.75rem, 6vw, 4rem);
     height: auto;
     margin: 0.45em 0 0 -1.05em;
-    opacity: 0.95;
-    filter: brightness(0) saturate(100%) invert(18%) sepia(32%) saturate(900%) hue-rotate(118deg) brightness(0.88);
+    opacity: 0.9;
   }
 
   &__grid {
@@ -251,8 +250,8 @@
   }
 
   .deal-cards__kicker-arrow {
-    filter: invert(1) brightness(1.08);
-    opacity: 0.9;
+    filter: invert(1) brightness(1.05);
+    opacity: 0.85;
   }
 }
 
