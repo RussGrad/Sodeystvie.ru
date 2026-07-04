@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/site-image.php';
+
 /**
  * Блок направлений: Продать / Купить / Сдать / Снять.
  */
@@ -14,6 +16,7 @@ $dealCards = [
         'action' => 'lead',
         'topic' => 'sell-evaluation',
         'aria' => 'Оставить заявку на продажу квартиры',
+        'imageAlt' => 'Консультация по продаже квартиры',
     ],
     [
         'variant' => 'buy',
@@ -22,6 +25,7 @@ $dealCards = [
         'action' => 'link',
         'href' => '/catalog/?operation=buy&type=flat',
         'aria' => 'Перейти в каталог покупки квартир',
+        'imageAlt' => 'Подбор квартиры с риэлтором',
     ],
     [
         'variant' => 'rent-out',
@@ -30,6 +34,7 @@ $dealCards = [
         'action' => 'lead',
         'topic' => 'rent-out',
         'aria' => 'Оставить заявку на сдачу квартиры',
+        'imageAlt' => 'Сдача квартиры в аренду',
     ],
     [
         'variant' => 'rent-in',
@@ -38,37 +43,63 @@ $dealCards = [
         'action' => 'link',
         'href' => '/catalog/?operation=rent&type=flat',
         'aria' => 'Перейти в каталог аренды квартир',
+        'imageAlt' => 'Просмотр квартиры в аренду',
     ],
 ];
 
-/**
- * @param string $variant
- */
-function site_render_deal_card_visual(string $variant): void
+function site_deal_card_image_path(string $variant): ?string
 {
     $safe = preg_replace('/[^a-z-]/', '', $variant) ?: 'sell';
+    $dir = dirname(__DIR__) . '/assets/deal-cards';
+    $webBase = '/assets/deal-cards/' . $safe;
+
+    foreach (['.jpg', '.jpeg', '.png', '.webp'] as $ext) {
+        if (is_file($dir . '/' . $safe . $ext)) {
+            return $webBase . $ext;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * @param string $variant
+ * @param string $alt
+ */
+function site_render_deal_card_visual(string $variant, string $alt = ''): void
+{
+    $safe = preg_replace('/[^a-z-]/', '', $variant) ?: 'sell';
+    $imagePath = site_deal_card_image_path($variant);
+    $photoClass = $imagePath !== null ? ' deal-cards__visual--photo' : '';
     ?>
-    <div class="deal-cards__visual deal-cards__visual--<?php echo htmlspecialchars($safe, ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="true">
-        <?php if ($safe === 'sell') { ?>
-            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div class="deal-cards__visual deal-cards__visual--<?php echo htmlspecialchars($safe, ENT_QUOTES, 'UTF-8'); ?><?php echo $photoClass; ?>">
+        <?php if ($imagePath !== null) {
+            echo site_render_static_picture(
+                $imagePath,
+                $alt,
+                'deal-cards__photo',
+                'width="560" height="720"'
+            );
+        } elseif ($safe === 'sell') { ?>
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <path d="M10 34V18l14-8 14 8v16" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
                 <path d="M20 34v-8h8v8" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
                 <path d="M30 22l6-3M18 22l-6-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
         <?php } elseif ($safe === 'buy') { ?>
-            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <circle cx="21" cy="21" r="9" stroke="currentColor" stroke-width="2"/>
                 <path d="M28 28l9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                 <path d="M18 21h6M21 18v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
         <?php } elseif ($safe === 'rent-out') { ?>
-            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <circle cx="16" cy="28" r="7" stroke="currentColor" stroke-width="2"/>
                 <path d="M23 28h14a3 3 0 0 0 0-6h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                 <path d="M33 22v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
         <?php } else { ?>
-            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <path d="M8 20l16-10 16 10v18H8V20z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
                 <path d="M20 38V26h8v12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
                 <path d="M8 20h32" stroke="currentColor" stroke-width="2"/>
@@ -86,6 +117,7 @@ function site_render_deal_card_inner(array $card): void
     $title = (string) ($card['title'] ?? '');
     $subtitle = (string) ($card['subtitle'] ?? '');
     $variant = (string) ($card['variant'] ?? 'sell');
+    $imageAlt = (string) ($card['imageAlt'] ?? $title);
     ?>
     <div class="deal-cards__head">
         <div class="deal-cards__labels">
@@ -99,7 +131,7 @@ function site_render_deal_card_inner(array $card): void
         </span>
     </div>
     <div class="deal-cards__media">
-        <?php site_render_deal_card_visual($variant); ?>
+        <?php site_render_deal_card_visual($variant, $imageAlt); ?>
     </div>
     <?php
 }
@@ -110,7 +142,7 @@ function site_render_deal_card_inner(array $card): void
         <div class="deal-cards__leadspace">
             <div class="deal-cards__kicker">
                 <p class="deal-cards__kicker-text">с нами легко</p>
-                <svg class="deal-cards__kicker-arrow" viewBox="0 0 108 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg class="deal-cards__kicker-arrow" viewBox="0 0 108 76" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path
                         d="M14 10C8 6 3 11 6 17C8.5 21 13 19.5 16 14.5C22 24 36 31 50 40C64 49 76 58 84 68"
                         stroke="currentColor"
