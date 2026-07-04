@@ -32,7 +32,7 @@
     justify-self: end;
     display: inline-flex;
     flex-direction: row;
-    align-items: flex-end;
+    align-items: flex-start;
     gap: 0;
     color: var(--deal-kicker-text);
     pointer-events: none;
@@ -63,12 +63,11 @@
   &__kicker-arrow {
     display: block;
     flex-shrink: 0;
-    width: clamp(3.5rem, 7.5vw, 5rem);
-    aspect-ratio: 360 / 429;
-    margin: 0 0 0.12em -0.35em;
-    background: currentColor;
-    -webkit-mask: url('/assets/deal-cards/kicker-arrow.png?v=3') center / contain no-repeat;
-    mask: url('/assets/deal-cards/kicker-arrow.png?v=3') center / contain no-repeat;
+    width: clamp(2.75rem, 6vw, 4rem);
+    height: auto;
+    margin: 0.45em 0 0 -1.05em;
+    opacity: 0.95;
+    filter: brightness(0) saturate(100%) invert(18%) sepia(32%) saturate(900%) hue-rotate(118deg) brightness(0.88);
   }
 
   &__grid {
@@ -249,6 +248,11 @@
 
   .deal-cards__kicker-text {
     text-shadow: none;
+  }
+
+  .deal-cards__kicker-arrow {
+    filter: invert(1) brightness(1.08);
+    opacity: 0.9;
   }
 }
 

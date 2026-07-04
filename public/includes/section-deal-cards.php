@@ -142,7 +142,15 @@ function site_render_deal_card_inner(array $card): void
         <div class="deal-cards__leadspace">
             <div class="deal-cards__kicker">
                 <p class="deal-cards__kicker-text">с нами легко</p>
-                <span class="deal-cards__kicker-arrow" aria-hidden="true"></span>
+                <img
+                    class="deal-cards__kicker-arrow"
+                    src="/assets/deal-cards/kicker-arrow.png"
+                    width="360"
+                    height="429"
+                    alt=""
+                    aria-hidden="true"
+                    decoding="async"
+                >
             </div>
         </div>
         <div class="deal-cards__grid">
