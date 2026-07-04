@@ -45,11 +45,12 @@
   }
 
   &__kicker-arrow {
-    width: clamp(5rem, 12vw, 7.75rem);
+    display: block;
+    width: clamp(3rem, 8vw, 4.5rem);
     height: auto;
-    margin-top: 0;
-    margin-right: 0.5rem;
-    opacity: 1;
+    margin-top: -0.15rem;
+    margin-right: 0.35rem;
+    opacity: 0.92;
   }
 
   &__grid {
@@ -230,6 +231,11 @@
 
   .deal-cards__kicker-text {
     text-shadow: none;
+  }
+
+  .deal-cards__kicker-arrow {
+    filter: invert(1) brightness(1.05);
+    opacity: 0.88;
   }
 }
 
