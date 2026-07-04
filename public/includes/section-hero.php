@@ -27,28 +27,6 @@ $heroSlides = array_values(array_filter(
 $heroSlideCount = count($heroSlides);
 $heroSliderEnabled = $heroSlideCount > 1;
 
-/** Динамика цен на жильё в России, ₽/м² (источник — пользовательские данные). */
-$heroGrowthBars = [
-    ['year' => '2022', 'period' => 'Янв. 2022', 'newbuild' => 141150, 'resale' => 107712],
-    ['year' => '2023', 'period' => 'Янв. 2023', 'newbuild' => 164340, 'resale' => 117350],
-    ['year' => '2024', 'period' => 'Янв. 2024', 'newbuild' => 184761, 'resale' => 125137],
-    ['year' => '2025', 'period' => 'Янв. 2025', 'newbuild' => 191314, 'resale' => 128877],
-    ['year' => '2026', 'period' => 'Сер. 2026', 'newbuild' => 218800, 'resale' => 141500, 'projected' => true],
-];
-$heroGrowthMax = 1;
-$heroGrowthMin = PHP_INT_MAX;
-foreach ($heroGrowthBars as $bar) {
-    $v = (int) ($bar['resale'] ?? 0);
-    $heroGrowthMax = max($heroGrowthMax, $v);
-    $heroGrowthMin = min($heroGrowthMin, $v);
-}
-if ($heroGrowthMin === PHP_INT_MAX) {
-    $heroGrowthMin = 0;
-}
-$heroGrowthForecast = $heroGrowthBars[count($heroGrowthBars) - 1];
-$heroGrowthSpan = max(1, $heroGrowthMax - $heroGrowthMin);
-$heroGrowthBarCount = count($heroGrowthBars);
-
 ?>
 <section class="hero" aria-labelledby="hero-title">
     <div class="hero__media" data-hero-slider aria-hidden="true">
@@ -80,58 +58,6 @@ $heroGrowthBarCount = count($heroGrowthBars);
             ?>
         <?php } ?>
     </div>
-
-    <aside
-        class="hero__growth"
-        aria-label="Динамика цен на жильё в России"
-    >
-        <div class="hero-growth">
-            <div class="hero-growth__card">
-                <p class="hero-growth__kicker">Динамика цен на жильё в России</p>
-                <strong class="hero-growth__headline">
-                    <?php echo number_format((int) $heroGrowthForecast['resale'], 0, '', ' '); ?> ₽
-                </strong>
-                <p class="hero-growth__caption">
-                    вторичный рынок за м² · прогноз <?php echo htmlspecialchars((string) $heroGrowthForecast['period'], ENT_QUOTES, 'UTF-8'); ?>
-                    · новостройки <?php echo number_format((int) $heroGrowthForecast['newbuild'], 0, '', ' '); ?> ₽
-                </p>
-            </div>
-            <div class="hero-growth__chart">
-                <div
-                    class="hero-growth__bars"
-                    style="--hero-growth-cols: <?php echo (int) $heroGrowthBarCount; ?>"
-                >
-                    <?php foreach ($heroGrowthBars as $bar) {
-                        $year = (string) ($bar['year'] ?? '');
-                        $value = (int) ($bar['resale'] ?? 0);
-                        $projected = !empty($bar['projected']);
-                        $heightPct = max(14.0, min(100.0, round((($value - $heroGrowthMin) / $heroGrowthSpan) * 100, 1)));
-                        $colClass = 'hero-growth__col' . ($projected ? ' hero-growth__col--projected' : '');
-                        $prevValue = $projected ? (int) ($heroGrowthBars[count($heroGrowthBars) - 2]['resale'] ?? 1) : 0;
-                        ?>
-                    <div class="<?php echo htmlspecialchars($colClass, ENT_QUOTES, 'UTF-8'); ?>">
-                        <div class="hero-growth__stack">
-                            <div
-                                class="hero-growth__rise"
-                                style="height: <?php echo htmlspecialchars((string) $heightPct, ENT_QUOTES, 'UTF-8'); ?>%"
-                            >
-                                <?php if ($projected) { ?>
-                                <div class="hero-growth__callout">
-                                    <span class="hero-growth__callout-icon" aria-hidden="true">📈</span>
-                                    <span>+<?php echo (int) round((($value / max(1, $prevValue)) - 1) * 100); ?>%</span>
-                                </div>
-                                <?php } ?>
-                                <span class="hero-growth__value"><?php echo number_format($value, 0, '', ' '); ?></span>
-                                <div class="hero-growth__bar"></div>
-                            </div>
-                        </div>
-                        <span class="hero-growth__year"><?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8'); ?></span>
-                    </div>
-                    <?php } ?>
-                </div>
-            </div>
-        </div>
-    </aside>
 
     <div class="container hero__layout">
         <p class="hero__eyebrow"><?php echo htmlspecialchars(site_brand_full(), ENT_QUOTES, 'UTF-8'); ?></p>
