@@ -141,36 +141,15 @@ function site_render_deal_card_inner(array $card): void
     <div class="container">
         <div class="deal-cards__kicker">
             <p class="deal-cards__kicker-text">с нами легко</p>
-            <svg
+            <img
                 class="deal-cards__kicker-arrow"
-                viewBox="0 0 360 429"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+                src="/assets/deal-cards/kicker-arrow.png"
+                width="360"
+                height="429"
+                alt=""
                 aria-hidden="true"
+                decoding="async"
             >
-                <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <path
-                        d="M170 10C192 12 212 30 218 54C224 78 214 100 192 110C170 120 146 110 138 86C130 62 142 38 164 30C186 22 210 34 220 58C230 82 218 110 196 126C174 142 146 164 122 198C102 226 92 258 96 286C100 314 116 338 140 354"
-                        stroke-width="5"
-                        opacity="0.9"
-                    />
-                    <path
-                        d="M166 14C188 16 208 34 214 58C220 82 210 104 188 114C166 124 142 114 134 90C126 66 138 42 160 34C182 26 206 38 216 62C226 86 214 114 192 130C170 146 142 168 118 202C98 230 88 262 92 290C96 318 112 342 136 358"
-                        stroke-width="3.5"
-                        opacity="0.55"
-                    />
-                    <path
-                        d="M136 358L112 380M136 358L156 370"
-                        stroke-width="5"
-                        opacity="0.9"
-                    />
-                    <path
-                        d="M132 362L108 384M132 362L152 374"
-                        stroke-width="3.5"
-                        opacity="0.55"
-                    />
-                </g>
-            </svg>
         </div>
         <div class="deal-cards__grid">
             <?php foreach ($dealCards as $card) {

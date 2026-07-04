@@ -239,6 +239,11 @@
   .deal-cards__kicker-text {
     text-shadow: none;
   }
+
+  .deal-cards__kicker-arrow {
+    filter: invert(1) brightness(1.05);
+    opacity: 0.92;
+  }
 }
 
 :root[data-theme='dark'] .deal-cards__visual {
