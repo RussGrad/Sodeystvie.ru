@@ -1,0 +1,184 @@
+// Прозрачный график роста недвижимости поверх фона hero
+
+.hero__growth {
+  position: absolute;
+  z-index: 1;
+  right: clamp(0.5rem, 3vw, 2rem);
+  bottom: clamp(5.5rem, 14vw, 9rem);
+  width: min(54vw, 34rem);
+  max-width: calc(100% - 1rem);
+  pointer-events: none;
+  user-select: none;
+
+  @media (max-width: 960px) {
+    display: none;
+  }
+}
+
+.hero-growth {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.hero-growth__card {
+  align-self: flex-start;
+  max-width: 14.5rem;
+  padding: 0.85rem 1rem 0.95rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 10px 28px rgba(22, 22, 22, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.hero-growth__headline {
+  display: block;
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--color-accent);
+}
+
+.hero-growth__caption {
+  margin: 0.35rem 0 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--hero-filter-hint);
+}
+
+.hero-growth__chart {
+  padding: 0.35rem 0.15rem 0;
+}
+
+.hero-growth__bars {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: clamp(0.25rem, 0.9vw, 0.55rem);
+  align-items: end;
+  min-height: 9.5rem;
+}
+
+.hero-growth__col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+  position: relative;
+}
+
+.hero-growth__value {
+  font-size: clamp(0.5625rem, 0.85vw, 0.6875rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: rgba(22, 22, 22, 0.88);
+  white-space: nowrap;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.hero-growth__bar-track {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  height: clamp(4.5rem, 8vw, 6.25rem);
+}
+
+.hero-growth__bar {
+  width: 100%;
+  min-height: 0.45rem;
+  border-radius: 10px 10px 4px 4px;
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(6px);
+  transition: height 0.4s var(--ease-smooth, ease);
+
+  .hero-growth__col--projected & {
+    background: rgba(var(--color-accent-rgb), 0.52);
+    border-color: rgba(var(--color-accent-rgb), 0.35);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.25),
+      0 6px 18px rgba(var(--color-accent-rgb), 0.22);
+  }
+}
+
+.hero-growth__year {
+  font-size: clamp(0.5625rem, 0.8vw, 0.6875rem);
+  font-weight: 600;
+  line-height: 1;
+  color: rgba(22, 22, 22, 0.72);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.hero-growth__callout {
+  position: absolute;
+  top: -0.15rem;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: rgba(22, 22, 22, 0.9);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgba(22, 22, 22, 0.12);
+  backdrop-filter: blur(8px);
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -4px;
+    width: 8px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.88);
+    border-right: 1px solid rgba(255, 255, 255, 0.7);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.7);
+    transform: translateX(-50%) rotate(45deg);
+  }
+}
+
+.hero-growth__callout-icon {
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+:root[data-theme='dark'] .hero-growth__card {
+  background: rgba(20, 20, 20, 0.72);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+:root[data-theme='dark'] .hero-growth__headline {
+  color: #6ee7d8;
+}
+
+:root[data-theme='dark'] .hero-growth__value,
+:root[data-theme='dark'] .hero-growth__year {
+  color: rgba(245, 245, 245, 0.92);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+
+:root[data-theme='dark'] .hero-growth__bar {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+:root[data-theme='dark'] .hero-growth__callout {
+  color: #f5f5f5;
+  background: rgba(30, 30, 30, 0.88);
+  border-color: rgba(255, 255, 255, 0.14);
+
+  &::after {
+    background: rgba(30, 30, 30, 0.88);
+    border-color: rgba(255, 255, 255, 0.14);
+  }
+}

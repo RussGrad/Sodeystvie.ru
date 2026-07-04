@@ -27,6 +27,23 @@ $heroSlides = array_values(array_filter(
 $heroSlideCount = count($heroSlides);
 $heroSliderEnabled = $heroSlideCount > 1;
 
+/** Средняя цена м² вторички в Иркутске, ₽ — иллюстративный ряд для графика на hero. */
+$heroGrowthBars = [
+    ['year' => '2019', 'value' => 72500],
+    ['year' => '2020', 'value' => 79000],
+    ['year' => '2021', 'value' => 93500],
+    ['year' => '2022', 'value' => 108000],
+    ['year' => '2023', 'value' => 122000],
+    ['year' => '2024', 'value' => 136500],
+    ['year' => '2025', 'value' => 149000],
+    ['year' => '2026', 'value' => 165000, 'projected' => true],
+];
+$heroGrowthMax = 1;
+foreach ($heroGrowthBars as $bar) {
+    $heroGrowthMax = max($heroGrowthMax, (int) ($bar['value'] ?? 0));
+}
+$heroGrowthForecast = $heroGrowthBars[count($heroGrowthBars) - 1];
+
 ?>
 <section class="hero" aria-labelledby="hero-title">
     <div class="hero__media" data-hero-slider aria-hidden="true">
@@ -58,6 +75,49 @@ $heroSliderEnabled = $heroSlideCount > 1;
             ?>
         <?php } ?>
     </div>
+
+    <aside
+        class="hero__growth"
+        aria-label="Рост средней стоимости недвижимости в Иркутске"
+    >
+        <div class="hero-growth">
+            <div class="hero-growth__card">
+                <strong class="hero-growth__headline">
+                    <?php echo number_format((int) $heroGrowthForecast['value'], 0, '', ' '); ?> ₽
+                </strong>
+                <p class="hero-growth__caption">прогноз средней цены м² в Иркутске на <?php echo htmlspecialchars((string) $heroGrowthForecast['year'], ENT_QUOTES, 'UTF-8'); ?> год</p>
+            </div>
+            <div class="hero-growth__chart">
+                <div class="hero-growth__bars">
+                    <?php foreach ($heroGrowthBars as $bar) {
+                        $value = (int) ($bar['value'] ?? 0);
+                        $year = (string) ($bar['year'] ?? '');
+                        $projected = !empty($bar['projected']);
+                        $heightPct = $heroGrowthMax > 0 ? round($value / $heroGrowthMax * 100, 1) : 0;
+                        $heightPct = max(10.0, $heightPct);
+                        $colClass = 'hero-growth__col' . ($projected ? ' hero-growth__col--projected' : '');
+                        ?>
+                    <div class="<?php echo htmlspecialchars($colClass, ENT_QUOTES, 'UTF-8'); ?>">
+                        <?php if ($projected) { ?>
+                        <div class="hero-growth__callout">
+                            <span class="hero-growth__callout-icon" aria-hidden="true">📈</span>
+                            <span>+<?php echo (int) round((($value / max(1, (int) $heroGrowthBars[count($heroGrowthBars) - 2]['value'])) - 1) * 100); ?>% рост</span>
+                        </div>
+                        <?php } ?>
+                        <span class="hero-growth__value"><?php echo number_format($value, 0, '', ' '); ?></span>
+                        <div class="hero-growth__bar-track">
+                            <div
+                                class="hero-growth__bar"
+                                style="height: <?php echo htmlspecialchars((string) $heightPct, ENT_QUOTES, 'UTF-8'); ?>%"
+                            ></div>
+                        </div>
+                        <span class="hero-growth__year"><?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8'); ?></span>
+                    </div>
+                    <?php } ?>
+                </div>
+            </div>
+        </div>
+    </aside>
 
     <div class="container hero__layout">
         <p class="hero__eyebrow"><?php echo htmlspecialchars(site_brand_full(), ENT_QUOTES, 'UTF-8'); ?></p>
