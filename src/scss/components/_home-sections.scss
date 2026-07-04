@@ -55,9 +55,11 @@
   &__kicker-arrow {
     display: block;
     flex-shrink: 0;
-    width: clamp(5rem, 11vw, 7.5rem);
+    width: clamp(4rem, 8.5vw, 6rem);
     height: auto;
-    margin: 0.15em 0 0 0.2em;
+    margin: -0.25em 0 0 0.15em;
+    transform: translateY(clamp(-1.1rem, -2.8vw, -1.85rem));
+    transform-origin: top right;
   }
 
   &__grid {
