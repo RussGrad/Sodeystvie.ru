@@ -110,18 +110,20 @@ $heroGrowthBarCount = count($heroGrowthBars);
                         $prevValue = $projected ? (int) ($heroGrowthBars[count($heroGrowthBars) - 2]['resale'] ?? 1) : 0;
                         ?>
                     <div class="<?php echo htmlspecialchars($colClass, ENT_QUOTES, 'UTF-8'); ?>">
-                        <?php if ($projected) { ?>
-                        <div class="hero-growth__callout">
-                            <span class="hero-growth__callout-icon" aria-hidden="true">📈</span>
-                            <span>+<?php echo (int) round((($value / max(1, $prevValue)) - 1) * 100); ?>%</span>
-                        </div>
-                        <?php } ?>
-                        <span class="hero-growth__value"><?php echo number_format($value, 0, '', ' '); ?></span>
-                        <div class="hero-growth__bar-track">
+                        <div class="hero-growth__stack">
                             <div
-                                class="hero-growth__bar"
+                                class="hero-growth__rise"
                                 style="height: <?php echo htmlspecialchars((string) $heightPct, ENT_QUOTES, 'UTF-8'); ?>%"
-                            ></div>
+                            >
+                                <?php if ($projected) { ?>
+                                <div class="hero-growth__callout">
+                                    <span class="hero-growth__callout-icon" aria-hidden="true">📈</span>
+                                    <span>+<?php echo (int) round((($value / max(1, $prevValue)) - 1) * 100); ?>%</span>
+                                </div>
+                                <?php } ?>
+                                <span class="hero-growth__value"><?php echo number_format($value, 0, '', ' '); ?></span>
+                                <div class="hero-growth__bar"></div>
+                            </div>
                         </div>
                         <span class="hero-growth__year"><?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8'); ?></span>
                     </div>
