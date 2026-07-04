@@ -32,6 +32,7 @@ $maxUrl = site_max_url();
     <?php } ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Montserrat:wght@400;600;700&display=swap">
     <link rel="stylesheet" href="/css/main.css?v=<?php echo htmlspecialchars($cssVersion, ENT_QUOTES, 'UTF-8'); ?>">
     <style>
     /* Критичные стили шапки: совпадают с main.css, чтобы не было скачка при догрузке */
@@ -71,25 +72,6 @@ $maxUrl = site_max_url();
             }
             document.documentElement.setAttribute('data-theme', t);
         } catch (e) {}
-    })();
-    </script>
-    <script>
-    (function () {
-        function loadFonts() {
-            if (document.getElementById('site-fonts-montserrat')) {
-                return;
-            }
-            var link = document.createElement('link');
-            link.id = 'site-fonts-montserrat';
-            link.rel = 'stylesheet';
-            link.href = 'https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Montserrat:wght@400;600;700&display=swap';
-            document.head.appendChild(link);
-        }
-        if (document.readyState === 'complete') {
-            loadFonts();
-        } else {
-            window.addEventListener('load', loadFonts, { once: true });
-        }
     })();
     </script>
 </head>

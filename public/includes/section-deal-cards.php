@@ -108,7 +108,7 @@ function site_render_deal_card_inner(array $card): void
 <section class="deal-cards" aria-label="Направления работы с недвижимостью">
     <div class="container">
         <div class="deal-cards__leadspace">
-            <div class="deal-cards__kicker" aria-hidden="true">
+            <div class="deal-cards__kicker">
                 <p class="deal-cards__kicker-text">с нами легко</p>
                 <svg class="deal-cards__kicker-arrow" viewBox="0 0 108 76" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
