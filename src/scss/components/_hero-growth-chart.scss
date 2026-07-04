@@ -1,8 +1,8 @@
-// График роста недвижимости — вертикальные столбцы, цифры на вершине
+// График роста — декоративный фон справа, фокус на hero__search-wrap
 
 .hero__growth {
   position: absolute;
-  z-index: 1;
+  z-index: 0;
   top: clamp(6rem, 14vw, 10rem);
   right: clamp(0.75rem, 2.5vw, 1.75rem);
   bottom: clamp(2rem, 4.5vw, 3.25rem);
@@ -12,6 +12,7 @@
   justify-content: flex-end;
   pointer-events: none;
   user-select: none;
+  opacity: 0.52;
 
   @media (max-width: 960px) {
     display: none;
@@ -22,46 +23,46 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  gap: 0.65rem;
+  gap: 0.55rem;
   height: 100%;
 }
 
 .hero-growth__card {
   align-self: flex-end;
   max-width: 16.5rem;
-  margin-bottom: 0.15rem;
-  padding: 0.75rem 0.9rem 0.85rem;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(255, 255, 255, 1);
-  box-shadow: 0 10px 28px rgba(22, 22, 22, 0.1);
-  backdrop-filter: blur(10px);
+  margin-bottom: 0.1rem;
+  padding: 0.65rem 0.8rem 0.75rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: none;
+  backdrop-filter: blur(6px);
 }
 
 .hero-growth__kicker {
-  margin: 0 0 0.35rem;
-  font-size: 0.625rem;
+  margin: 0 0 0.3rem;
+  font-size: 0.5625rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: rgba(22, 22, 22, 0.48);
+  color: rgba(22, 22, 22, 0.42);
 }
 
 .hero-growth__headline {
   display: block;
-  font-size: clamp(1.15rem, 1.7vw, 1.45rem);
-  font-weight: 800;
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.02em;
-  color: var(--color-accent);
+  color: rgba(var(--color-accent-rgb), 0.78);
 }
 
 .hero-growth__caption {
-  margin: 0.3rem 0 0;
-  font-size: 0.625rem;
+  margin: 0.25rem 0 0;
+  font-size: 0.5625rem;
   font-weight: 500;
   line-height: 1.35;
-  color: rgba(22, 22, 22, 0.58);
+  color: rgba(22, 22, 22, 0.42);
 }
 
 .hero-growth__chart {
@@ -80,8 +81,8 @@
   width: 100%;
   height: 100%;
   min-height: clamp(10rem, 20vw, 14rem);
-  padding-top: 1.5rem;
-  border-bottom: 1px solid rgba(22, 22, 22, 0.1);
+  padding-top: 1.25rem;
+  border-bottom: 1px solid rgba(22, 22, 22, 0.08);
 }
 
 .hero-growth__col {
@@ -115,11 +116,11 @@
 
 .hero-growth__value {
   flex-shrink: 0;
-  margin-bottom: 0.35rem;
-  font-size: clamp(0.5625rem, 0.82vw, 0.75rem);
-  font-weight: 700;
+  margin-bottom: 0.3rem;
+  font-size: clamp(0.5rem, 0.75vw, 0.6875rem);
+  font-weight: 600;
   line-height: 1.1;
-  color: #161616;
+  color: rgba(22, 22, 22, 0.5);
   white-space: nowrap;
 }
 
@@ -128,93 +129,92 @@
   flex: 1 1 auto;
   min-height: 0.45rem;
   border-radius: 10px 10px 4px 4px;
-  background: rgba(228, 232, 236, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 4px 12px rgba(22, 22, 22, 0.08);
+  background: rgba(var(--color-accent-rgb), 0.38);
+  border: 1px solid rgba(var(--color-accent-rgb), 0.28);
+  box-shadow: none;
 
   .hero-growth__col--projected & {
-    background: rgba(var(--color-accent-rgb), 0.92);
-    border-color: rgba(var(--color-accent-rgb), 0.55);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.22),
-      0 8px 20px rgba(var(--color-accent-rgb), 0.28);
+    background: rgba(var(--color-accent-rgb), 0.58);
+    border-color: rgba(var(--color-accent-rgb), 0.42);
   }
 }
 
 .hero-growth__year {
   flex-shrink: 0;
-  margin-top: 0.45rem;
-  font-size: clamp(0.5625rem, 0.75vw, 0.6875rem);
+  margin-top: 0.4rem;
+  font-size: clamp(0.5rem, 0.72vw, 0.625rem);
   font-weight: 500;
   line-height: 1;
-  color: rgba(22, 22, 22, 0.48);
+  color: rgba(22, 22, 22, 0.38);
 }
 
 .hero-growth__callout {
   position: absolute;
-  bottom: calc(100% + 0.2rem);
+  bottom: calc(100% + 0.15rem);
   left: 50%;
   transform: translateX(-50%);
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.3rem 0.55rem;
-  font-size: 0.625rem;
+  gap: 0.2rem;
+  padding: 0.22rem 0.45rem;
+  font-size: 0.5625rem;
   font-weight: 600;
   line-height: 1.2;
   white-space: nowrap;
-  color: #161616;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(255, 255, 255, 1);
+  color: rgba(22, 22, 22, 0.55);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.65);
   border-radius: 999px;
-  box-shadow: 0 6px 18px rgba(22, 22, 22, 0.12);
+  box-shadow: none;
 }
 
 .hero-growth__callout-icon {
-  font-size: 0.75rem;
+  font-size: 0.625rem;
   line-height: 1;
 }
 
+:root[data-theme='dark'] .hero__growth {
+  opacity: 0.45;
+}
+
 :root[data-theme='dark'] .hero-growth__card {
-  background: rgba(24, 24, 24, 0.92);
-  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(20, 20, 20, 0.38);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 :root[data-theme='dark'] .hero-growth__headline {
-  color: #7ee8da;
+  color: rgba(126, 232, 218, 0.72);
 }
 
 :root[data-theme='dark'] .hero-growth__caption,
 :root[data-theme='dark'] .hero-growth__kicker {
-  color: rgba(245, 245, 245, 0.58);
+  color: rgba(245, 245, 245, 0.4);
 }
 
 :root[data-theme='dark'] .hero-growth__bars {
-  border-bottom-color: rgba(255, 255, 255, 0.12);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
 :root[data-theme='dark'] .hero-growth__value {
-  color: #f5f5f5;
+  color: rgba(245, 245, 245, 0.48);
 }
 
 :root[data-theme='dark'] .hero-growth__year {
-  color: rgba(245, 245, 245, 0.52);
+  color: rgba(245, 245, 245, 0.36);
 }
 
 :root[data-theme='dark'] .hero-growth__bar {
-  background: rgba(255, 255, 255, 0.32);
-  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(var(--color-accent-rgb), 0.32);
+  border-color: rgba(var(--color-accent-rgb), 0.22);
 
   .hero-growth__col--projected & {
-    background: rgba(var(--color-accent-rgb), 0.9);
-    border-color: rgba(var(--color-accent-rgb), 0.55);
+    background: rgba(var(--color-accent-rgb), 0.52);
+    border-color: rgba(var(--color-accent-rgb), 0.38);
   }
 }
 
 :root[data-theme='dark'] .hero-growth__callout {
-  color: #f5f5f5;
-  background: rgba(30, 30, 30, 0.95);
-  border-color: rgba(255, 255, 255, 0.14);
+  color: rgba(245, 245, 245, 0.55);
+  background: rgba(30, 30, 30, 0.45);
+  border-color: rgba(255, 255, 255, 0.1);
 }
