@@ -107,6 +107,27 @@ function site_render_deal_card_inner(array $card): void
 ?>
 <section class="deal-cards" aria-label="Направления работы с недвижимостью">
     <div class="container">
+        <div class="deal-cards__leadspace">
+            <div class="deal-cards__kicker" aria-hidden="true">
+                <p class="deal-cards__kicker-text">с нами легко</p>
+                <svg class="deal-cards__kicker-arrow" viewBox="0 0 108 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M14 10C8 6 3 11 6 17C8.5 21 13 19.5 16 14.5C22 24 36 31 50 40C64 49 76 58 84 68"
+                        stroke="currentColor"
+                        stroke-width="1.25"
+                        stroke-linecap="round"
+                        fill="none"
+                    />
+                    <path
+                        d="M76 61L84 68L77 72"
+                        stroke="currentColor"
+                        stroke-width="1.25"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                </svg>
+            </div>
+        </div>
         <div class="deal-cards__grid">
             <?php foreach ($dealCards as $card) {
                 $aria = (string) ($card['aria'] ?? ($card['title'] ?? ''));

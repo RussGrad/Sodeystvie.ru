@@ -82,7 +82,7 @@ $maxUrl = site_max_url();
             var link = document.createElement('link');
             link.id = 'site-fonts-montserrat';
             link.rel = 'stylesheet';
-            link.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap';
+            link.href = 'https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Montserrat:wght@400;600;700&display=swap';
             document.head.appendChild(link);
         }
         if (document.readyState === 'complete') {
