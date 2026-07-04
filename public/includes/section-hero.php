@@ -39,10 +39,17 @@ $heroGrowthBars = [
     ['year' => '2026', 'value' => 165000, 'projected' => true],
 ];
 $heroGrowthMax = 1;
+$heroGrowthMin = PHP_INT_MAX;
 foreach ($heroGrowthBars as $bar) {
-    $heroGrowthMax = max($heroGrowthMax, (int) ($bar['value'] ?? 0));
+    $v = (int) ($bar['value'] ?? 0);
+    $heroGrowthMax = max($heroGrowthMax, $v);
+    $heroGrowthMin = min($heroGrowthMin, $v);
+}
+if ($heroGrowthMin === PHP_INT_MAX) {
+    $heroGrowthMin = 0;
 }
 $heroGrowthForecast = $heroGrowthBars[count($heroGrowthBars) - 1];
+$heroGrowthSpan = max(1, $heroGrowthMax - $heroGrowthMin);
 
 ?>
 <section class="hero" aria-labelledby="hero-title">
@@ -93,8 +100,8 @@ $heroGrowthForecast = $heroGrowthBars[count($heroGrowthBars) - 1];
                         $value = (int) ($bar['value'] ?? 0);
                         $year = (string) ($bar['year'] ?? '');
                         $projected = !empty($bar['projected']);
-                        $heightPct = $heroGrowthMax > 0 ? round($value / $heroGrowthMax * 100, 1) : 0;
-                        $heightPct = max(10.0, $heightPct);
+                        $heightPct = round((($value - $heroGrowthMin) / $heroGrowthSpan) * 100, 1);
+                        $heightPct = max(14.0, min(100.0, $heightPct));
                         $colClass = 'hero-growth__col' . ($projected ? ' hero-growth__col--projected' : '');
                         ?>
                     <div class="<?php echo htmlspecialchars($colClass, ENT_QUOTES, 'UTF-8'); ?>">
