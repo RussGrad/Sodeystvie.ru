@@ -1,50 +1,39 @@
 // Главная: направления, команда, кейсы, ипотечный квиз
 
 .deal-cards {
+  position: relative;
   padding: 0 0 clamp(2rem, 4vw, 2.75rem);
   background: var(--featured-strip-bg);
   border-top: 1px solid var(--header-border);
   color: var(--services-title);
   --deal-kicker-text: var(--color-accent);
 
-  &__leadspace {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.75rem;
-    box-sizing: border-box;
-    align-items: end;
-    min-height: clamp(3.25rem, 9vw, 5.5rem);
-    padding: clamp(1rem, 3vw, 2rem) 0 clamp(0.25rem, 0.8vw, 0.45rem);
-
-    @media (max-width: 960px) {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      min-height: clamp(2.75rem, 7vw, 4.5rem);
-    }
-
-    @media (max-width: 520px) {
-      grid-template-columns: 1fr;
-      justify-items: end;
-    }
+  .container {
+    position: relative;
+    padding-top: clamp(3.25rem, 8.5vw, 5rem);
   }
 
   &__kicker {
-    grid-column: 4;
-    justify-self: end;
+    position: absolute;
+    z-index: 2;
+    top: clamp(0.65rem, 1.8vw, 1.1rem);
+    right: 0;
+    width: calc((100% - 2.25rem) / 4);
     display: inline-flex;
     flex-direction: row;
     align-items: flex-start;
-    gap: 0;
+    justify-content: flex-end;
     color: var(--deal-kicker-text);
     pointer-events: none;
     user-select: none;
     transform: rotate(-2deg);
 
     @media (max-width: 960px) {
-      grid-column: 2;
+      width: calc((100% - 0.75rem) / 2);
     }
 
     @media (max-width: 520px) {
-      grid-column: 1;
+      width: 100%;
     }
   }
 
@@ -66,10 +55,9 @@
   &__kicker-arrow {
     display: block;
     flex-shrink: 0;
-    width: clamp(5.5rem, 12vw, 8rem);
+    width: clamp(5rem, 11vw, 7.5rem);
     height: auto;
-    margin: 0.35em 0 0 0.05em;
-    opacity: 0.9;
+    margin: 0.15em 0 -2.25rem 0.2em;
   }
 
   &__grid {
@@ -250,11 +238,6 @@
 
   .deal-cards__kicker-text {
     text-shadow: none;
-  }
-
-  .deal-cards__kicker-arrow {
-    filter: invert(1) brightness(1.05);
-    opacity: 0.85;
   }
 }
 
