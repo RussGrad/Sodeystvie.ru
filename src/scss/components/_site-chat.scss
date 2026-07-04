@@ -44,8 +44,12 @@
   display: block;
 }
 
-// На главной кнопка в hero; на остальных — site-chat-fab
+// На главной — только плавающая FAB; кнопка в hero скрыта, чтобы не перекрывала блоки ниже
 .page-home .site-chat-fab {
+  display: flex;
+}
+
+.page-home .hero .hero__chat {
   display: none;
 }
 

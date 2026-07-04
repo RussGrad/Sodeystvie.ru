@@ -8,6 +8,10 @@
   color: var(--services-title);
   --deal-kicker-text: var(--color-accent);
 
+  @media (max-width: 768px) {
+    padding-bottom: clamp(4.75rem, 12vw, 5.5rem);
+  }
+
   .container {
     position: relative;
     padding-top: clamp(4.75rem, 12vw, 7rem);
@@ -21,7 +25,7 @@
     width: calc((100% - 2.25rem) / 4);
     display: inline-flex;
     flex-direction: row;
-    align-items: flex-start;
+    align-items: flex-end;
     justify-content: flex-end;
     color: var(--deal-kicker-text);
     pointer-events: none;
@@ -30,10 +34,12 @@
 
     @media (max-width: 960px) {
       width: calc((100% - 0.75rem) / 2);
+      padding-right: 0.25rem;
     }
 
     @media (max-width: 520px) {
       width: 100%;
+      padding-right: 3.75rem;
     }
   }
 
@@ -57,8 +63,8 @@
     flex-shrink: 0;
     width: clamp(4rem, 8.5vw, 6rem);
     height: auto;
-    margin: -0.25em 0 0 0.15em;
-    transform: translateY(clamp(-1.1rem, -2.8vw, -1.85rem));
+    margin: 0.05em 0 0 -0.45em;
+    transform: translateY(0.35em);
     transform-origin: top right;
   }
 
