@@ -20,7 +20,7 @@
   &__kicker {
     position: absolute;
     z-index: 2;
-    top: clamp(1rem, 2.8vw, 1.75rem);
+    top: clamp(1.35rem, 3.4vw, 2.15rem);
     right: clamp(0.75rem, 2.5vw, 1.5rem);
     width: calc((100% - 2.25rem) / 4);
     display: inline-flex;
@@ -30,7 +30,7 @@
     color: var(--deal-kicker-text);
     pointer-events: none;
     user-select: none;
-    transform: rotate(-2deg) translate(clamp(-1.15rem, -3.2vw, -2.15rem), clamp(0.55rem, 1.6vw, 1rem));
+    transform: rotate(-2deg) translate(clamp(-1.15rem, -3.2vw, -2.15rem), clamp(0.9rem, 2.2vw, 1.45rem));
 
     @media (max-width: 960px) {
       width: calc((100% - 0.75rem) / 2);
