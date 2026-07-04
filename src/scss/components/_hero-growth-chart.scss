@@ -1,4 +1,4 @@
-// График роста недвижимости — справа на hero (референс: «стеклянные» столбцы)
+// График роста недвижимости — один вертикальный ряд тонких столбцов
 
 .hero__growth {
   position: absolute;
@@ -28,7 +28,7 @@
 
 .hero-growth__card {
   align-self: flex-end;
-  max-width: 17.5rem;
+  max-width: 16.5rem;
   margin-bottom: 0.15rem;
   padding: 0.75rem 0.9rem 0.85rem;
   border-radius: 14px;
@@ -49,150 +49,89 @@
 
 .hero-growth__headline {
   display: block;
-  font-size: clamp(1rem, 1.55vw, 1.35rem);
+  font-size: clamp(1.15rem, 1.7vw, 1.45rem);
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.1;
   letter-spacing: -0.02em;
   color: var(--color-accent);
 }
 
-.hero-growth__headline-sep {
-  margin: 0 0.15rem;
-  font-weight: 600;
-  color: rgba(22, 22, 22, 0.28);
-}
-
 .hero-growth__caption {
   margin: 0.3rem 0 0;
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   font-weight: 500;
   line-height: 1.35;
   color: rgba(22, 22, 22, 0.58);
-}
-
-.hero-growth__legend {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.55rem 0.85rem;
-  font-size: 0.625rem;
-  font-weight: 600;
-  color: rgba(22, 22, 22, 0.58);
-}
-
-.hero-growth__legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.hero-growth__swatch {
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 999px;
-
-  &--newbuild {
-    background: rgba(var(--color-accent-rgb), 0.92);
-  }
-
-  &--resale {
-    background: rgba(228, 232, 236, 0.94);
-    border: 1px solid rgba(22, 22, 22, 0.12);
-  }
 }
 
 .hero-growth__chart {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding-bottom: 0;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .hero-growth__bars {
   display: grid;
   grid-template-columns: repeat(var(--hero-growth-cols, 5), minmax(0, 1fr));
-  gap: clamp(0.45rem, 1.2vw, 0.9rem);
+  gap: clamp(0.55rem, 1.5vw, 1.15rem);
   align-items: end;
   width: 100%;
-  min-height: clamp(9rem, 17vw, 12rem);
+  height: 100%;
+  min-height: clamp(10rem, 20vw, 14rem);
   padding-top: 2rem;
 }
 
 .hero-growth__col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.4rem;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  align-items: end;
+  justify-items: center;
+  gap: 0.45rem;
   height: 100%;
   min-width: 0;
   position: relative;
 }
 
-.hero-growth__values {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.1rem;
-  width: 100%;
-}
-
 .hero-growth__value {
-  font-size: clamp(0.5rem, 0.72vw, 0.625rem);
+  font-size: clamp(0.5625rem, 0.78vw, 0.6875rem);
   font-weight: 700;
   line-height: 1.1;
   color: #161616;
   white-space: nowrap;
-
-  &--newbuild {
-    color: var(--color-accent);
-  }
-
-  &--resale {
-    color: rgba(22, 22, 22, 0.72);
-  }
 }
 
 .hero-growth__bar-track {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: 0.2rem;
   width: 100%;
-  flex: 1 1 auto;
-  min-height: clamp(6rem, 12vw, 8.5rem);
+  height: 100%;
+  min-height: clamp(7rem, 14vw, 10.5rem);
 }
 
 .hero-growth__bar {
-  flex: 1 1 0;
-  min-width: 0;
-  border-radius: 999px 999px 8px 8px;
+  width: clamp(0.55rem, 1.1vw, 0.8rem);
+  min-height: 0.5rem;
+  border-radius: 6px 6px 3px 3px;
+  background: rgba(228, 232, 236, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.95);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 6px 16px rgba(22, 22, 22, 0.08);
+    0 4px 12px rgba(22, 22, 22, 0.08);
 
-  &--newbuild {
+  .hero-growth__col--projected & {
     background: rgba(var(--color-accent-rgb), 0.92);
-    border: 1px solid rgba(var(--color-accent-rgb), 0.55);
+    border-color: rgba(var(--color-accent-rgb), 0.55);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.22),
-      0 8px 20px rgba(var(--color-accent-rgb), 0.24);
-  }
-
-  &--resale {
-    background: rgba(228, 232, 236, 0.94);
-    border: 1px solid rgba(255, 255, 255, 0.95);
-  }
-
-  .hero-growth__col--projected &--newbuild {
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.22),
-      0 10px 24px rgba(var(--color-accent-rgb), 0.32);
+      0 8px 20px rgba(var(--color-accent-rgb), 0.28);
   }
 }
 
 .hero-growth__year {
-  font-size: clamp(0.5625rem, 0.78vw, 0.6875rem);
+  font-size: clamp(0.5625rem, 0.75vw, 0.6875rem);
   font-weight: 500;
   line-height: 1;
   color: rgba(22, 22, 22, 0.48);
@@ -206,7 +145,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.35rem 0.6rem;
+  padding: 0.3rem 0.55rem;
   font-size: 0.625rem;
   font-weight: 600;
   line-height: 1.2;
@@ -232,31 +171,9 @@
   color: #7ee8da;
 }
 
-:root[data-theme='dark'] .hero-growth__caption {
+:root[data-theme='dark'] .hero-growth__caption,
+:root[data-theme='dark'] .hero-growth__kicker {
   color: rgba(245, 245, 245, 0.58);
-}
-
-:root[data-theme='dark'] .hero-growth__kicker,
-:root[data-theme='dark'] .hero-growth__legend {
-  color: rgba(245, 245, 245, 0.52);
-}
-
-:root[data-theme='dark'] .hero-growth__headline-sep {
-  color: rgba(245, 245, 245, 0.28);
-}
-
-:root[data-theme='dark'] .hero-growth__value--resale {
-  color: rgba(245, 245, 245, 0.72);
-}
-
-:root[data-theme='dark'] .hero-growth__bar--resale {
-  background: rgba(255, 255, 255, 0.28);
-  border-color: rgba(255, 255, 255, 0.22);
-}
-
-:root[data-theme='dark'] .hero-growth__bar--newbuild {
-  background: rgba(var(--color-accent-rgb), 0.9);
-  border-color: rgba(var(--color-accent-rgb), 0.55);
 }
 
 :root[data-theme='dark'] .hero-growth__value {
@@ -265,6 +182,16 @@
 
 :root[data-theme='dark'] .hero-growth__year {
   color: rgba(245, 245, 245, 0.52);
+}
+
+:root[data-theme='dark'] .hero-growth__bar {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.22);
+
+  .hero-growth__col--projected & {
+    background: rgba(var(--color-accent-rgb), 0.9);
+    border-color: rgba(var(--color-accent-rgb), 0.55);
+  }
 }
 
 :root[data-theme='dark'] .hero-growth__callout {
