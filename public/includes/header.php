@@ -40,9 +40,10 @@ $maxUrl = site_max_url();
     :root[data-theme="light"]{--header-bg:#fff;--header-border:rgba(22,22,22,.1)}
     html{scrollbar-gutter:stable}
     body{margin:0}
-    .container{width:100%;max-width:1280px;margin-inline:auto;padding-inline:1.25rem}
+    .container{width:100%;max-width:none;margin-inline:auto;padding-inline:1.25rem}
+    @media(min-width:1024px){.container{padding-inline:120px}}
     .site-header{position:sticky;top:0;z-index:100;background:var(--header-bg);border-bottom:1px solid var(--header-border)}
-    .site-header__inner{display:flex;align-items:center;justify-content:space-between;gap:.75rem;box-sizing:border-box;height:4.25rem;padding-block:0}
+    .site-header__inner{display:flex;align-items:center;justify-content:space-between;gap:.75rem;box-sizing:border-box;min-height:0;height:auto;padding-block:29px}
     .site-header__cluster{display:flex;align-items:center;flex:1 1 auto;min-width:0;gap:.75rem}
     .site-header__logo-link{display:block;line-height:0}
     .site-header__logo-svg,.site-header__logo--fallback{height:2.5rem;width:auto;display:block;max-width:none}
@@ -53,10 +54,10 @@ $maxUrl = site_max_url();
       .site-header__bar{position:fixed;inset:0;z-index:99;visibility:hidden;opacity:0;pointer-events:none}
     }
     @media(min-width:1024px){
-      .site-header__cluster{display:grid;grid-template-columns:auto minmax(0,1fr);width:100%;column-gap:clamp(1rem,2.2vw,2rem)}
-      .site-header__bar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;min-width:0;grid-column:2;position:static;visibility:visible;opacity:1;pointer-events:auto;padding:0}
-      .site-header__nav{flex:1 1 auto;display:flex;justify-content:center;min-width:0}
-      .site-header__actions{display:flex;align-items:center;flex-shrink:0;gap:.55rem;margin:0;width:auto}
+      .site-header__cluster{display:grid;grid-template-columns:auto 1fr auto;width:100%;column-gap:clamp(1rem,2vw,2rem)}
+      .site-header__bar{display:contents;min-width:0;position:static;visibility:visible;opacity:1;pointer-events:auto;padding:0}
+      .site-header__nav{grid-column:2;display:flex;justify-content:center;justify-self:center;min-width:0}
+      .site-header__actions{grid-column:3;display:flex;align-items:center;justify-self:end;flex-shrink:0;gap:.55rem;margin:0;width:auto}
       .site-header__burger{display:none}
       .site-header__logo-svg,.site-header__logo--fallback{height:2.75rem}
     }

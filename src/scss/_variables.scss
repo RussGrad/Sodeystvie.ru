@@ -1,7 +1,9 @@
 // Переменные Sass (брейкпоинты, шрифты). Цвета темы — через CSS custom properties ниже.
 $breakpoint-nav: 1024px;
 $breakpoint-header-comfort: 1200px;
-$container-max: 1280px;
+$container-padding-inline: 1.25rem;
+$container-padding-inline-wide: 120px;
+$header-padding-block: 29px;
 $font-sans: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
 $font-script: "Caveat", "Segoe Script", "Bradley Hand", cursive;
 

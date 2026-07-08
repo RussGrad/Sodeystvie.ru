@@ -26,8 +26,9 @@
   justify-content: space-between;
   gap: 0.75rem;
   box-sizing: border-box;
-  height: 4.25rem;
-  padding-block: 0;
+  min-height: 0;
+  height: auto;
+  padding-block: $header-padding-block;
 
   @media (min-width: $breakpoint-nav) {
     align-items: center;
@@ -47,10 +48,10 @@
 
   @media (min-width: $breakpoint-nav) {
     display: grid;
-    grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
+    grid-template-columns: auto 1fr auto;
     align-items: center;
     width: 100%;
-    column-gap: clamp(1rem, 2.2vw, 2rem);
+    column-gap: clamp(1rem, 2vw, 2rem);
     row-gap: 0;
   }
 }
@@ -164,7 +165,7 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    padding: 5.25rem 1.25rem 2rem;
+    padding: calc(#{$header-padding-block} * 2 + 2.5rem + 0.5rem) 1.25rem 2rem;
     background: var(--header-bg);
     opacity: 0;
     visibility: hidden;
@@ -176,13 +177,8 @@
   @media (min-width: $breakpoint-nav) {
     position: static;
     inset: auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: clamp(0.5rem, 1.5vw, 1.25rem);
-    grid-column: 2;
+    display: contents;
     min-width: 0;
-    width: 100%;
     padding: 0;
     opacity: 1;
     visibility: visible;
@@ -205,10 +201,11 @@
   }
 
   @media (min-width: $breakpoint-nav) {
-    flex: 1 1 auto;
+    grid-column: 2;
     display: flex;
     align-items: center;
     justify-content: center;
+    justify-self: center;
     min-width: 0;
     width: auto;
   }
@@ -434,12 +431,13 @@ $header-tool-size: 2rem; // 32px
   width: 100%;
 
   @media (min-width: $breakpoint-nav) {
-    flex: 0 0 auto;
+    grid-column: 3;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
     justify-content: flex-end;
+    justify-self: end;
     gap: 0.55rem;
     margin-top: 0;
     width: auto;

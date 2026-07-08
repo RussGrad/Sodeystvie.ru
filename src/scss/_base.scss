@@ -72,10 +72,14 @@ a {
   }
 }
 
-// Ограничение ширины и горизонтальные поля (БЭМ-блок вне компонентов)
+// Горизонтальные поля: 120px на широких экранах, компактнее на мобильных
 .container {
   width: 100%;
-  max-width: $container-max;
+  max-width: none;
   margin-inline: auto;
-  padding-inline: 1.25rem;
+  padding-inline: $container-padding-inline;
+
+  @media (min-width: $breakpoint-nav) {
+    padding-inline: $container-padding-inline-wide;
+  }
 }
