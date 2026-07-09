@@ -101,8 +101,8 @@ $heroSliderEnabled = $heroSlideCount > 1;
                         <div class="hero__filter">
                             <span class="hero__filter-name visually-hidden" id="hero-lbl-type">Квартиру</span>
                             <label class="hero__filter-field">
-                                <span class="hero__filter-hint">Выберите недвижимость</span>
-                                <select class="hero__select" name="type" aria-labelledby="hero-lbl-type">
+                                <span class="hero__filter-hint visually-hidden">Выберите недвижимость</span>
+                                <select class="hero__select" name="type" aria-label="Выберите недвижимость" aria-labelledby="hero-lbl-type">
                                     <option value="">Тип объекта</option>
                                     <option value="flat">Квартира</option>
                                     <option value="house">Дом</option>
@@ -114,8 +114,8 @@ $heroSliderEnabled = $heroSlideCount > 1;
                         <div class="hero__filter">
                             <span class="hero__filter-name visually-hidden" id="hero-lbl-rooms">Комнат</span>
                             <label class="hero__filter-field">
-                                <span class="hero__filter-hint">Выберите кол-во комнат</span>
-                                <select class="hero__select" name="rooms" aria-labelledby="hero-lbl-rooms">
+                                <span class="hero__filter-hint visually-hidden">Выберите кол-во комнат</span>
+                                <select class="hero__select" name="rooms" aria-label="Выберите кол-во комнат" aria-labelledby="hero-lbl-rooms">
                                     <option value="">Любое</option>
                                     <option value="studio">Студия</option>
                                     <option value="1">1</option>
@@ -128,8 +128,8 @@ $heroSliderEnabled = $heroSlideCount > 1;
                         <div class="hero__filter">
                             <span class="hero__filter-name visually-hidden" id="hero-lbl-price">Цена</span>
                             <label class="hero__filter-field">
-                                <span class="hero__filter-hint">Выберите диапазон</span>
-                                <select class="hero__select" name="price" aria-labelledby="hero-lbl-price">
+                                <span class="hero__filter-hint visually-hidden">Выберите диапазон</span>
+                                <select class="hero__select" name="price" aria-label="Выберите диапазон" aria-labelledby="hero-lbl-price">
                                     <option value="">Любая</option>
                                     <option value="0-5">до 5 млн</option>
                                     <option value="5-10">5–10 млн</option>
@@ -141,8 +141,8 @@ $heroSliderEnabled = $heroSlideCount > 1;
                         <div class="hero__filter">
                             <span class="hero__filter-name visually-hidden" id="hero-lbl-region">Регион</span>
                             <label class="hero__filter-field">
-                                <span class="hero__filter-hint">Выберите регион</span>
-                                <select class="hero__select" name="region" aria-labelledby="hero-lbl-region">
+                                <span class="hero__filter-hint visually-hidden">Выберите регион</span>
+                                <select class="hero__select" name="region" aria-label="Выберите регион" aria-labelledby="hero-lbl-region">
                                     <option value="">Регион</option>
                                     <option value="irkutsk" selected>Иркутск</option>
                                     <option value="angarsk">Ангарск</option>
