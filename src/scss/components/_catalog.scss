@@ -15,6 +15,10 @@
   }
 }
 
+.catalog-page--favorites .catalog-layout {
+  grid-template-columns: 1fr;
+}
+
 .catalog-layout__aside {
   @media (min-width: 901px) {
     position: sticky;

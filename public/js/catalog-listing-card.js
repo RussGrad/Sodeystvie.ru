@@ -2,38 +2,21 @@
  * Галерея и избранное в карточках каталога.
  */
 (function () {
-  var FAV_KEY = 'sodeystvie:catalog-favs';
+  'use strict';
+
+  var LEGACY_FAV_KEY = 'sodeystvie:catalog-favs';
   var resolveCache = Object.create(null);
 
-  function readFavs() {
+  function favApi() {
+    return window.SodeystvieFavorites || null;
+  }
+
+  function isFavoritesView() {
     try {
-      var raw = localStorage.getItem(FAV_KEY);
-      var parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed : [];
+      return new URLSearchParams(window.location.search).get('favorites') === '1';
     } catch (e) {
-      return [];
+      return false;
     }
-  }
-
-  function writeFavs(list) {
-    try {
-      localStorage.setItem(FAV_KEY, JSON.stringify(list));
-    } catch (e) {
-      /* ignore */
-    }
-  }
-
-  function isFav(id) {
-    return readFavs().indexOf(id) >= 0;
-  }
-
-  function toggleFav(id) {
-    var list = readFavs();
-    var idx = list.indexOf(id);
-    if (idx >= 0) list.splice(idx, 1);
-    else list.push(id);
-    writeFavs(list);
-    return idx < 0;
   }
 
   function parseB64Json(attr) {
@@ -148,27 +131,127 @@
     if (!(card instanceof HTMLElement)) return;
     var id = card.getAttribute('data-listing-id') || '';
     if (!id) return;
+    var api = favApi();
+    if (!api) return;
 
     function sync() {
-      var on = isFav(id);
+      var on = api.has(id);
       btn.setAttribute('aria-pressed', on ? 'true' : 'false');
       btn.classList.toggle('is-active', on);
       btn.setAttribute('aria-label', on ? 'Убрать из избранного' : 'Добавить в избранное');
+      if (isFavoritesView() && !on) {
+        card.remove();
+        updateFavoritesCount();
+        showFavoritesEmptyIfNeeded();
+      }
     }
 
     sync();
     btn.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
-      toggleFav(id);
+      api.toggle(id);
       sync();
     });
   }
 
-  document.querySelectorAll('[data-listing-gallery]').forEach(function (el) {
-    if (el instanceof HTMLElement) initGallery(el);
-  });
-  document.querySelectorAll('[data-listing-fav]').forEach(function (el) {
-    if (el instanceof HTMLButtonElement) initFav(el);
-  });
+  function initCardInteractions(root) {
+    if (!(root instanceof Element)) return;
+    root.querySelectorAll('[data-listing-gallery]').forEach(function (el) {
+      if (el instanceof HTMLElement) initGallery(el);
+    });
+    root.querySelectorAll('[data-listing-fav]').forEach(function (el) {
+      if (el instanceof HTMLButtonElement) initFav(el);
+    });
+  }
+
+  function updateFavoritesCount() {
+    var countEl = document.querySelector('.catalog__count');
+    if (!countEl) return;
+    var cards = document.querySelectorAll('.catalog-list [data-listing-card]');
+    countEl.textContent = 'В избранном: ' + String(cards.length);
+  }
+
+  function showFavoritesEmptyIfNeeded() {
+    var list = document.getElementById('catalog-list-root');
+    var emptyEl = document.querySelector('.catalog-favorites-empty');
+    if (!(list instanceof HTMLElement) || !(emptyEl instanceof HTMLElement)) return;
+    if (list.querySelector('[data-listing-card]')) {
+      emptyEl.hidden = true;
+      list.hidden = false;
+      return;
+    }
+    list.hidden = true;
+    emptyEl.hidden = false;
+    updateFavoritesCount();
+  }
+
+  function setFavoritesLoading(isLoading) {
+    var loadingEl = document.querySelector('.catalog-favorites-loading');
+    if (loadingEl instanceof HTMLElement) {
+      loadingEl.hidden = !isLoading;
+    }
+  }
+
+  function loadFavoritesView() {
+    if (!isFavoritesView()) return;
+    var api = favApi();
+    var list = document.getElementById('catalog-list-root');
+    var emptyEl = document.querySelector('.catalog-favorites-empty');
+    if (!api || !(list instanceof HTMLElement)) return;
+
+    var ids = api.getIds();
+    if (ids.length === 0) {
+      setFavoritesLoading(false);
+      list.innerHTML = '';
+      list.hidden = true;
+      if (emptyEl instanceof HTMLElement) emptyEl.hidden = false;
+      updateFavoritesCount();
+      return;
+    }
+
+    setFavoritesLoading(true);
+    if (emptyEl instanceof HTMLElement) emptyEl.hidden = true;
+
+    fetch('/api/catalog-favorites.php?ids=' + encodeURIComponent(ids.join(',')), {
+      credentials: 'same-origin',
+    })
+      .then(function (r) {
+        return r.ok ? r.json() : null;
+      })
+      .then(function (data) {
+        setFavoritesLoading(false);
+        if (!data || typeof data.html !== 'string') {
+          list.innerHTML = '';
+          list.hidden = true;
+          if (emptyEl instanceof HTMLElement) emptyEl.hidden = false;
+          return;
+        }
+        list.innerHTML = data.html;
+        list.hidden = data.html === '';
+        initCardInteractions(list);
+        updateFavoritesCount();
+        showFavoritesEmptyIfNeeded();
+      })
+      .catch(function () {
+        setFavoritesLoading(false);
+        list.innerHTML = '';
+        list.hidden = true;
+        if (emptyEl instanceof HTMLElement) {
+          emptyEl.textContent = 'Не удалось загрузить избранное. Обновите страницу.';
+          emptyEl.hidden = false;
+        }
+      });
+  }
+
+  function boot() {
+    initCardInteractions(document);
+    loadFavoritesView();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
 })();

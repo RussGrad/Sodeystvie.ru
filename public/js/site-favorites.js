@@ -5,6 +5,7 @@
     'use strict';
 
     var STORAGE_KEY = 'sodeystvie-favorites';
+    var LEGACY_KEY = 'sodeystvie:catalog-favs';
 
     function readIds() {
         try {
@@ -32,6 +33,31 @@
         }
     }
 
+    function migrateLegacy() {
+        try {
+            var legacyRaw = localStorage.getItem(LEGACY_KEY);
+            if (!legacyRaw) {
+                return;
+            }
+            var legacy = JSON.parse(legacyRaw);
+            if (!Array.isArray(legacy)) {
+                localStorage.removeItem(LEGACY_KEY);
+                return;
+            }
+            var ids = readIds();
+            legacy.forEach(function (id) {
+                id = String(id || '').trim();
+                if (id && ids.indexOf(id) === -1) {
+                    ids.push(id);
+                }
+            });
+            writeIds(ids);
+            localStorage.removeItem(LEGACY_KEY);
+        } catch (e) {
+            /* ignore */
+        }
+    }
+
     function updateBadge() {
         var el = document.getElementById('site-favorites-count');
         if (!el) {
@@ -45,6 +71,8 @@
             el.setAttribute('hidden', 'hidden');
         }
     }
+
+    migrateLegacy();
 
     window.SodeystvieFavorites = {
         getIds: readIds,
@@ -70,6 +98,9 @@
             return false;
         },
         refresh: updateBadge,
+        getCatalogUrl: function () {
+            return '/catalog/?favorites=1';
+        },
     };
 
     if (document.readyState === 'loading') {

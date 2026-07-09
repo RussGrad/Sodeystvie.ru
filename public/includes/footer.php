@@ -135,5 +135,17 @@ $siteChatJsVersion = (string) (@filemtime(__DIR__ . '/../js/site-chat.js') ?: ti
     $listingPageJsVersion = (string) (@filemtime(__DIR__ . '/../js/listing-page.js') ?: time());
     ?>
     <script src="/js/listing-page.js?v=<?php echo htmlspecialchars($listingPageJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+    <?php
+    if (!empty($extraDeferScripts) && is_array($extraDeferScripts)) {
+        foreach ($extraDeferScripts as $scriptSrc) {
+            if (!is_string($scriptSrc) || $scriptSrc === '') {
+                continue;
+            }
+            ?>
+    <script src="<?php echo htmlspecialchars($scriptSrc, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+            <?php
+        }
+    }
+    ?>
 </body>
 </html>
