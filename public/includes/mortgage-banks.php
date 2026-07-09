@@ -60,6 +60,5 @@ function sodeystvie_mortgage_banks(): array
  */
 function sodeystvie_mortgage_banks_json(): string
 {
-    return json_encode(sodeystvie_mortgage_banks(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
-        ?: '[]';
+    return site_json_for_html_script(sodeystvie_mortgage_banks(), '[]');
 }

@@ -1009,7 +1009,7 @@ function site_developer_offers_client_payload(array $row): string
         ),
     ];
 
-    return json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}';
+    return site_json_for_html_script($payload, '{}');
 }
 
 function site_developer_completion_label(?int $quarter, ?int $year, bool $isReady = false): string
@@ -2879,23 +2879,6 @@ function site_crm_fetch_listings(int $limit = 24, int $offset = 0, array $apiQue
     }
 
     return ['items' => $items, 'total' => $total, 'error' => $error];
-}
-
-/**
- * @return array<string, mixed>|null
- */
-function site_crm_fetch_listing_by_id(string $id): ?array
-{
-    if (!site_validate_crm_object_id($id)) {
-        return null;
-    }
-
-    $detail = site_http_get_json_cached(site_crm_listings_url($id), 8, 60);
-    if (!is_array($detail) || isset($detail['_error']) || !isset($detail['id'])) {
-        return null;
-    }
-
-    return site_crm_listing_enrich_row($detail);
 }
 
 /**

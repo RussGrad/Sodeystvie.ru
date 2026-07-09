@@ -27,6 +27,20 @@ if (!function_exists('site_send_security_headers')) {
     }
 }
 
+if (!function_exists('site_json_for_html_script')) {
+    /**
+     * JSON для безопасной вставки в <script type="application/json"> (без выхода из тега).
+     */
+    function site_json_for_html_script(mixed $data, string $fallback = 'null'): string
+    {
+        $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+            | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
+        $encoded = json_encode($data, $flags);
+
+        return $encoded !== false ? $encoded : $fallback;
+    }
+}
+
 if (!function_exists('site_validate_crm_object_id')) {
     /** ID объекта CRM (cuid/uuid/ascii), защита от path traversal в URL API */
     function site_validate_crm_object_id(string $id): bool
