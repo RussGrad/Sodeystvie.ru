@@ -49,9 +49,13 @@ $maxUrl = site_max_url();
     .site-header__cluster{display:flex;align-items:center;flex:1 1 auto;min-width:0;gap:.75rem}
     .site-header__logo-link{display:block;line-height:1;text-decoration:none}
     .site-brand-lockup{display:inline-flex;align-items:center;gap:.55rem;line-height:1}
+    .site-brand-lockup--title-only{gap:.62rem}
+    .site-brand-lockup--title-only .site-brand-lockup__mark{height:clamp(1.58rem,3.7vw,1.82rem)}
     .site-brand-lockup__mark{height:2.35rem;width:auto;display:block;flex-shrink:0}
     .site-brand-lockup__text{display:inline-grid;grid-template-columns:minmax(0,max-content);justify-items:stretch;gap:.22rem}
     .site-brand-lockup__title,.site-brand-lockup__subtitle{font-family:"AAlterna","Montserrat",system-ui,sans-serif;line-height:1;white-space:nowrap}
+    .site-brand-lockup--title-only .site-brand-lockup__text{display:block}
+    .site-brand-lockup--title-only .site-brand-lockup__title{display:block;width:auto;font-size:clamp(1.18rem,2.85vw,1.58rem);letter-spacing:.035em;text-align:left;color:var(--header-text,#f5f5f5)}
     .site-brand-lockup__title{display:block;width:100%;font-size:clamp(1.1rem,2.55vw,1.5rem);letter-spacing:.06em;text-align:justify;text-align-last:justify;text-justify:inter-character;color:var(--header-text,#f5f5f5)}
     .site-brand-lockup__subtitle{font-size:clamp(.42rem,1vw,.56rem);letter-spacing:.16em;text-transform:uppercase;color:#d4b56a}
     .site-header__logo-svg,.site-header__logo--fallback,.site-header__logo-premium:not(.site-brand-lockup__mark){height:2.35rem;width:auto;display:block;max-width:min(9.5rem,34vw)}
@@ -67,6 +71,7 @@ $maxUrl = site_max_url();
       .site-header__nav{grid-column:2;display:flex;justify-content:center;justify-self:center;min-width:0}
       .site-header__actions{grid-column:3;display:flex;align-items:center;justify-self:end;flex-shrink:0;gap:.55rem;margin:0;width:auto}
       .site-header__burger{display:none}
+      .site-brand-lockup--title-only .site-brand-lockup__mark{height:clamp(1.72rem,2.2vw,1.82rem)}
       .site-brand-lockup__mark{height:2.65rem}
       .site-header__logo-svg,.site-header__logo--fallback,.site-header__logo-premium:not(.site-brand-lockup__mark){height:2.65rem;max-width:10.5rem}
     }

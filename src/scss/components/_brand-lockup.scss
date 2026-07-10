@@ -66,6 +66,40 @@
   color: var(--brand-lockup-subtitle, #b8954f);
 }
 
+// Временно: только знак АН + «СОДЕЙСТВИЕ», выровнены по центру по высоте
+.site-brand-lockup--title-only {
+  gap: clamp(0.5rem, 1.5vw, 0.78rem);
+  align-items: center;
+
+  .site-brand-lockup__mark {
+    height: clamp(1.58rem, 3.7vw, 1.82rem);
+    align-self: center;
+  }
+
+  .site-brand-lockup__text {
+    display: block;
+  }
+
+  .site-brand-lockup__title {
+    width: auto;
+    font-size: clamp(1.18rem, 2.85vw, 1.58rem);
+    letter-spacing: 0.035em;
+    text-align: left;
+    text-align-last: left;
+    text-justify: auto;
+  }
+
+  @media (min-width: $breakpoint-nav) {
+    .site-brand-lockup__mark {
+      height: clamp(1.72rem, 2.2vw, 1.9rem);
+    }
+
+    .site-brand-lockup__title {
+      font-size: clamp(1.28rem, 2.2vw, 1.62rem);
+    }
+  }
+}
+
 :root[data-theme="light"] {
   --brand-lockup-title: #{$brand-text};
   --brand-lockup-subtitle: #9a7a3f;
