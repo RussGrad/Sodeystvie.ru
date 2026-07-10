@@ -47,7 +47,7 @@ $maxUrl = site_max_url();
     .site-header__inner{display:flex;align-items:center;justify-content:space-between;gap:.75rem;box-sizing:border-box;min-height:0;height:auto;padding-block:29px}
     .site-header__cluster{display:flex;align-items:center;flex:1 1 auto;min-width:0;gap:.75rem}
     .site-header__logo-link{display:block;line-height:0}
-    .site-header__logo-svg,.site-header__logo--fallback,.site-header__logo-premium{height:2.65rem;width:auto;display:block;max-width:min(14rem,42vw)}
+    .site-header__logo-svg,.site-header__logo--fallback,.site-header__logo-premium{height:2.35rem;width:auto;display:block;max-width:min(9.5rem,34vw)}
     .site-header__menu{list-style:none;margin:0;padding:0;display:flex}
     .site-header__menu-link{white-space:nowrap}
     .site-header__burger{display:flex;flex-shrink:0;margin-left:auto}
@@ -60,7 +60,7 @@ $maxUrl = site_max_url();
       .site-header__nav{grid-column:2;display:flex;justify-content:center;justify-self:center;min-width:0}
       .site-header__actions{grid-column:3;display:flex;align-items:center;justify-self:end;flex-shrink:0;gap:.55rem;margin:0;width:auto}
       .site-header__burger{display:none}
-      .site-header__logo-svg,.site-header__logo--fallback,.site-header__logo-premium{height:3rem;max-width:15.5rem}
+      .site-header__logo-svg,.site-header__logo--fallback,.site-header__logo-premium{height:2.65rem;max-width:10.5rem}
     }
     </style>
     <!-- Ранняя установка темы: уменьшает мигание до загрузки CSS (localStorage или prefers-color-scheme). -->

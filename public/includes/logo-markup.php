@@ -21,7 +21,7 @@ $premiumSrc = is_readable($premiumWebp)
 
 if ($premiumSrc !== '') {
     $imgClass = htmlspecialchars($logoSvgClass . ' site-header__logo-premium', ENT_QUOTES, 'UTF-8');
-    echo '<img class="' . $imgClass . '" src="' . htmlspecialchars($premiumSrc, ENT_QUOTES, 'UTF-8') . '" width="463" height="497" alt="' . htmlspecialchars($logoAlt, ENT_QUOTES, 'UTF-8') . '" decoding="async">';
+    echo '<img class="' . $imgClass . '" src="' . htmlspecialchars($premiumSrc, ENT_QUOTES, 'UTF-8') . '" width="282" height="278" alt="' . htmlspecialchars($logoAlt, ENT_QUOTES, 'UTF-8') . '" decoding="async">';
     return;
 }
 

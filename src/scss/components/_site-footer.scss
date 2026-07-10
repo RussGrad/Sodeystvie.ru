@@ -62,13 +62,13 @@
 .site-footer__logo-svg,
 .site-footer__logo-premium {
   display: block;
-  height: 2.65rem;
+  height: 2.35rem;
   width: auto;
-  max-width: 14rem;
+  max-width: 9.5rem;
 
   @media (min-width: $breakpoint-nav) {
-    height: 3rem;
-    max-width: 15.5rem;
+    height: 2.65rem;
+    max-width: 10.5rem;
   }
 }
 

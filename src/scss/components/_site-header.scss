@@ -83,13 +83,13 @@
 .site-header__logo-svg,
 .site-header__logo-premium {
   display: block;
-  height: 2.65rem;
+  height: 2.35rem;
   width: auto;
-  max-width: min(14rem, 42vw);
+  max-width: min(9.5rem, 34vw);
 
   @media (min-width: $breakpoint-nav) {
-    height: 3rem;
-    max-width: 15.5rem;
+    height: 2.65rem;
+    max-width: 10.5rem;
   }
 }
 
