@@ -50,9 +50,9 @@ $maxUrl = site_max_url();
     .site-header__logo-link{display:block;line-height:1;text-decoration:none}
     .site-brand-lockup{display:inline-flex;align-items:center;gap:.55rem;line-height:1}
     .site-brand-lockup__mark{height:2.35rem;width:auto;display:block;flex-shrink:0}
-    .site-brand-lockup__text{display:flex;flex-direction:column;justify-content:center;gap:.2rem}
+    .site-brand-lockup__text{display:inline-grid;grid-template-columns:minmax(0,max-content);justify-items:stretch;gap:.22rem}
     .site-brand-lockup__title,.site-brand-lockup__subtitle{font-family:"AAlterna","Montserrat",system-ui,sans-serif;line-height:1;white-space:nowrap}
-    .site-brand-lockup__title{font-size:clamp(.95rem,2.1vw,1.28rem);letter-spacing:.02em;color:var(--header-text,#f5f5f5)}
+    .site-brand-lockup__title{display:block;width:100%;font-size:clamp(1.1rem,2.55vw,1.5rem);letter-spacing:.06em;text-align:justify;text-align-last:justify;text-justify:inter-character;color:var(--header-text,#f5f5f5)}
     .site-brand-lockup__subtitle{font-size:clamp(.42rem,1vw,.56rem);letter-spacing:.16em;text-transform:uppercase;color:#d4b56a}
     .site-header__logo-svg,.site-header__logo--fallback,.site-header__logo-premium:not(.site-brand-lockup__mark){height:2.35rem;width:auto;display:block;max-width:min(9.5rem,34vw)}
     .site-header__menu{list-style:none;margin:0;padding:0;display:flex}
