@@ -96,6 +96,7 @@
 .site-header__logo-premium {
   object-fit: contain;
   object-position: left center;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.28));
 }
 
 // Светлая тема: перекрашиваем только .st26 в тёмный (градиенты АН и подпись не трогаем)
