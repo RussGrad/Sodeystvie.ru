@@ -25,7 +25,7 @@ if ($premiumSrc !== '') {
     $imgClass = htmlspecialchars($logoSvgClass . ' site-header__logo-premium site-brand-lockup__mark', ENT_QUOTES, 'UTF-8');
     $lockupClass = htmlspecialchars($logoLockupClass, ENT_QUOTES, 'UTF-8');
     echo '<span class="' . $lockupClass . '">';
-    echo '<img class="' . $imgClass . '" src="' . htmlspecialchars($premiumSrc, ENT_QUOTES, 'UTF-8') . '" width="282" height="278" alt="' . htmlspecialchars($logoAlt, ENT_QUOTES, 'UTF-8') . '" decoding="async">';
+    echo '<img class="' . $imgClass . '" src="' . htmlspecialchars($premiumSrc, ENT_QUOTES, 'UTF-8') . '" width="122" height="150" alt="' . htmlspecialchars($logoAlt, ENT_QUOTES, 'UTF-8') . '" decoding="async">';
     echo '<span class="site-brand-lockup__text" aria-hidden="true">';
     echo '<span class="site-brand-lockup__title">СОДЕЙСТВИЕ</span>';
     echo '<span class="site-brand-lockup__subtitle">АГЕНТСТВО НЕДВИЖИМОСТИ</span>';
