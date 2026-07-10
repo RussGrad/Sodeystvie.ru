@@ -36,17 +36,18 @@ $maxUrl = site_max_url();
     <link rel="stylesheet" href="/css/main.css?v=<?php echo htmlspecialchars($cssVersion, ENT_QUOTES, 'UTF-8'); ?>">
     <style>
     /* Критичные стили шапки: совпадают с main.css, чтобы не было скачка при догрузке */
-    :root[data-theme="dark"]{--header-bg:#141414;--header-border:rgba(255,255,255,.1)}
+    :root[data-theme="dark"]{--header-bg:rgba(18,22,30,.78);--header-border:rgba(255,255,255,.12)}
     :root[data-theme="light"]{--header-bg:#fff;--header-border:rgba(22,22,22,.1)}
     html{scrollbar-gutter:stable}
-    body{margin:0}
+    body{margin:0;background-color:var(--page-bg,#fff)}
+    :root[data-theme="dark"] body{background-color:#121820;background-image:linear-gradient(rgba(10,14,20,.74),rgba(10,14,20,.86)),url('/assets/brand/site-ambient-bg.webp');background-size:cover;background-position:center;background-attachment:fixed}
     .container{width:100%;max-width:none;margin-inline:auto;padding-inline:1.25rem}
     @media(min-width:1024px){.container{padding-inline:120px}}
     .site-header{position:sticky;top:0;z-index:100;background:var(--header-bg);border-bottom:1px solid var(--header-border)}
     .site-header__inner{display:flex;align-items:center;justify-content:space-between;gap:.75rem;box-sizing:border-box;min-height:0;height:auto;padding-block:29px}
     .site-header__cluster{display:flex;align-items:center;flex:1 1 auto;min-width:0;gap:.75rem}
     .site-header__logo-link{display:block;line-height:0}
-    .site-header__logo-svg,.site-header__logo--fallback{height:2.5rem;width:auto;display:block;max-width:none}
+    .site-header__logo-svg,.site-header__logo--fallback,.site-header__logo-premium{height:2.65rem;width:auto;display:block;max-width:min(14rem,42vw)}
     .site-header__menu{list-style:none;margin:0;padding:0;display:flex}
     .site-header__menu-link{white-space:nowrap}
     .site-header__burger{display:flex;flex-shrink:0;margin-left:auto}
@@ -59,7 +60,7 @@ $maxUrl = site_max_url();
       .site-header__nav{grid-column:2;display:flex;justify-content:center;justify-self:center;min-width:0}
       .site-header__actions{grid-column:3;display:flex;align-items:center;justify-self:end;flex-shrink:0;gap:.55rem;margin:0;width:auto}
       .site-header__burger{display:none}
-      .site-header__logo-svg,.site-header__logo--fallback{height:2.75rem}
+      .site-header__logo-svg,.site-header__logo--fallback,.site-header__logo-premium{height:3rem;max-width:15.5rem}
     }
     </style>
     <!-- Ранняя установка темы: уменьшает мигание до загрузки CSS (localStorage или prefers-color-scheme). -->
@@ -69,7 +70,7 @@ $maxUrl = site_max_url();
             var k = 'sodeystvie-theme';
             var t = localStorage.getItem(k);
             if (t !== 'light' && t !== 'dark') {
-                t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                t = 'dark';
             }
             document.documentElement.setAttribute('data-theme', t);
         } catch (e) {}

@@ -20,7 +20,12 @@ body {
   flex-direction: column; // main растягивается, footer прижимается вниз
   font-family: var(--font-sans, #{$font-sans});
   line-height: 1.5;
-  background: var(--page-bg);
+  background-color: var(--page-bg);
+  background-image: var(--page-bg-image, none);
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--page-text);
 }
 
