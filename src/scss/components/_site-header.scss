@@ -86,18 +86,25 @@
   display: block;
   height: 2.35rem;
   width: auto;
-  max-width: min(9.5rem, 34vw);
+  max-width: min(11rem, 54vw);
 
   @media (min-width: $breakpoint-nav) {
     height: 2.65rem;
-    max-width: 10.5rem;
+    max-width: 12.5rem;
   }
 }
 
-.site-header__logo-premium:not(.site-brand-lockup__mark) {
+.site-header__logo-premium {
   object-fit: contain;
   object-position: left center;
   filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.28));
+}
+
+:root[data-theme="light"] .site-header__logo-premium {
+  background: #161616;
+  border-radius: 8px;
+  padding: 0.16rem 0.4rem;
+  box-sizing: content-box;
 }
 
 // Светлая тема: перекрашиваем только .st26 в тёмный (градиенты АН и подпись не трогаем)

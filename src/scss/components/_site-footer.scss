@@ -64,18 +64,25 @@
   display: block;
   height: 2.35rem;
   width: auto;
-  max-width: 9.5rem;
+  max-width: 11rem;
 
   @media (min-width: $breakpoint-nav) {
     height: 2.65rem;
-    max-width: 10.5rem;
+    max-width: 12.5rem;
   }
 }
 
-.site-footer__logo-premium:not(.site-brand-lockup__mark) {
+.site-footer__logo-premium {
   object-fit: contain;
   object-position: left center;
   filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.28));
+}
+
+:root[data-theme="light"] .site-footer__logo-premium {
+  background: #161616;
+  border-radius: 8px;
+  padding: 0.16rem 0.4rem;
+  box-sizing: content-box;
 }
 
 .site-footer__logo--fallback {
