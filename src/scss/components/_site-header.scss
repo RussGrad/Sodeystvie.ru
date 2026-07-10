@@ -75,8 +75,9 @@
 
 .site-header__logo-link {
   display: block;
-  line-height: 0;
+  line-height: 1;
   flex-shrink: 0;
+  text-decoration: none;
 }
 
 // Встроенный SVG / премиум PNG: фиксированная высота
@@ -93,7 +94,7 @@
   }
 }
 
-.site-header__logo-premium {
+.site-header__logo-premium:not(.site-brand-lockup__mark) {
   object-fit: contain;
   object-position: left center;
   filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.28));

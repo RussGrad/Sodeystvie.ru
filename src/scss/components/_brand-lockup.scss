@@ -1,0 +1,82 @@
+// Логотип: монограмма АНС + текстовый блок справа (шрифт AAlterna).
+@use "../variables" as *;
+
+@font-face {
+  font-family: "AAlterna";
+  src: url("/assets/fonts/aalterna.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.site-brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(0.45rem, 1.4vw, 0.75rem);
+  min-width: 0;
+  line-height: 1;
+}
+
+.site-brand-lockup__mark {
+  display: block;
+  flex-shrink: 0;
+  height: 2.35rem;
+  width: auto;
+  max-width: none;
+  object-fit: contain;
+  object-position: left center;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.28));
+
+  @media (min-width: $breakpoint-nav) {
+    height: 2.65rem;
+  }
+}
+
+.site-brand-lockup__text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.site-brand-lockup__title,
+.site-brand-lockup__subtitle {
+  font-family: "AAlterna", #{$font-sans};
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.site-brand-lockup__title {
+  font-size: clamp(0.95rem, 2.1vw, 1.28rem);
+  letter-spacing: 0.02em;
+  color: var(--brand-lockup-title, var(--header-text, #{$brand-text}));
+}
+
+.site-brand-lockup__subtitle {
+  font-size: clamp(0.42rem, 1vw, 0.56rem);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brand-lockup-subtitle, #b8954f);
+}
+
+:root[data-theme="light"] {
+  --brand-lockup-title: #{$brand-text};
+  --brand-lockup-subtitle: #9a7a3f;
+}
+
+:root[data-theme="dark"] {
+  --brand-lockup-title: #f5f5f5;
+  --brand-lockup-subtitle: #d4b56a;
+}
+
+.site-footer__logo-link .site-brand-lockup__title {
+  color: var(--brand-lockup-title, var(--footer-text, #{$brand-text}));
+}
+
+@media (max-width: 479.98px) {
+  .site-brand-lockup__subtitle {
+    letter-spacing: 0.1em;
+  }
+}

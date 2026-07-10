@@ -1,5 +1,6 @@
 // Точка входа стилей: базовые правила, шапка, главная, первый экран (hero), подвал.
 @use "base";
+@use "components/brand-lockup";
 @use "components/site-header";
 @use "components/page-main";
 @use "components/messenger-links";

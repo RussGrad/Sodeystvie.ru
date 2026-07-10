@@ -55,7 +55,7 @@
 
 .site-footer__logo-link {
   display: inline-block;
-  line-height: 0;
+  line-height: 1;
   text-decoration: none;
 }
 
@@ -72,7 +72,7 @@
   }
 }
 
-.site-footer__logo-premium {
+.site-footer__logo-premium:not(.site-brand-lockup__mark) {
   object-fit: contain;
   object-position: left center;
   filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.28));

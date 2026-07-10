@@ -33,6 +33,7 @@ $maxUrl = site_max_url();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Montserrat:wght@400;600;700&display=swap">
+    <link rel="preload" href="/assets/fonts/aalterna.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="stylesheet" href="/css/main.css?v=<?php echo htmlspecialchars($cssVersion, ENT_QUOTES, 'UTF-8'); ?>">
     <style>
     /* Критичные стили шапки: совпадают с main.css, чтобы не было скачка при догрузке */
@@ -46,8 +47,14 @@ $maxUrl = site_max_url();
     .site-header{position:sticky;top:0;z-index:100;background:var(--header-bg);border-bottom:1px solid var(--header-border)}
     .site-header__inner{display:flex;align-items:center;justify-content:space-between;gap:.75rem;box-sizing:border-box;min-height:0;height:auto;padding-block:29px}
     .site-header__cluster{display:flex;align-items:center;flex:1 1 auto;min-width:0;gap:.75rem}
-    .site-header__logo-link{display:block;line-height:0}
-    .site-header__logo-svg,.site-header__logo--fallback,.site-header__logo-premium{height:2.35rem;width:auto;display:block;max-width:min(9.5rem,34vw)}
+    .site-header__logo-link{display:block;line-height:1;text-decoration:none}
+    .site-brand-lockup{display:inline-flex;align-items:center;gap:.55rem;line-height:1}
+    .site-brand-lockup__mark{height:2.35rem;width:auto;display:block;flex-shrink:0}
+    .site-brand-lockup__text{display:flex;flex-direction:column;justify-content:center;gap:.2rem}
+    .site-brand-lockup__title,.site-brand-lockup__subtitle{font-family:"AAlterna","Montserrat",system-ui,sans-serif;line-height:1;white-space:nowrap}
+    .site-brand-lockup__title{font-size:clamp(.95rem,2.1vw,1.28rem);letter-spacing:.02em;color:var(--header-text,#f5f5f5)}
+    .site-brand-lockup__subtitle{font-size:clamp(.42rem,1vw,.56rem);letter-spacing:.16em;text-transform:uppercase;color:#d4b56a}
+    .site-header__logo-svg,.site-header__logo--fallback,.site-header__logo-premium:not(.site-brand-lockup__mark){height:2.35rem;width:auto;display:block;max-width:min(9.5rem,34vw)}
     .site-header__menu{list-style:none;margin:0;padding:0;display:flex}
     .site-header__menu-link{white-space:nowrap}
     .site-header__burger{display:flex;flex-shrink:0;margin-left:auto}
@@ -60,7 +67,8 @@ $maxUrl = site_max_url();
       .site-header__nav{grid-column:2;display:flex;justify-content:center;justify-self:center;min-width:0}
       .site-header__actions{grid-column:3;display:flex;align-items:center;justify-self:end;flex-shrink:0;gap:.55rem;margin:0;width:auto}
       .site-header__burger{display:none}
-      .site-header__logo-svg,.site-header__logo--fallback,.site-header__logo-premium{height:2.65rem;max-width:10.5rem}
+      .site-brand-lockup__mark{height:2.65rem}
+      .site-header__logo-svg,.site-header__logo--fallback,.site-header__logo-premium:not(.site-brand-lockup__mark){height:2.65rem;max-width:10.5rem}
     }
     </style>
     <!-- Ранняя установка темы: уменьшает мигание до загрузки CSS (localStorage или prefers-color-scheme). -->
