@@ -56,6 +56,7 @@ require __DIR__ . '/includes/header.php';
     <?php require __DIR__ . '/includes/section-cases.php'; ?>
     <?php require __DIR__ . '/includes/section-mortgage-quiz.php'; ?>
     <?php require __DIR__ . '/includes/section-services.php'; ?>
+    <?php require __DIR__ . '/includes/section-reasons.php'; ?>
     <?php require __DIR__ . '/includes/section-reviews.php'; ?>
 <?php if ($showDbTest) { ?>
     <div class="container">

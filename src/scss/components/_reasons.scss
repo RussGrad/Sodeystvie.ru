@@ -1,0 +1,119 @@
+// Главная: «8 причин обратиться к нам»
+
+.reasons {
+  position: relative;
+  padding: clamp(3rem, 6.5vw, 4.75rem) 0 clamp(3.25rem, 7vw, 5rem);
+  background: var(--page-bg);
+  border-top: 1px solid var(--header-border);
+  overflow: hidden;
+}
+
+.reasons__inner {
+  position: relative;
+}
+
+.reasons__watermark {
+  position: absolute;
+  top: clamp(-0.5rem, -1vw, 0rem);
+  right: clamp(-0.5rem, 1vw, 2rem);
+  margin: 0;
+  font-size: clamp(3.5rem, 11vw, 7.5rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--reasons-watermark, rgba(22, 22, 22, 0.06));
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.reasons__title {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 clamp(1.75rem, 4vw, 2.5rem);
+  max-width: 34rem;
+  font-size: clamp(1.35rem, 2.8vw, 2rem);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--services-title);
+
+  strong {
+    font-weight: 700;
+  }
+}
+
+.reasons__grid {
+  position: relative;
+  z-index: 1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(1.35rem, 3vw, 2rem) clamp(1rem, 2.2vw, 1.75rem);
+
+  @media (max-width: 1023px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.reasons__item {
+  margin: 0;
+}
+
+.reasons__item-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin-bottom: 0.45rem;
+}
+
+.reasons__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.65rem;
+  height: 1.65rem;
+  margin-top: 0.08rem;
+  border: 1px solid var(--reasons-icon-border, rgba(22, 22, 22, 0.14));
+  border-radius: 50%;
+  color: var(--reasons-icon-color, #e4b31a);
+  background: transparent;
+}
+
+.reasons__icon-svg {
+  display: block;
+}
+
+.reasons__item-title {
+  margin: 0;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--services-title);
+}
+
+.reasons__item-text {
+  margin: 0;
+  font-size: clamp(0.75rem, 1.2vw, 0.875rem);
+  line-height: 1.5;
+  color: var(--services-text);
+}
+
+:root[data-theme="light"] {
+  --reasons-watermark: rgba(22, 22, 22, 0.06);
+  --reasons-icon-border: rgba(22, 22, 22, 0.14);
+  --reasons-icon-color: #e4b31a;
+}
+
+:root[data-theme="dark"] {
+  --reasons-watermark: rgba(255, 255, 255, 0.05);
+  --reasons-icon-border: rgba(255, 255, 255, 0.16);
+  --reasons-icon-color: #f0c53a;
+}
