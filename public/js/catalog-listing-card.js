@@ -215,16 +215,32 @@
 
     fetch('/api/catalog-favorites.php?ids=' + encodeURIComponent(ids.join(',')), {
       credentials: 'same-origin',
+      headers: { Accept: 'application/json' },
     })
       .then(function (r) {
-        return r.ok ? r.json() : null;
+        return r.text().then(function (text) {
+          var data = null;
+          try {
+            data = text ? JSON.parse(text) : null;
+          } catch (e) {
+            data = null;
+          }
+          return { ok: r.ok, data: data };
+        });
       })
-      .then(function (data) {
+      .then(function (result) {
         setFavoritesLoading(false);
-        if (!data || typeof data.html !== 'string') {
+        var data = result.data;
+        if (!result.ok || !data || typeof data.html !== 'string') {
           list.innerHTML = '';
           list.hidden = true;
-          if (emptyEl instanceof HTMLElement) emptyEl.hidden = false;
+          if (emptyEl instanceof HTMLElement) {
+            emptyEl.textContent = (data && data.error)
+              ? String(data.error)
+              : 'Не удалось загрузить избранное. Обновите страницу.';
+            emptyEl.hidden = false;
+          }
+          updateFavoritesCount();
           return;
         }
         list.innerHTML = data.html;
@@ -241,6 +257,7 @@
           emptyEl.textContent = 'Не удалось загрузить избранное. Обновите страницу.';
           emptyEl.hidden = false;
         }
+        updateFavoritesCount();
       });
   }
 

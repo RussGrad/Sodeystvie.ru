@@ -11,6 +11,20 @@ require_once __DIR__ . '/../includes/crm-listing-helpers.php';
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 
+if (!function_exists('site_crm_fetch_listing_by_id')) {
+    http_response_code(503);
+    echo json_encode(
+        [
+            'html' => '',
+            'count' => 0,
+            'requested' => 0,
+            'error' => 'Сервис избранного временно недоступен',
+        ],
+        JSON_UNESCAPED_UNICODE
+    );
+    exit;
+}
+
 $rawIds = isset($_GET['ids']) && is_string($_GET['ids']) ? trim($_GET['ids']) : '';
 if ($rawIds === '') {
     echo json_encode(['html' => '', 'count' => 0, 'requested' => 0], JSON_UNESCAPED_UNICODE);

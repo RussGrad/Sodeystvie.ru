@@ -2882,6 +2882,23 @@ function site_crm_fetch_listings(int $limit = 24, int $offset = 0, array $apiQue
 }
 
 /**
+ * @return array<string, mixed>|null
+ */
+function site_crm_fetch_listing_by_id(string $id): ?array
+{
+    if (!site_validate_crm_object_id($id)) {
+        return null;
+    }
+
+    $detail = site_http_get_json_cached(site_crm_listings_url($id), 8, 60);
+    if (!is_array($detail) || isset($detail['_error']) || !isset($detail['id'])) {
+        return null;
+    }
+
+    return site_crm_listing_enrich_row($detail);
+}
+
+/**
  * Объекты для карты: те же фильтры, что в каталоге, до 100 шт.
  *
  * @param array<string, string> $filters
