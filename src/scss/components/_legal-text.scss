@@ -14,3 +14,26 @@
     margin-bottom: 0;
   }
 }
+
+.legal-text__section {
+  margin: 1.35rem 0 0.65rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--page-text);
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.legal-text--modal .legal-text__paragraph,
+.legal-text--modal .legal-text__section {
+  color: #2a2a2a;
+}
+
+.legal-text--modal .legal-text__section {
+  color: #161616;
+}

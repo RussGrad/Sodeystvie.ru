@@ -1,0 +1,122 @@
+// Модальное окно политики конфиденциальности: крупная белая панель со скроллом.
+
+.modal-privacy {
+  position: fixed;
+  inset: 0;
+  z-index: 210;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 2.5rem) 1rem;
+  box-sizing: border-box;
+  visibility: hidden;
+  pointer-events: none;
+  overflow-y: auto;
+
+  &.modal-privacy--open {
+    visibility: visible;
+    pointer-events: auto;
+  }
+}
+
+.modal-privacy__backdrop {
+  position: fixed;
+  inset: 0;
+  cursor: pointer;
+  background: rgba(10, 14, 20, 0.62);
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-smooth);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  .modal-privacy.modal-privacy--open & {
+    opacity: 1;
+  }
+}
+
+.modal-privacy__panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 52rem;
+  max-height: min(88vh, 56rem);
+  margin-top: clamp(0.5rem, 2vh, 1.5rem);
+  border-radius: 24px;
+  background: #ffffff;
+  color: #1a1a1a;
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  opacity: 0;
+  transform: translateY(24px) scale(0.98);
+  transition:
+    opacity var(--duration-normal) var(--ease-smooth),
+    transform 0.38s var(--ease-smooth);
+
+  .modal-privacy.modal-privacy--open & {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-privacy__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-shrink: 0;
+  padding: 1.35rem 1.35rem 0.85rem;
+  border-bottom: 1px solid rgba(22, 22, 22, 0.08);
+}
+
+.modal-privacy__title {
+  margin: 0;
+  font-size: clamp(1.125rem, 2vw, 1.375rem);
+  font-weight: 700;
+  line-height: 1.3;
+  color: #161616;
+}
+
+.modal-privacy__close {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin: -0.25rem -0.25rem 0 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(22, 22, 22, 0.06);
+  color: #525252;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: rgba(22, 22, 22, 0.1);
+    color: #161616;
+  }
+}
+
+.modal-privacy__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1rem 1.35rem 1.5rem;
+  overscroll-behavior: contain;
+}
+
+.legal-text--modal {
+  max-width: none;
+}
+
+.legal-text__empty {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #525252;
+}

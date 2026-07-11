@@ -85,3 +85,36 @@ function site_privacy_policy_paragraphs(): array
 
     return $paragraphs;
 }
+
+function site_privacy_policy_is_section_heading(string $paragraph): bool
+{
+    return (bool) preg_match('/^\d+(?:\.\d+)*\.\s/u', $paragraph);
+}
+
+function site_privacy_policy_render(string $wrapperClass = 'legal-text'): void
+{
+    $paragraphs = site_privacy_policy_paragraphs();
+    if (count($paragraphs) === 0) {
+        echo '<p class="legal-text__empty">Текст политики конфиденциальности будет опубликован после согласования.</p>';
+
+        return;
+    }
+
+    echo '<div class="' . htmlspecialchars($wrapperClass, ENT_QUOTES, 'UTF-8') . '">';
+    foreach ($paragraphs as $paragraph) {
+        $lines = preg_split("/\r\n|\r|\n/u", $paragraph) ?: [];
+        $firstLine = trim((string) ($lines[0] ?? ''));
+        $rest = trim(implode("\n", array_slice($lines, 1)));
+
+        if ($firstLine !== '' && site_privacy_policy_is_section_heading($firstLine)) {
+            echo '<p class="legal-text__section">' . htmlspecialchars($firstLine, ENT_QUOTES, 'UTF-8') . '</p>';
+            if ($rest !== '') {
+                echo '<p class="legal-text__paragraph">' . nl2br(htmlspecialchars($rest, ENT_QUOTES, 'UTF-8')) . '</p>';
+            }
+            continue;
+        }
+
+        echo '<p class="legal-text__paragraph">' . nl2br(htmlspecialchars($paragraph, ENT_QUOTES, 'UTF-8')) . '</p>';
+    }
+    echo '</div>';
+}
