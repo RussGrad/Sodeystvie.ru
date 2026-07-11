@@ -130,7 +130,10 @@ $privacyModalJsVersion = (string) (@filemtime(__DIR__ . '/../js/privacy-modal.js
                     <div class="site-footer__requisite site-footer__requisite--messengers">
                         <dt class="site-footer__requisite-label">Мессенджеры</dt>
                         <dd class="site-footer__requisite-value">
-                            <?php site_render_messenger_links('messenger-links site-footer__messengers', 'messenger-links__item'); ?>
+                            <?php site_render_messenger_links(
+                                'messenger-links messenger-links--flat site-footer__messengers',
+                                'messenger-links__item',
+                            ); ?>
                         </dd>
                     </div>
                 </dl>
