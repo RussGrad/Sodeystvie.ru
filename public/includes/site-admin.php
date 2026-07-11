@@ -385,6 +385,11 @@ function site_admin_sanitize_settings(array $input): array
         'telegram_url' => 400,
         'vk_url' => 400,
         'max_url' => 400,
+        'whatsapp_url' => 400,
+        'messenger_show_telegram' => 1,
+        'messenger_show_vk' => 1,
+        'messenger_show_max' => 1,
+        'messenger_show_whatsapp' => 1,
         'footer_reprint_notice' => 500,
         'footer_info_disclaimer' => 1000,
         'privacy_policy' => 30000,
@@ -495,4 +500,96 @@ function site_admin_handle_team_photo_upload(string $memberId): array
     }
 
     return ['ok' => true, 'path' => '/assets/team/' . $safeId . '.' . $ext];
+}
+
+/**
+ * @param array<string, mixed> $files поле $_FILES['messenger_icon']
+ */
+function site_admin_handle_messenger_icons_upload(array $files): void
+{
+    if (!isset($files['name']) || !is_array($files['name'])) {
+        return;
+    }
+
+    require_once __DIR__ . '/site-messengers.php';
+
+    foreach ($files['name'] as $type => $name) {
+        if (!is_string($type) || !in_array($type, site_messenger_types(), true)) {
+            continue;
+        }
+        if (!is_string($name) || $name === '') {
+            continue;
+        }
+
+        $single = [
+            'name' => $files['name'][$type] ?? '',
+            'type' => $files['type'][$type] ?? '',
+            'tmp_name' => $files['tmp_name'][$type] ?? '',
+            'error' => $files['error'][$type] ?? UPLOAD_ERR_NO_FILE,
+            'size' => $files['size'][$type] ?? 0,
+        ];
+
+        if (($single['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+            continue;
+        }
+
+        site_admin_handle_messenger_icon_upload($type, $single);
+    }
+}
+
+/**
+ * @param 'telegram'|'vk'|'max'|'whatsapp' $type
+ * @param array{name?: string, type?: string, tmp_name?: string, error?: int, size?: int} $file
+ * @return array{ok: bool, error?: string}
+ */
+function site_admin_handle_messenger_icon_upload(string $type, array $file): array
+{
+    if (!in_array($type, site_messenger_types(), true)) {
+        return ['ok' => false, 'error' => 'Некорректный тип мессенджера'];
+    }
+
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        return ['ok' => false, 'error' => 'Ошибка загрузки файла'];
+    }
+
+    $size = (int) ($file['size'] ?? 0);
+    if ($size <= 0 || $size > 512 * 1024) {
+        return ['ok' => false, 'error' => 'Иконка должна быть не больше 512 КБ'];
+    }
+
+    $tmp = (string) ($file['tmp_name'] ?? '');
+    if ($tmp === '' || !is_uploaded_file($tmp)) {
+        return ['ok' => false, 'error' => 'Некорректная загрузка'];
+    }
+
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = $finfo->file($tmp);
+    $ext = match ($mime) {
+        'image/svg+xml' => 'svg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+        default => null,
+    };
+    if ($ext === null) {
+        return ['ok' => false, 'error' => 'Допустимы SVG, PNG или WebP'];
+    }
+
+    $dir = site_messenger_icons_dir();
+    if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
+        return ['ok' => false, 'error' => 'Не удалось создать каталог для иконок'];
+    }
+
+    foreach (['svg', 'png', 'webp'] as $oldExt) {
+        $old = $dir . '/' . $type . '.' . $oldExt;
+        if (is_file($old)) {
+            @unlink($old);
+        }
+    }
+
+    $dest = $dir . '/' . $type . '.' . $ext;
+    if (!move_uploaded_file($tmp, $dest)) {
+        return ['ok' => false, 'error' => 'Не удалось сохранить иконку'];
+    }
+
+    return ['ok' => true];
 }

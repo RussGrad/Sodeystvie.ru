@@ -36,7 +36,7 @@ site_admin_render_foot();
 function site_admin_card_hint(string $section): string
 {
     return match ($section) {
-        'settings' => 'Телефон, email, адрес, тексты hero, реквизиты, ссылки мессенджеров',
+        'settings' => 'Телефон, email, адрес, тексты hero, реквизиты, мессенджеры и иконки',
         'team' => 'Сотрудники на главной и в разделе «О компании»',
         'reviews' => 'Карточки отзывов и сводный рейтинг',
         'cases' => 'Блок «Решённые задачи» на главной',

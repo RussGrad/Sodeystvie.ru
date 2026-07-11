@@ -28,6 +28,10 @@ if (!in_array($section, site_admin_editable_datasets(), true)) {
 
 if ($section === 'settings') {
     $payload = site_admin_sanitize_settings($_POST);
+    foreach (['telegram', 'vk', 'max', 'whatsapp'] as $messengerType) {
+        $key = 'messenger_show_' . $messengerType;
+        $payload[$key] = isset($_POST[$key]) && (string) $_POST[$key] === '1' ? '1' : '0';
+    }
 } else {
     $raw = $_POST['items'] ?? [];
     if (!is_array($raw)) {
@@ -64,6 +68,10 @@ if ($section === 'team' && isset($_FILES['photo_file']) && is_array($_FILES['pho
             site_admin_handle_team_photo_upload($memberId);
         }
     }
+}
+
+if ($section === 'settings' && isset($_FILES['messenger_icon']) && is_array($_FILES['messenger_icon'])) {
+    site_admin_handle_messenger_icons_upload($_FILES['messenger_icon']);
 }
 
 site_admin_flash_set('Сохранено: ' . site_admin_dataset_label($section) . '.');

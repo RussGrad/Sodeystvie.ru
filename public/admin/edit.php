@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../includes/site-team.php';
 require_once __DIR__ . '/../includes/site-legal.php';
+require_once __DIR__ . '/../includes/site-messengers.php';
 
 site_admin_require_login();
 
@@ -71,9 +72,6 @@ function site_admin_render_settings_form(array $data): void
         ['slogan_short', 'Короткий слоган (подвал)', 'text'],
         ['reviews_rating', 'Рейтинг отзывов (например 4.9)', 'text'],
         ['reviews_count', 'Количество отзывов (например 250)', 'text'],
-        ['telegram_url', 'Ссылка Telegram', 'url'],
-        ['vk_url', 'Ссылка ВКонтакте', 'url'],
-        ['max_url', 'Ссылка MAX', 'url'],
         ['footer_reprint_notice', 'Подвал: запрет перепечатки', 'textarea'],
         ['footer_info_disclaimer', 'Подвал: информационный дисклеймер', 'textarea'],
         ['privacy_policy', 'Политика конфиденциальности (текст страницы /privacy/)', 'textarea-large'],
@@ -100,6 +98,66 @@ function site_admin_render_settings_form(array $data): void
             </label>
         <?php } ?>
     </div>
+    <?php site_admin_render_messengers_settings($data); ?>
+    <?php
+}
+
+/**
+ * @param array<string, string> $data
+ */
+function site_admin_render_messengers_settings(array $data): void
+{
+    $rows = [
+        ['telegram', 'telegram_url', 'https://t.me/your_channel'],
+        ['vk', 'vk_url', 'https://vk.com/your_group'],
+        ['max', 'max_url', 'https://max.ru/'],
+        ['whatsapp', 'whatsapp_url', 'https://wa.me/73952603808'],
+    ];
+    ?>
+    <fieldset class="admin-messengers admin-field--wide">
+        <legend class="admin-messengers__legend">Мессенджеры (шапка и подвал)</legend>
+        <p class="admin-messengers__hint">
+            Укажите ссылку, отметьте «Показывать» и при необходимости загрузите иконку <strong>24×24</strong>
+            (SVG, PNG или WebP, прозрачный фон). Без своей иконки используются стандартные.
+        </p>
+        <div class="admin-messengers__list">
+            <?php foreach ($rows as [$type, $urlKey, $placeholder]) {
+                $showKey = 'messenger_show_' . $type;
+                $url = $data[$urlKey] ?? '';
+                $show = ($data[$showKey] ?? '') !== '0';
+                $iconSrc = site_messenger_custom_icon_src($type);
+                ?>
+                <div class="admin-messenger-row">
+                    <div class="admin-messenger-row__head">
+                        <label class="admin-messenger-row__toggle">
+                            <input type="checkbox" name="<?php echo htmlspecialchars($showKey, ENT_QUOTES, 'UTF-8'); ?>" value="1"<?php echo $show ? ' checked' : ''; ?>>
+                            <span>Показывать <?php echo htmlspecialchars(site_messenger_label($type), ENT_QUOTES, 'UTF-8'); ?></span>
+                        </label>
+                    </div>
+                    <label class="admin-field admin-messenger-row__url">
+                        <span class="admin-field__label">Ссылка</span>
+                        <input
+                            class="admin-field__input"
+                            type="url"
+                            name="<?php echo htmlspecialchars($urlKey, ENT_QUOTES, 'UTF-8'); ?>"
+                            value="<?php echo htmlspecialchars($url, ENT_QUOTES, 'UTF-8'); ?>"
+                            placeholder="<?php echo htmlspecialchars($placeholder, ENT_QUOTES, 'UTF-8'); ?>"
+                        >
+                    </label>
+                    <label class="admin-field admin-messenger-row__icon">
+                        <span class="admin-field__label">Иконка 24×24</span>
+                        <input class="admin-field__input" type="file" name="messenger_icon[<?php echo htmlspecialchars($type, ENT_QUOTES, 'UTF-8'); ?>]" accept="image/svg+xml,image/png,image/webp">
+                        <?php if ($iconSrc !== null) { ?>
+                            <span class="admin-messenger-row__preview">
+                                <img src="<?php echo htmlspecialchars($iconSrc, ENT_QUOTES, 'UTF-8'); ?>" width="24" height="24" alt="">
+                                <span>Текущая иконка</span>
+                            </span>
+                        <?php } ?>
+                    </label>
+                </div>
+            <?php } ?>
+        </div>
+    </fieldset>
     <?php
 }
 

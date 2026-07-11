@@ -97,6 +97,12 @@ $messenger-hit-size: 32px;
   background: linear-gradient(135deg, #7b2ff7 0%, #5e5ce6 45%, #3d5afe 100%);
 }
 
+.messenger-links__item--whatsapp,
+.contacts-page__messenger--whatsapp {
+  color: #fff;
+  background: #25d366;
+}
+
 .messenger-links__svg {
   display: block;
   width: $messenger-icon-size;
