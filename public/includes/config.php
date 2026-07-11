@@ -833,10 +833,16 @@ function site_http_public_api_get(string $url, int $timeoutSeconds = 8): array
  */
 function site_nav_items(): array
 {
+    require_once __DIR__ . '/services-catalog.php';
+
     return [
         'home' => ['href' => '/', 'label' => 'Главная'],
         'catalog' => ['href' => '/catalog/', 'label' => 'Каталог'],
-        'services' => ['href' => '/services/', 'label' => 'Услуги'],
+        'services' => [
+            'href' => '/services/',
+            'label' => 'Услуги',
+            'children' => sodeystvie_services_nav_children(),
+        ],
         'mortgage' => ['href' => '/mortgage/', 'label' => 'ИПОТЕКА'],
         'about' => [
             'href' => '/about/',

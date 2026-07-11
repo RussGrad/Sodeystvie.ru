@@ -26,7 +26,12 @@ $servicesItems = sodeystvie_services_catalog();
                             <?php sodeystvie_services_render_icon($item['icon']); ?>
                         </div>
                         <h3 class="services__card-title">
-                            <a class="services__card-link" href="/services/#<?php echo htmlspecialchars($item['id'], ENT_QUOTES, 'UTF-8'); ?>">
+                            <?php
+                            $serviceHref = !empty($item['href'])
+                                ? $item['href']
+                                : '/services/#' . $item['id'];
+                            ?>
+                            <a class="services__card-link" href="<?php echo htmlspecialchars($serviceHref, ENT_QUOTES, 'UTF-8'); ?>">
                                 <?php echo htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8'); ?>
                             </a>
                         </h3>

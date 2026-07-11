@@ -1,0 +1,204 @@
+// Страница /services/legal/ — расширенные юридические услуги
+
+.page-main--legal-services {
+  .page-main__heading {
+    margin-bottom: 0.65rem;
+  }
+}
+
+.legal-services-page__intro {
+  margin-bottom: clamp(1.75rem, 4vw, 2.5rem);
+}
+
+.legal-services-page__crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.legal-services-page__crumb {
+  color: var(--services-text);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--cta-bg);
+    text-decoration: underline;
+  }
+
+  &--current {
+    color: var(--header-muted);
+  }
+}
+
+.legal-services-page__crumb-sep {
+  color: var(--header-muted);
+}
+
+.legal-services-page__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+
+  @media (min-width: 640px) {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}
+
+.legal-services-page__icon {
+  flex-shrink: 0;
+}
+
+.legal-services-page__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+
+  @media (min-width: 768px) {
+    gap: 1.15rem;
+  }
+}
+
+.legal-services-page__item {
+  scroll-margin-top: 5.5rem;
+}
+
+.legal-services-page__card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem 1rem;
+  padding: clamp(1rem, 2.5vw, 1.35rem);
+  background: var(--services-card-bg);
+  border: 1px solid var(--services-card-border);
+  border-radius: 14px;
+  box-shadow: var(--services-card-shadow);
+  transition:
+    border-color var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) var(--ease-smooth);
+
+  @media (min-width: 768px) {
+    gap: 1rem 1.25rem;
+    padding: clamp(1.25rem, 2.5vw, 1.6rem);
+
+    &:hover {
+      border-color: rgba(var(--color-accent-rgb), 0.3);
+      box-shadow: var(--services-card-shadow), 0 6px 20px rgba(var(--color-accent-rgb), 0.08);
+    }
+  }
+}
+
+.legal-services-page__num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--cta-text);
+  background: var(--cta-bg);
+  border-radius: 50%;
+}
+
+.legal-services-page__body {
+  min-width: 0;
+}
+
+.legal-services-page__title {
+  margin: 0 0 0.45rem;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--services-title);
+}
+
+.legal-services-page__short {
+  margin: 0 0 0.55rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--color-accent);
+}
+
+.legal-services-page__text {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--services-text);
+}
+
+.legal-services-page__bullets {
+  margin: 0 0 1rem;
+  padding-left: 1.1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--services-text);
+
+  li + li {
+    margin-top: 0.35rem;
+  }
+}
+
+.legal-services-page__cta {
+  width: 100%;
+
+  @media (min-width: 480px) {
+    width: auto;
+  }
+}
+
+.legal-services-page__bottom {
+  margin-top: clamp(2rem, 5vw, 3rem);
+  padding: clamp(1.5rem, 3vw, 2rem);
+  text-align: center;
+  background: var(--services-card-bg);
+  border: 1px solid var(--services-card-border);
+  border-radius: 14px;
+}
+
+.legal-services-page__bottom-text {
+  margin: 0 0 1.25rem;
+  max-width: 38rem;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+  color: var(--services-text);
+
+  a {
+    color: var(--cta-bg);
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      color: var(--cta-bg-hover);
+      text-decoration: underline;
+    }
+  }
+}
+
+.legal-services-page__bottom-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  align-items: stretch;
+  justify-content: center;
+
+  @media (min-width: 520px) {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .btn {
+    justify-content: center;
+  }
+}

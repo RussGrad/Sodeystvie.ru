@@ -77,6 +77,26 @@ function sodeystvie_services_catalog(): array
 }
 
 /**
+ * Подменю «Услуги» в шапке и подвале.
+ *
+ * @return array<string, array{href: string, label: string}>
+ */
+function sodeystvie_services_nav_children(): array
+{
+    $children = [];
+    foreach (sodeystvie_services_catalog() as $item) {
+        $slug = 'service-' . $item['id'];
+        $href = !empty($item['href']) ? $item['href'] : '/services/#' . $item['id'];
+        $children[$slug] = [
+            'href' => $href,
+            'label' => $item['title'],
+        ];
+    }
+
+    return $children;
+}
+
+/**
  * @return list<array{id: string, title: string, short: string, text: string, icon: string, href?: string, hrefLabel?: string, bullets?: list<string>}>
  */
 function sodeystvie_services_catalog_defaults(): array
