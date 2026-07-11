@@ -5,6 +5,7 @@ declare(strict_types=1);
 // Подвал: бренд, меню, реквизиты, CTA; нижняя полоса — копирайт и юридические тексты.
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/site-legal.php';
+require_once __DIR__ . '/messenger-links.php';
 
 $nav = site_nav_items();
 $currentNav = $currentNav ?? '';
@@ -126,9 +127,14 @@ $privacyModalJsVersion = (string) (@filemtime(__DIR__ . '/../js/privacy-modal.js
                         <dt class="site-footer__requisite-label">Режим работы</dt>
                         <dd class="site-footer__requisite-value"><?php echo htmlspecialchars(site_office_hours(), ENT_QUOTES, 'UTF-8'); ?></dd>
                     </div>
+                    <div class="site-footer__requisite site-footer__requisite--messengers">
+                        <dt class="site-footer__requisite-label">Мессенджеры</dt>
+                        <dd class="site-footer__requisite-value">
+                            <?php site_render_messenger_links('messenger-links site-footer__messengers', 'messenger-links__item'); ?>
+                        </dd>
+                    </div>
                 </dl>
                 <ul class="site-footer__legal-links">
-                    <li><a class="site-footer__legal-link" href="/privacy/" data-privacy-open>Политика конфиденциальности</a></li>
                     <li><a class="site-footer__legal-link" href="/cookies/">Согласие на cookies</a></li>
                 </ul>
             </div>
