@@ -122,7 +122,7 @@ function site_admin_dataset_label(string $id): string
         'cases' => 'Кейсы',
         'vacancies' => 'Вакансии',
         'services' => 'Услуги',
-        'settings' => 'Контакты и тексты',
+        'settings' => 'Контакты, тексты и политика',
     ];
 
     return $labels[$id] ?? $id;

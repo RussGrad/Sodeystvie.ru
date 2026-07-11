@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../includes/site-team.php';
+require_once __DIR__ . '/../includes/site-legal.php';
 
 site_admin_require_login();
 
@@ -73,16 +74,26 @@ function site_admin_render_settings_form(array $data): void
         ['telegram_url', 'Ссылка Telegram', 'url'],
         ['vk_url', 'Ссылка ВКонтакте', 'url'],
         ['max_url', 'Ссылка MAX', 'url'],
+        ['footer_reprint_notice', 'Подвал: запрет перепечатки', 'textarea'],
+        ['footer_info_disclaimer', 'Подвал: информационный дисклеймер', 'textarea'],
+        ['privacy_policy', 'Политика конфиденциальности (текст страницы /privacy/)', 'textarea-large'],
     ];
     ?>
     <div class="admin-settings-grid">
         <?php foreach ($fields as [$key, $label, $type]) {
             $value = $data[$key] ?? '';
+            if ($key === 'privacy_policy' && trim($value) === '') {
+                $value = site_privacy_policy_default_text();
+            } elseif ($key === 'footer_reprint_notice' && trim($value) === '') {
+                $value = site_footer_reprint_notice();
+            } elseif ($key === 'footer_info_disclaimer' && trim($value) === '') {
+                $value = site_footer_info_disclaimer();
+            }
             ?>
-            <label class="admin-field<?php echo $type === 'textarea' ? ' admin-field--wide' : ''; ?>">
+            <label class="admin-field<?php echo $type === 'textarea' || $type === 'textarea-large' ? ' admin-field--wide' : ''; ?>">
                 <span class="admin-field__label"><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></span>
-                <?php if ($type === 'textarea') { ?>
-                    <textarea class="admin-field__textarea" name="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>" rows="3"><?php echo htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); ?></textarea>
+                <?php if ($type === 'textarea' || $type === 'textarea-large') { ?>
+                    <textarea class="admin-field__textarea" name="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>" rows="<?php echo $type === 'textarea-large' ? 18 : 3; ?>"><?php echo htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); ?></textarea>
                 <?php } else { ?>
                     <input class="admin-field__input" type="<?php echo htmlspecialchars($type, ENT_QUOTES, 'UTF-8'); ?>" name="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>" value="<?php echo htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); ?>">
                 <?php } ?>

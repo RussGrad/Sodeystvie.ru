@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 // Подвал: логотип, меню, контакты, реквизиты, политики; затем скрипты и закрытие документа.
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/site-legal.php';
 
 $nav = site_nav_items();
 $currentNav = $currentNav ?? '';
@@ -111,6 +112,8 @@ $siteChatJsVersion = (string) (@filemtime(__DIR__ . '/../js/site-chat.js') ?: ti
 
         <div class="site-footer__bottom">
             <p class="site-footer__copy">© <?php echo date('Y'); ?> <?php echo htmlspecialchars(SITE_LEGAL_NAME, ENT_QUOTES, 'UTF-8'); ?>. Все права защищены.</p>
+            <p class="site-footer__legal-note"><?php echo htmlspecialchars(site_footer_reprint_notice(), ENT_QUOTES, 'UTF-8'); ?></p>
+            <p class="site-footer__legal-note"><?php echo htmlspecialchars(site_footer_info_disclaimer(), ENT_QUOTES, 'UTF-8'); ?></p>
         </div>
     </div>
 </footer>

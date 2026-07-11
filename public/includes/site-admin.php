@@ -369,16 +369,29 @@ function site_admin_sanitize_service_row(array $row): ?array
  */
 function site_admin_sanitize_settings(array $input): array
 {
-    $keys = [
-        'phone_tel', 'phone_display', 'email', 'address', 'work_hours',
-        'legal_inn', 'legal_ogrn',
-        'slogan_short', 'slogan_hero', 'hero_headline',
-        'reviews_rating', 'reviews_count',
-        'telegram_url', 'vk_url', 'max_url',
+    $fields = [
+        'phone_tel' => 400,
+        'phone_display' => 400,
+        'email' => 400,
+        'address' => 400,
+        'work_hours' => 400,
+        'legal_inn' => 400,
+        'legal_ogrn' => 400,
+        'slogan_short' => 400,
+        'slogan_hero' => 2000,
+        'hero_headline' => 400,
+        'reviews_rating' => 400,
+        'reviews_count' => 400,
+        'telegram_url' => 400,
+        'vk_url' => 400,
+        'max_url' => 400,
+        'footer_reprint_notice' => 500,
+        'footer_info_disclaimer' => 1000,
+        'privacy_policy' => 30000,
     ];
     $out = [];
-    foreach ($keys as $key) {
-        $out[$key] = mb_substr(trim((string) ($input[$key] ?? '')), 0, 400);
+    foreach ($fields as $key => $limit) {
+        $out[$key] = mb_substr(trim((string) ($input[$key] ?? '')), 0, $limit);
     }
 
     return $out;

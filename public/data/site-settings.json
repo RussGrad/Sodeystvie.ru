@@ -13,5 +13,8 @@
     "reviews_count": "",
     "telegram_url": "",
     "vk_url": "",
-    "max_url": ""
+    "max_url": "",
+    "footer_reprint_notice": "",
+    "footer_info_disclaimer": "",
+    "privacy_policy": ""
 }

@@ -264,7 +264,19 @@
 }
 
 .site-footer__copy {
-  margin: 0;
+  margin: 0 0 0.45rem;
   font-size: 0.8125rem;
   color: var(--footer-muted);
+}
+
+.site-footer__legal-note {
+  margin: 0;
+  max-width: 52rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--footer-muted);
+
+  & + & {
+    margin-top: 0.35rem;
+  }
 }

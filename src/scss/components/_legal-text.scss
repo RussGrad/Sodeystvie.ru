@@ -1,0 +1,16 @@
+// Юридические страницы: политика конфиденциальности и т.п.
+
+.legal-text {
+  max-width: 46rem;
+}
+
+.legal-text__paragraph {
+  margin: 0 0 1rem;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--services-text);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
