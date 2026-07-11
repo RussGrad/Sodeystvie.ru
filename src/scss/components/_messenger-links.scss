@@ -1,12 +1,15 @@
 // Иконки мессенджеров (контакты, шапка, подвал)
 @use "../variables" as *;
 
+$messenger-icon-size: 24px;
+$messenger-hit-size: 32px;
+
 .messenger-links,
 .contacts-page__messengers {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   justify-content: flex-start;
   gap: 0.75rem 1rem;
   margin: 0;
@@ -96,58 +99,53 @@
 
 .messenger-links__svg {
   display: block;
-  width: 1.375rem;
-  height: 1.375rem;
+  width: $messenger-icon-size;
+  height: $messenger-icon-size;
 }
 
 .messenger-links__img {
   display: block;
-  width: 1.375rem;
-  height: 1.375rem;
+  width: $messenger-icon-size;
+  height: $messenger-icon-size;
   object-fit: contain;
   border-radius: 4px;
 }
 
-// Шапка и подвал: плоские иконки без цветных кружков
+// Шапка и подвал: плоские иконки 24×24 без фона
 .messenger-links--flat {
-  gap: 0.15rem;
+  gap: 0.35rem;
+
+  .messenger-links__cell {
+    min-width: 0;
+  }
 
   .messenger-links__item,
   .site-header__messenger {
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 8px;
-    background: transparent;
+    width: $messenger-hit-size;
+    height: $messenger-hit-size;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent !important;
     color: var(--messenger-flat-color, var(--header-tool-icon, rgba(255, 255, 255, 0.9)));
-    box-shadow: none;
+    box-shadow: none !important;
     transform: none;
 
     &:hover {
       transform: none;
-      box-shadow: none;
-      background: var(--messenger-flat-hover-bg, var(--header-tool-hover-bg, rgba(255, 255, 255, 0.08)));
+      box-shadow: none !important;
+      background: var(--messenger-flat-hover-bg, var(--header-tool-hover-bg, rgba(255, 255, 255, 0.08))) !important;
       color: var(--messenger-flat-hover-color, var(--color-accent-hover, #5eb8a8));
     }
   }
 
-  .messenger-links__item--tg,
-  .messenger-links__item--vk,
-  .messenger-links__item--max,
-  .site-header__messenger--tg,
-  .site-header__messenger--vk,
-  .site-header__messenger--max {
-    background: transparent;
-  }
-
-  .messenger-links__svg {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
-
+  .messenger-links__svg,
   .messenger-links__img {
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: 4px;
+    display: block;
+    width: $messenger-icon-size;
+    height: $messenger-icon-size;
+    border-radius: 0;
+    object-fit: contain;
   }
 }
 
@@ -160,8 +158,7 @@
 }
 
 .site-footer__messengers.messenger-links--flat {
-  --messenger-flat-color: rgba(255, 255, 255, 0.88);
+  --messenger-flat-color: rgba(255, 255, 255, 0.92);
   --messenger-flat-hover-bg: rgba(255, 255, 255, 0.08);
   --messenger-flat-hover-color: #e8bc62;
-  gap: 0.35rem;
 }
