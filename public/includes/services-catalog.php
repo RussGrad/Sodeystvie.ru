@@ -77,6 +77,32 @@ function sodeystvie_services_catalog(): array
 }
 
 /**
+ * URL страницы услуги.
+ */
+function sodeystvie_service_page_href(array $item): string
+{
+    if (!empty($item['href'])) {
+        return $item['href'];
+    }
+
+    return '/services/' . rawurlencode($item['id']) . '/';
+}
+
+/**
+ * @return array{id: string, title: string, short: string, text: string, icon: string, href?: string, hrefLabel?: string, bullets?: list<string>}|null
+ */
+function sodeystvie_service_by_id(string $id): ?array
+{
+    foreach (sodeystvie_services_catalog() as $item) {
+        if ($item['id'] === $id) {
+            return $item;
+        }
+    }
+
+    return null;
+}
+
+/**
  * Подменю «Услуги» в шапке и подвале.
  *
  * @return array<string, array{href: string, label: string}>
@@ -86,9 +112,8 @@ function sodeystvie_services_nav_children(): array
     $children = [];
     foreach (sodeystvie_services_catalog() as $item) {
         $slug = 'service-' . $item['id'];
-        $href = !empty($item['href']) ? $item['href'] : '/services/#' . $item['id'];
         $children[$slug] = [
-            'href' => $href,
+            'href' => sodeystvie_service_page_href($item),
             'label' => $item['title'],
         ];
     }

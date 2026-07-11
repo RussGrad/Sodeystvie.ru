@@ -81,7 +81,7 @@ require __DIR__ . '/../../includes/header.php';
                 </a>
             </p>
             <div class="legal-services-page__bottom-actions">
-                <a class="btn btn--ghost" href="/services/#legal">Все услуги агентства</a>
+                <a class="btn btn--ghost" href="/services/">Все услуги агентства</a>
                 <button
                     type="button"
                     class="btn btn--primary"

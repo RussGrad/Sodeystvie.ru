@@ -26,7 +26,7 @@ require __DIR__ . '/../includes/header.php';
 
         <ul class="services-page__list">
             <?php foreach ($servicesItems as $item) { ?>
-                <li class="services-page__item" id="<?php echo htmlspecialchars($item['id'], ENT_QUOTES, 'UTF-8'); ?>">
+                <li class="services-page__item">
                     <article class="services-page__card">
                         <div class="services-page__card-head">
                             <div class="services__icon-wrap" aria-hidden="true">
@@ -46,9 +46,12 @@ require __DIR__ . '/../includes/header.php';
                             </ul>
                         <?php } ?>
                         <div class="services-page__actions">
-                            <?php if (!empty($item['href'])) { ?>
+                            <a class="btn btn--ghost services-page__link" href="<?php echo htmlspecialchars(sodeystvie_service_page_href($item), ENT_QUOTES, 'UTF-8'); ?>">
+                                Подробнее
+                            </a>
+                            <?php if (!empty($item['href']) && !empty($item['hrefLabel']) && $item['href'] !== sodeystvie_service_page_href($item)) { ?>
                                 <a class="btn btn--ghost services-page__link" href="<?php echo htmlspecialchars($item['href'], ENT_QUOTES, 'UTF-8'); ?>">
-                                    <?php echo htmlspecialchars($item['hrefLabel'] ?? 'Подробнее', ENT_QUOTES, 'UTF-8'); ?>
+                                    <?php echo htmlspecialchars($item['hrefLabel'], ENT_QUOTES, 'UTF-8'); ?>
                                 </a>
                             <?php } ?>
                             <button

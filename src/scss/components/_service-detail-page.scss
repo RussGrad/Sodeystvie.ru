@@ -1,0 +1,138 @@
+// Страница отдельной услуги /services/{id}/
+
+.page-main--service-detail {
+  .page-main__heading {
+    margin-bottom: 0.65rem;
+  }
+}
+
+.service-detail__intro {
+  margin-bottom: clamp(1.75rem, 4vw, 2.5rem);
+}
+
+.service-detail__crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.service-detail__crumb {
+  color: var(--services-text);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--cta-bg);
+    text-decoration: underline;
+  }
+
+  &--current {
+    color: var(--header-muted);
+  }
+}
+
+.service-detail__crumb-sep {
+  color: var(--header-muted);
+}
+
+.service-detail__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+
+  @media (min-width: 640px) {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}
+
+.service-detail__icon {
+  flex-shrink: 0;
+}
+
+.service-detail__card {
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  background: var(--services-card-bg);
+  border: 1px solid var(--services-card-border);
+  border-radius: 14px;
+  box-shadow: var(--services-card-shadow);
+}
+
+.service-detail__text {
+  margin: 0 0 1rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--services-text);
+}
+
+.service-detail__bullets {
+  margin: 0 0 1.25rem;
+  padding-left: 1.15rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--services-text);
+
+  li + li {
+    margin-top: 0.4rem;
+  }
+}
+
+.service-detail__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+
+  @media (min-width: 520px) {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+}
+
+.service-detail__link,
+.service-detail__cta {
+  justify-content: center;
+
+  @media (min-width: 520px) {
+    width: auto;
+  }
+}
+
+.service-detail__cta {
+  @media (min-width: 520px) {
+    margin-left: auto;
+  }
+}
+
+.service-detail__bottom {
+  margin-top: clamp(2rem, 5vw, 3rem);
+  padding: clamp(1.5rem, 3vw, 2rem);
+  text-align: center;
+  background: var(--services-card-bg);
+  border: 1px solid var(--services-card-border);
+  border-radius: 14px;
+}
+
+.service-detail__bottom-text {
+  margin: 0 0 1.15rem;
+  max-width: 38rem;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+  color: var(--services-text);
+
+  a {
+    color: var(--cta-bg);
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      color: var(--cta-bg-hover);
+      text-decoration: underline;
+    }
+  }
+}
