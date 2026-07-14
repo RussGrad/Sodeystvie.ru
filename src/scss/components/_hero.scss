@@ -126,13 +126,8 @@
     box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.06);
   }
 
-  &--abroad {
-    margin-left: auto;
-  }
-
   @media (max-width: 520px) {
     &--abroad {
-      margin-left: 0;
       flex: 1 1 auto;
       text-align: center;
     }
@@ -152,7 +147,7 @@
 .hero__search-card {
   position: relative;
   z-index: 2;
-  width: fit-content;
+  width: 50%;
   max-width: 100%;
   background: var(--hero-panel-bg);
   border: 1px solid var(--hero-panel-border);
@@ -223,14 +218,11 @@
 
 .hero__filters {
   display: grid;
-  grid-template-columns:
-    minmax(5.75rem, 6.75rem)
-    repeat(3, minmax(4.25rem, 5.5rem));
-  width: fit-content;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: 100%;
   max-width: 100%;
 
   @media (max-width: 900px) {
-    width: 100%;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
