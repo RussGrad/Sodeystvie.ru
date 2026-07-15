@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 site_admin_render_head('Вход', 'login');
 ?>
 <main class="admin-login">
+    <?php site_admin_render_theme_toggle(); ?>
     <div class="admin-login__card">
         <h1 class="admin-login__title">Вход в админку сайта</h1>
         <p class="admin-login__lead"><?php echo htmlspecialchars(site_brand_full(), ENT_QUOTES, 'UTF-8'); ?></p>

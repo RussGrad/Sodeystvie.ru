@@ -20,9 +20,34 @@ function site_admin_render_head(string $title, string $variant = 'app'): void
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?> — Админка <?php echo htmlspecialchars(site_brand_full(), ENT_QUOTES, 'UTF-8'); ?></title>
+    <script>
+    (function () {
+        try {
+            var key = 'sodeystvie-admin-theme';
+            var stored = localStorage.getItem(key);
+            var theme = (stored === 'light' || stored === 'dark')
+                ? stored
+                : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    })();
+    </script>
     <link rel="stylesheet" href="/css/admin.css?v=<?php echo htmlspecialchars($cssVersion, ENT_QUOTES, 'UTF-8'); ?>">
 </head>
 <body class="admin-body admin-body--<?php echo htmlspecialchars($variant, ENT_QUOTES, 'UTF-8'); ?>">
+    <?php
+}
+
+function site_admin_render_theme_toggle(): void
+{
+    ?>
+    <button type="button" class="admin-theme-toggle" data-admin-theme-toggle aria-label="Переключить тему">
+        <span class="admin-theme-toggle__icon" aria-hidden="true"></span>
+        <span class="admin-theme-toggle__label-light">Тёмная</span>
+        <span class="admin-theme-toggle__label-dark">Светлая</span>
+    </button>
     <?php
 }
 
@@ -47,6 +72,7 @@ function site_admin_render_nav(string $active = ''): void
                 <?php } ?>
             </nav>
             <div class="admin-topbar__actions">
+                <?php site_admin_render_theme_toggle(); ?>
                 <a class="admin-topbar__site" href="/" target="_blank" rel="noopener noreferrer">Открыть сайт</a>
                 <a class="admin-topbar__logout" href="/admin/logout.php">Выйти</a>
             </div>
@@ -58,6 +84,30 @@ function site_admin_render_nav(string $active = ''): void
 function site_admin_render_foot(): void
 {
     ?>
+<script>
+(function () {
+    var key = 'sodeystvie-admin-theme';
+
+    function currentTheme() {
+        var theme = document.documentElement.getAttribute('data-theme');
+        return theme === 'dark' ? 'dark' : 'light';
+    }
+
+    function applyTheme(theme) {
+        var next = theme === 'dark' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        try {
+            localStorage.setItem(key, next);
+        } catch (e) {}
+    }
+
+    document.querySelectorAll('[data-admin-theme-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+        });
+    });
+})();
+</script>
 </body>
 </html>
     <?php
