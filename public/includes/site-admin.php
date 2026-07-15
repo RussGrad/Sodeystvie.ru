@@ -380,6 +380,9 @@ function site_admin_sanitize_settings(array $input): array
         'slogan_short' => 400,
         'slogan_hero' => 2000,
         'hero_headline' => 400,
+        'home_lead_title' => 240,
+        'home_lead_description' => 800,
+        'home_lead_cta' => 80,
         'reviews_rating' => 400,
         'reviews_count' => 400,
         'telegram_url' => 400,
@@ -500,6 +503,82 @@ function site_admin_handle_team_photo_upload(string $memberId): array
     }
 
     return ['ok' => true, 'path' => '/assets/team/' . $safeId . '.' . $ext];
+}
+
+/**
+ * @param array{name?: string, type?: string, tmp_name?: string, error?: int, size?: int} $file
+ * @return array{ok: bool, path?: string, error?: string}
+ */
+function site_admin_handle_home_lead_image_upload(array $file): array
+{
+    $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
+    if ($error === UPLOAD_ERR_NO_FILE) {
+        return ['ok' => false, 'error' => 'Выберите изображение для загрузки'];
+    }
+    if ($error !== UPLOAD_ERR_OK) {
+        return ['ok' => false, 'error' => 'Не удалось загрузить изображение (код ' . $error . ')'];
+    }
+
+    $size = (int) ($file['size'] ?? 0);
+    if ($size <= 0 || $size > 8 * 1024 * 1024) {
+        return ['ok' => false, 'error' => 'Изображение должно быть не больше 8 МБ'];
+    }
+
+    $tmp = (string) ($file['tmp_name'] ?? '');
+    if ($tmp === '' || !is_uploaded_file($tmp)) {
+        return ['ok' => false, 'error' => 'Некорректная загрузка изображения'];
+    }
+
+    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($tmp);
+    $ext = match ($mime) {
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+        default => null,
+    };
+    if ($ext === null || @getimagesize($tmp) === false) {
+        return ['ok' => false, 'error' => 'Допустимы только корректные JPG, PNG или WebP'];
+    }
+
+    $dir = dirname(__DIR__) . '/assets/admin';
+    if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
+        return ['ok' => false, 'error' => 'Не удалось создать каталог для изображения'];
+    }
+
+    $staged = $dir . '/.home-lead-' . bin2hex(random_bytes(6)) . '.' . $ext;
+    if (!move_uploaded_file($tmp, $staged)) {
+        return ['ok' => false, 'error' => 'Не удалось сохранить изображение'];
+    }
+
+    $destination = $dir . '/home-lead.' . $ext;
+    if (!@rename($staged, $destination)) {
+        @unlink($staged);
+
+        return ['ok' => false, 'error' => 'Не удалось установить загруженное изображение'];
+    }
+
+    foreach (['jpg', 'png', 'webp'] as $oldExt) {
+        $old = $dir . '/home-lead.' . $oldExt;
+        if ($old !== $destination && is_file($old)) {
+            @unlink($old);
+        }
+    }
+
+    return ['ok' => true, 'path' => '/assets/admin/home-lead.' . $ext];
+}
+
+function site_admin_delete_home_lead_image(): bool
+{
+    $dir = dirname(__DIR__) . '/assets/admin';
+    $ok = true;
+    foreach (['jpg', 'png', 'webp'] as $ext) {
+        $path = $dir . '/home-lead.' . $ext;
+        if (is_file($path) && !@unlink($path)) {
+            $ok = false;
+        }
+    }
+
+    return $ok;
 }
 
 /**

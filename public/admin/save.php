@@ -32,6 +32,32 @@ if ($section === 'settings') {
         $key = 'messenger_show_' . $messengerType;
         $payload[$key] = isset($_POST[$key]) && (string) $_POST[$key] === '1' ? '1' : '0';
     }
+
+    $currentSettings = site_admin_read_dataset('settings');
+    $currentImage = is_array($currentSettings)
+        ? site_home_lead_image_path()
+        : '';
+    $payload['home_lead_image'] = $currentImage;
+
+    if (isset($_POST['home_lead_image_remove']) && (string) $_POST['home_lead_image_remove'] === '1') {
+        if (!site_admin_delete_home_lead_image()) {
+            site_admin_flash_set('Не удалось удалить изображение промоматериала. Проверьте права на assets/admin/.');
+            header('Location: /admin/edit.php?section=settings', true, 302);
+            exit;
+        }
+        $payload['home_lead_image'] = '';
+    }
+
+    $imageFile = $_FILES['home_lead_image_file'] ?? null;
+    if (is_array($imageFile) && (int) ($imageFile['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+        $upload = site_admin_handle_home_lead_image_upload($imageFile);
+        if (!$upload['ok']) {
+            site_admin_flash_set($upload['error'] ?? 'Не удалось загрузить изображение промоматериала.');
+            header('Location: /admin/edit.php?section=settings', true, 302);
+            exit;
+        }
+        $payload['home_lead_image'] = (string) ($upload['path'] ?? '');
+    }
 } else {
     $raw = $_POST['items'] ?? [];
     if (!is_array($raw)) {

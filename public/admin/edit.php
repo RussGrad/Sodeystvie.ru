@@ -98,7 +98,55 @@ function site_admin_render_settings_form(array $data): void
             </label>
         <?php } ?>
     </div>
+    <?php site_admin_render_home_lead_settings($data); ?>
     <?php site_admin_render_messengers_settings($data); ?>
+    <?php
+}
+
+/**
+ * @param array<string, string> $data
+ */
+function site_admin_render_home_lead_settings(array $data): void
+{
+    $title = trim((string) ($data['home_lead_title'] ?? ''));
+    $description = trim((string) ($data['home_lead_description'] ?? ''));
+    $cta = trim((string) ($data['home_lead_cta'] ?? ''));
+    $imageSrc = site_home_lead_image_src();
+    ?>
+    <fieldset class="admin-promo admin-field--wide">
+        <legend class="admin-promo__legend">Блок заявки на главной</legend>
+        <p class="admin-promo__hint">
+            Тексты и изображение каталога, журнала или книги для правой части тёмного блока заявки.
+            Допустимы JPG, PNG или WebP до 8&nbsp;МБ. SVG не принимаются.
+        </p>
+        <div class="admin-promo__fields">
+            <label class="admin-field admin-field--wide">
+                <span class="admin-field__label">Заголовок</span>
+                <input class="admin-field__input" type="text" name="home_lead_title" maxlength="240" value="<?php echo htmlspecialchars($title !== '' ? $title : site_home_lead_title(), ENT_QUOTES, 'UTF-8'); ?>">
+            </label>
+            <label class="admin-field admin-field--wide">
+                <span class="admin-field__label">Описание</span>
+                <textarea class="admin-field__textarea" name="home_lead_description" rows="3" maxlength="800"><?php echo htmlspecialchars($description !== '' ? $description : site_home_lead_description(), ENT_QUOTES, 'UTF-8'); ?></textarea>
+            </label>
+            <label class="admin-field">
+                <span class="admin-field__label">Текст кнопки</span>
+                <input class="admin-field__input" type="text" name="home_lead_cta" maxlength="80" value="<?php echo htmlspecialchars($cta !== '' ? $cta : site_home_lead_cta(), ENT_QUOTES, 'UTF-8'); ?>">
+            </label>
+            <label class="admin-field admin-field--wide">
+                <span class="admin-field__label">Изображение каталога / журнала (JPG/PNG/WebP, до 8 МБ)</span>
+                <input class="admin-field__input" type="file" name="home_lead_image_file" accept="image/jpeg,image/png,image/webp">
+            </label>
+        </div>
+        <?php if ($imageSrc !== '') { ?>
+            <div class="admin-promo__current">
+                <img class="admin-promo__preview" src="<?php echo htmlspecialchars($imageSrc, ENT_QUOTES, 'UTF-8'); ?>" alt="Текущее изображение промоматериала" width="220" height="280">
+                <label class="admin-promo__remove">
+                    <input type="checkbox" name="home_lead_image_remove" value="1">
+                    <span>Удалить текущее изображение</span>
+                </label>
+            </div>
+        <?php } ?>
+    </fieldset>
     <?php
 }
 

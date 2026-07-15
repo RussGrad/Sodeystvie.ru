@@ -89,6 +89,64 @@ function site_office_hours(): string
 }
 
 /**
+ * Промоматериал блока заявки на главной (каталог / журнал).
+ * Источник истины — файл в /assets/admin/; ключ настроек синхронизируется при сохранении.
+ */
+function site_home_lead_image_path(): string
+{
+    $dir = dirname(__DIR__) . '/assets/admin';
+    foreach (['webp', 'jpg', 'png'] as $ext) {
+        $absolutePath = $dir . '/home-lead.' . $ext;
+        if (is_readable($absolutePath)) {
+            return '/assets/admin/home-lead.' . $ext;
+        }
+    }
+
+    $path = site_content_setting('home_lead_image');
+    if (!preg_match('#^/assets/admin/home-lead\.(?:jpg|png|webp)$#', $path)) {
+        return '';
+    }
+
+    $absolutePath = dirname(__DIR__) . $path;
+
+    return is_readable($absolutePath) ? $path : '';
+}
+
+function site_home_lead_image_src(): string
+{
+    $path = site_home_lead_image_path();
+    if ($path === '') {
+        return '';
+    }
+
+    $absolutePath = dirname(__DIR__) . $path;
+    $version = (string) (@filemtime($absolutePath) ?: time());
+
+    return $path . '?v=' . rawurlencode($version);
+}
+
+function site_home_lead_title(): string
+{
+    return site_content_setting(
+        'home_lead_title',
+        'Подберём ипотечную программу под вашу ситуацию'
+    );
+}
+
+function site_home_lead_description(): string
+{
+    return site_content_setting(
+        'home_lead_description',
+        'Ответьте на несколько вопросов — специалист подготовит персональный расчёт и свяжется с вами.'
+    );
+}
+
+function site_home_lead_cta(): string
+{
+    return site_content_setting('home_lead_cta', 'Получить расчёт');
+}
+
+/**
  * @return list<string>
  */
 function site_admin_editable_datasets(): array

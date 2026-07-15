@@ -433,3 +433,71 @@ a {
   background: #1a1f28;
   padding: 2px;
 }
+
+.admin-promo {
+  margin-top: 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius);
+  background: #fafbfb;
+}
+
+.admin-promo__legend {
+  padding: 0 0.35rem;
+  font-weight: 700;
+}
+
+.admin-promo__hint {
+  margin: 0 0 1rem;
+  color: var(--admin-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.admin-promo__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 0.85rem;
+}
+
+.admin-promo__current {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-promo__preview {
+  display: block;
+  width: min(12rem, 40%);
+  max-height: 12rem;
+  object-fit: contain;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: #172624;
+}
+
+.admin-promo__remove {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--admin-danger);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .admin-promo__fields {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-promo__current {
+    flex-direction: column;
+  }
+
+  .admin-promo__preview {
+    width: min(100%, 14rem);
+  }
+}

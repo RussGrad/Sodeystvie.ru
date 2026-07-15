@@ -18,6 +18,7 @@
   var successEl = document.getElementById('mortgage-quiz-success');
   var phoneInput = document.getElementById('mortgage-quiz-phone');
   var nameInput = document.getElementById('mortgage-quiz-name');
+  var honeypotInput = document.getElementById('mortgage-quiz-company');
   var current = 0;
   var answers = {};
 
@@ -160,6 +161,11 @@
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
+
+    if (honeypotInput instanceof HTMLInputElement && honeypotInput.value.trim() !== '') {
+      return;
+    }
+
     if (!validateStep()) {
       if (errorEl) {
         errorEl.textContent = 'Укажите имя и телефон';
@@ -182,7 +188,7 @@
       pageUrl: window.location.pathname + window.location.search,
       topic: 'mortgage-quiz',
       message: buildMessage(),
-      company: '',
+      company: honeypotInput instanceof HTMLInputElement ? honeypotInput.value : '',
     };
 
     fetch('/api/lead-submit.php', {
