@@ -15,6 +15,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 }
 
 require_once dirname(__DIR__) . '/includes/config.php';
+define('SITE_CONTACTS_FORM_HELPERS_ONLY', true);
 require_once dirname(__DIR__) . '/includes/contacts-form.php';
 
 site_send_security_headers();

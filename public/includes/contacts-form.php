@@ -35,6 +35,11 @@ if (!function_exists('site_contacts_form_subjects')) {
     }
 }
 
+// API (lead-submit) подключает только хелперы — без HTML в JSON-ответе.
+if (defined('SITE_CONTACTS_FORM_HELPERS_ONLY') && SITE_CONTACTS_FORM_HELPERS_ONLY) {
+    return;
+}
+
 $recaptchaSiteKey = site_recaptcha_site_key();
 $regions = site_contacts_form_regions();
 $subjects = site_contacts_form_subjects();
