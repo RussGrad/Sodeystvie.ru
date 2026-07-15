@@ -43,10 +43,14 @@ function site_admin_render_head(string $title, string $variant = 'app'): void
 function site_admin_render_theme_toggle(): void
 {
     ?>
-    <button type="button" class="admin-theme-toggle" data-admin-theme-toggle aria-label="Переключить тему">
-        <span class="admin-theme-toggle__icon" aria-hidden="true"></span>
-        <span class="admin-theme-toggle__label-light">Тёмная</span>
-        <span class="admin-theme-toggle__label-dark">Светлая</span>
+    <button type="button" class="admin-theme-toggle" data-admin-theme-toggle aria-label="Включить светлую тему">
+        <svg class="admin-theme-toggle__icon admin-theme-toggle__icon--moon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <svg class="admin-theme-toggle__icon admin-theme-toggle__icon--sun" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" hidden>
+            <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
     </button>
     <?php
 }
@@ -88,9 +92,24 @@ function site_admin_render_foot(): void
 (function () {
     var key = 'sodeystvie-admin-theme';
 
-    function currentTheme() {
-        var theme = document.documentElement.getAttribute('data-theme');
-        return theme === 'dark' ? 'dark' : 'light';
+    function isDarkTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'dark';
+    }
+
+    function syncToggle(btn) {
+        var dark = isDarkTheme();
+        var moon = btn.querySelector('.admin-theme-toggle__icon--moon');
+        var sun = btn.querySelector('.admin-theme-toggle__icon--sun');
+        if (moon) {
+            moon.hidden = !dark;
+        }
+        if (sun) {
+            sun.hidden = dark;
+        }
+        btn.setAttribute(
+            'aria-label',
+            dark ? 'Включить светлую тему' : 'Включить тёмную тему'
+        );
     }
 
     function applyTheme(theme) {
@@ -99,11 +118,13 @@ function site_admin_render_foot(): void
         try {
             localStorage.setItem(key, next);
         } catch (e) {}
+        document.querySelectorAll('[data-admin-theme-toggle]').forEach(syncToggle);
     }
 
     document.querySelectorAll('[data-admin-theme-toggle]').forEach(function (btn) {
+        syncToggle(btn);
         btn.addEventListener('click', function () {
-            applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+            applyTheme(isDarkTheme() ? 'light' : 'dark');
         });
     });
 })();

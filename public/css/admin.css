@@ -139,57 +139,76 @@ a {
 }
 
 .admin-theme-toggle {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  min-height: 2rem;
-  padding: 0.3rem 0.55rem;
-  border: 1px solid var(--admin-border);
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid transparent;
   border-radius: 6px;
   background: var(--admin-theme-toggle-bg);
   color: var(--admin-muted);
-  font: inherit;
-  font-size: 0.75rem;
-  font-weight: 600;
   cursor: pointer;
-  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease;
 }
 
 .admin-theme-toggle:hover {
   color: var(--admin-text);
   background: var(--admin-theme-toggle-hover);
+  transform: scale(1.04);
+}
+
+.admin-theme-toggle:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 2px;
+}
+
+.admin-theme-toggle:active {
+  transform: scale(0.96);
 }
 
 .admin-theme-toggle__icon {
-  display: inline-block;
-  width: 0.9em;
-  height: 0.9em;
-  border-radius: 50%;
-  border: 1.5px solid currentColor;
-  position: relative;
-  flex-shrink: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
-html[data-theme="light"] .admin-theme-toggle__icon {
-  background: currentColor;
-  box-shadow: inset -0.28em 0 0 0 var(--admin-surface);
+.admin-theme-toggle__icon path,
+.admin-theme-toggle__icon circle {
+  stroke: currentColor;
 }
 
-html[data-theme="dark"] .admin-theme-toggle__icon {
-  background: transparent;
+.admin-theme-toggle__icon--moon {
+  display: block;
 }
 
-.admin-theme-toggle__label-dark {
-  display: none;
+.admin-theme-toggle__icon--sun {
+  display: none !important;
 }
 
-html[data-theme="dark"] .admin-theme-toggle__label-light {
-  display: none;
+html[data-theme="light"] .admin-theme-toggle__icon--moon {
+  display: none !important;
 }
 
-html[data-theme="dark"] .admin-theme-toggle__label-dark {
-  display: inline;
+html[data-theme="light"] .admin-theme-toggle__icon--sun {
+  display: block !important;
+}
+
+html:not([data-theme="light"]) .admin-theme-toggle__icon--sun {
+  display: none !important;
+}
+
+html:not([data-theme="light"]) .admin-theme-toggle__icon--moon {
+  display: block !important;
 }
 
 .admin-login .admin-theme-toggle {
