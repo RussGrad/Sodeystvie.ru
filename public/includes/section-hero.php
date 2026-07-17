@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 /**
  * Первый экран: слайдер фона (CRM или запасной кадр), заголовок, вкладки, панель фильтров.
+ * magazine removed
  */
 
 require_once __DIR__ . '/crm-listing-helpers.php';
