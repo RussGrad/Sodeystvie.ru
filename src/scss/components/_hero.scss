@@ -45,9 +45,37 @@
   }
 }
 
+// Вырезанная сцена встречи: справа поверх фона, без офисного фона, чуть затемнена
+.hero__figure {
+  position: absolute;
+  z-index: 1;
+  right: clamp(-2rem, -1vw, 0rem);
+  bottom: clamp(-1.5rem, -2vw, 0rem);
+  width: min(58vw, 42rem);
+  max-width: 680px;
+  pointer-events: none;
+  user-select: none;
+
+  @media (max-width: 900px) {
+    width: min(70vw, 28rem);
+    opacity: 0.85;
+  }
+
+  @media (max-width: 640px) {
+    display: none;
+  }
+}
+
+.hero__figure-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: brightness(0.82) contrast(1.05);
+}
+
 .hero__layout {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   padding-top: clamp(3rem, 5.5vw + 1.5rem, 6rem);
   padding-bottom: clamp(4.5rem, 11vw, 7.5rem);
 }

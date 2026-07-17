@@ -59,6 +59,17 @@ $heroSliderEnabled = $heroSlideCount > 1;
         <?php } ?>
     </div>
 
+    <div class="hero__figure" aria-hidden="true">
+        <?php
+        echo site_render_static_picture(
+            '/assets/hero/meeting-team.png',
+            '',
+            'hero__figure-img',
+            'width="1024" height="682" decoding="async" loading="lazy"'
+        );
+        ?>
+    </div>
+
     <div class="container hero__layout">
         <p class="hero__eyebrow"><?php echo htmlspecialchars(site_brand_full(), ENT_QUOTES, 'UTF-8'); ?></p>
         <h1 class="hero__title" id="hero-title"><?php echo htmlspecialchars(site_hero_headline(), ENT_QUOTES, 'UTF-8'); ?></h1>
