@@ -168,6 +168,43 @@
     activateDeal(String(dealInput.value || 'buy'));
   }
 
+  // --- Декор: фигура команды (появление + лёгкий parallax) ---
+  var figure = hero.querySelector('.hero__figure');
+  var figureReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (figure) {
+    window.requestAnimationFrame(function () {
+      figure.classList.add('is-visible');
+    });
+
+    if (!figureReduceMotion) {
+      var figureRaf = 0;
+      var figureBaseY = 0;
+
+      function onFigureScroll() {
+        if (figureRaf) {
+          return;
+        }
+        figureRaf = window.requestAnimationFrame(function () {
+          figureRaf = 0;
+          var rect = hero.getBoundingClientRect();
+          var viewH = window.innerHeight || 1;
+          if (rect.bottom < 0 || rect.top > viewH) {
+            return;
+          }
+          var progress = (viewH - rect.top) / (viewH + rect.height);
+          figureBaseY = Math.max(-12, Math.min(18, (progress - 0.35) * 28));
+          if (!figure.classList.contains('is-visible')) {
+            return;
+          }
+          figure.style.transform = 'translate3d(0, ' + figureBaseY.toFixed(1) + 'px, 0)';
+        });
+      }
+
+      window.addEventListener('scroll', onFigureScroll, { passive: true });
+      onFigureScroll();
+    }
+  }
+
   // --- Фоновый слайдер ---
   var sliderRoot = hero.querySelector('[data-hero-slider]');
   if (!sliderRoot) {
