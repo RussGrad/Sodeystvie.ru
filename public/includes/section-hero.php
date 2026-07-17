@@ -62,10 +62,10 @@ $heroSliderEnabled = $heroSlideCount > 1;
     <div class="hero__figure" aria-hidden="true">
         <?php
         echo site_render_static_picture(
-            '/assets/hero/meeting-team.png',
+            '/assets/hero/magazine-cover.png',
             '',
             'hero__figure-img',
-            'width="1024" height="682" decoding="async" loading="lazy"'
+            'width="720" height="988" decoding="async" loading="lazy"'
         );
         ?>
     </div>
