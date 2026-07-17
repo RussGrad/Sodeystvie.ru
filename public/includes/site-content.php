@@ -91,7 +91,57 @@ function site_office_hours(): string
 /**
  * Промоматериал блока заявки на главной (каталог / журнал).
  * Источник истины — файл в /assets/admin/; ключ настроек синхронизируется при сохранении.
+ * Fallback: /assets/mortgage/magazine-cover.* (обложка журнала для ипотечного квиза).
  */
+function site_ensure_mortgage_magazine_asset(): void
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+
+    $dir = dirname(__DIR__) . '/assets/mortgage';
+    foreach (['webp', 'png'] as $ext) {
+        if (is_readable($dir . '/magazine-cover.' . $ext)) {
+            return;
+        }
+    }
+
+    if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
+        return;
+    }
+
+    // Восстановление с GitHub (коммит с готовой обложкой), если локальный файл отсутствует.
+    $sources = [
+        'webp' => 'https://raw.githubusercontent.com/RussGrad/Sodeystvie.ru/b27965e/public/assets/hero/magazine-cover.webp',
+        'png' => 'https://raw.githubusercontent.com/RussGrad/Sodeystvie.ru/b27965e/public/assets/hero/magazine-cover.png',
+    ];
+    $ctx = stream_context_create([
+        'http' => [
+            'method' => 'GET',
+            'timeout' => 20,
+            'follow_location' => 1,
+            'header' => "User-Agent: SodeystvieMagazineBootstrap/1.0\r\n",
+        ],
+        'ssl' => [
+            'verify_peer' => true,
+            'verify_peer_name' => true,
+        ],
+    ]);
+
+    foreach ($sources as $ext => $url) {
+        $raw = @file_get_contents($url, false, $ctx);
+        if ($raw === false || strlen($raw) < 2000) {
+            continue;
+        }
+        $target = $dir . '/magazine-cover.' . $ext;
+        if (@file_put_contents($target, $raw, LOCK_EX) !== false) {
+            return;
+        }
+    }
+}
+
 function site_home_lead_image_path(): string
 {
     $dir = dirname(__DIR__) . '/assets/admin';
@@ -103,13 +153,31 @@ function site_home_lead_image_path(): string
     }
 
     $path = site_content_setting('home_lead_image');
-    if (!preg_match('#^/assets/admin/home-lead\.(?:jpg|png|webp)$#', $path)) {
-        return '';
+    if (preg_match('#^/assets/admin/home-lead\.(?:jpg|png|webp)$#', $path)) {
+        $absolutePath = dirname(__DIR__) . $path;
+        if (is_readable($absolutePath)) {
+            return $path;
+        }
     }
 
-    $absolutePath = dirname(__DIR__) . $path;
+    site_ensure_mortgage_magazine_asset();
 
-    return is_readable($absolutePath) ? $path : '';
+    $magazineDir = dirname(__DIR__) . '/assets/mortgage';
+    foreach (['webp', 'png', 'jpg'] as $ext) {
+        $absolutePath = $magazineDir . '/magazine-cover.' . $ext;
+        if (is_readable($absolutePath)) {
+            return '/assets/mortgage/magazine-cover.' . $ext;
+        }
+    }
+
+    return '';
+}
+
+function site_home_lead_image_is_magazine(): bool
+{
+    $path = site_home_lead_image_path();
+
+    return str_contains($path, '/magazine-cover.');
 }
 
 function site_home_lead_image_src(): string

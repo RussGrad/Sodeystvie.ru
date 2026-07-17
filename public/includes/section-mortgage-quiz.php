@@ -5,6 +5,8 @@ declare(strict_types=1);
 require_once __DIR__ . '/messenger-links.php';
 
 $leadImage = site_home_lead_image_src();
+$leadImagePath = site_home_lead_image_path();
+$leadIsMagazine = site_home_lead_image_is_magazine();
 
 ?>
 <section class="mortgage-quiz" aria-labelledby="mortgage-quiz-title">
@@ -108,20 +110,19 @@ $leadImage = site_home_lead_image_src();
                 </div>
             </div>
 
-            <div class="mortgage-quiz__visual<?php echo $leadImage !== '' ? ' mortgage-quiz__visual--image' : ''; ?>">
+            <div class="mortgage-quiz__visual<?php echo $leadImage !== '' ? ' mortgage-quiz__visual--image' : ''; ?><?php echo $leadIsMagazine ? ' mortgage-quiz__visual--magazine' : ''; ?>">
                 <span class="mortgage-quiz__orbit mortgage-quiz__orbit--large" aria-hidden="true"></span>
                 <span class="mortgage-quiz__orbit mortgage-quiz__orbit--small" aria-hidden="true"></span>
                 <div class="mortgage-quiz__publication-wrap">
-                    <div class="mortgage-quiz__publication">
-                        <?php if ($leadImage !== '') { ?>
-                            <img
-                                class="mortgage-quiz__photo"
-                                src="<?php echo htmlspecialchars($leadImage, ENT_QUOTES, 'UTF-8'); ?>"
-                                alt="Промоматериал ипотечного центра «Содействие»"
-                                loading="lazy"
-                                decoding="async"
-                            >
-                        <?php } else { ?>
+                    <div class="mortgage-quiz__publication<?php echo $leadIsMagazine ? ' mortgage-quiz__publication--magazine' : ''; ?>">
+                        <?php if ($leadImagePath !== '') {
+                            echo site_render_static_picture(
+                                $leadImagePath,
+                                'Промоматериал ипотечного центра «Содействие»',
+                                $leadIsMagazine ? 'mortgage-quiz__magazine-cover' : 'mortgage-quiz__photo',
+                                'width="720" height="988"'
+                            );
+                        } else { ?>
                             <div class="mortgage-quiz__publication-fallback" aria-hidden="true">
                                 <span class="mortgage-quiz__publication-brand">Содействие</span>
                                 <span class="mortgage-quiz__publication-rule"></span>

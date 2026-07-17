@@ -959,6 +959,29 @@
       background: linear-gradient(90deg, rgba(0, 0, 0, 0.44), rgba(255, 255, 255, 0.08), transparent);
     }
 
+    &--magazine {
+      width: min(78%, 22rem);
+      aspect-ratio: auto;
+      overflow: visible;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      transform: rotate(4deg);
+
+      &::after {
+        display: none;
+      }
+
+      @media (max-width: 980px) {
+        width: min(48%, 16rem);
+      }
+
+      @media (max-width: 620px) {
+        width: min(68%, 14rem);
+      }
+    }
+
     @media (max-width: 980px) {
       width: min(42%, 15rem);
     }
@@ -966,6 +989,13 @@
     @media (max-width: 620px) {
       width: min(62%, 13rem);
     }
+  }
+
+  &__magazine-cover {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(-12px 18px 28px rgba(0, 0, 0, 0.5));
   }
 
   &__photo {
