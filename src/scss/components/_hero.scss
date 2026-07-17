@@ -45,20 +45,68 @@
   }
 }
 
-// Вырезанная сцена встречи: справа поверх фона, без офисного фона, чуть затемнена
+// Вырезанная сцена встречи: справа поверх фона, градиент-подложка, мягкий блик, вход
 .hero__figure {
   position: absolute;
   z-index: 1;
-  right: clamp(-2rem, -1vw, 0rem);
-  bottom: clamp(-1.5rem, -2vw, 0rem);
-  width: min(58vw, 42rem);
-  max-width: 680px;
+  right: clamp(-1.5rem, -0.5vw, 1rem);
+  bottom: clamp(3.5rem, 8vw, 6.5rem);
+  width: min(52vw, 38rem);
+  max-width: 620px;
   pointer-events: none;
   user-select: none;
+  opacity: 0;
+  transform: translate3d(0, 1.25rem, 0);
+  transition:
+    opacity 0.9s var(--ease-smooth),
+    transform 0.9s var(--ease-smooth);
+  will-change: transform, opacity;
+
+  &.is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  // Мягкий градиент под вырезку — связывает фото с тёмным городом
+  &::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    inset: 8% -8% -12% -18%;
+    border-radius: 50% 40% 45% 55%;
+    background:
+      radial-gradient(
+        ellipse 72% 68% at 58% 55%,
+        rgba(0, 0, 0, 0.55) 0%,
+        rgba(0, 0, 0, 0.28) 45%,
+        transparent 72%
+      );
+    pointer-events: none;
+  }
+
+  // Тёплый блик под столом
+  &::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    left: 18%;
+    right: 12%;
+    bottom: 2%;
+    height: 28%;
+    border-radius: 50%;
+    background: radial-gradient(
+      ellipse 70% 55% at 50% 80%,
+      rgba(201, 168, 110, 0.22) 0%,
+      rgba(201, 168, 110, 0.06) 45%,
+      transparent 70%
+    );
+    filter: blur(6px);
+    pointer-events: none;
+  }
 
   @media (max-width: 900px) {
-    width: min(70vw, 28rem);
-    opacity: 0.85;
+    width: min(64vw, 26rem);
+    bottom: clamp(2.5rem, 6vw, 4.5rem);
   }
 
   @media (max-width: 640px) {
@@ -67,10 +115,20 @@
 }
 
 .hero__figure-img {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   height: auto;
   filter: brightness(0.62) contrast(1.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__figure {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 .hero__layout {

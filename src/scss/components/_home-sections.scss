@@ -19,8 +19,8 @@
 
   &__kicker {
     position: absolute;
-    z-index: 2;
-    top: clamp(1.35rem, 3.4vw, 2.15rem);
+    z-index: 3;
+    top: clamp(0.85rem, 2.4vw, 1.55rem);
     right: clamp(0.75rem, 2.5vw, 1.5rem);
     width: calc((100% - 2.25rem) / 4);
     display: inline-flex;
@@ -30,7 +30,7 @@
     color: var(--deal-kicker-text);
     pointer-events: none;
     user-select: none;
-    transform: rotate(-2deg) translate(clamp(-1.15rem, -3.2vw, -2.15rem), clamp(0.9rem, 2.2vw, 1.45rem));
+    transform: rotate(-2deg) translate(clamp(-0.85rem, -2.4vw, -1.65rem), clamp(0.35rem, 1.2vw, 0.85rem));
 
     @media (max-width: 960px) {
       width: calc((100% - 0.75rem) / 2);
@@ -57,7 +57,9 @@
     letter-spacing: 0.01em;
     white-space: nowrap;
     color: var(--deal-kicker-text);
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+    text-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.35),
+      0 2px 14px rgba(0, 0, 0, 0.12);
   }
 
   &__kicker-arrow {
@@ -245,15 +247,17 @@
 }
 
 :root[data-theme='dark'] .deal-cards {
-  --deal-kicker-text: rgba(255, 255, 255, 0.9);
+  --deal-kicker-text: #f5f5f5;
 
   .deal-cards__kicker-text {
-    text-shadow: none;
+    text-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.55),
+      0 4px 18px rgba(0, 0, 0, 0.35);
   }
 
   .deal-cards__kicker-arrow {
-    filter: invert(1) brightness(1.05);
-    opacity: 0.92;
+    filter: invert(1) brightness(1.08) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.45));
+    opacity: 0.95;
   }
 }
 
