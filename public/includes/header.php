@@ -146,7 +146,7 @@ $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());
                         'site-header__messenger messenger-links__item',
                     ); ?>
                     <a class="site-header__fav" href="/catalog/?favorites=1" id="site-header-favorites" aria-label="Избранное">
-                        <svg class="site-header__fav-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                        <svg class="site-header__fav-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
                             <path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                         </svg>
                         <span class="site-header__fav-count" id="site-favorites-count" hidden>0</span>
@@ -159,7 +159,7 @@ $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());
                         aria-controls="lead-modal"
                         aria-label="Оставить заявку"
                     >
-                        <svg class="site-header__cta-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                        <svg class="site-header__cta-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
                             <path fill="currentColor" d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.07 21 3 13.93 3 5a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.46.57 3.58a1 1 0 0 1-.25 1.01l-2.2 2.2z"/>
                         </svg>
                     </button>
