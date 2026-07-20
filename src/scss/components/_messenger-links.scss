@@ -153,6 +153,23 @@ $messenger-hit-size: 32px;
     border-radius: 0;
     object-fit: contain;
   }
+
+  .messenger-links__mask {
+    display: block;
+    flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+  }
+
+  .messenger-links__mask--max {
+    -webkit-mask-image: url("/assets/icons/messengers/max.webp");
+    mask-image: url("/assets/icons/messengers/max.webp");
+  }
 }
 
 .site-header__messengers {

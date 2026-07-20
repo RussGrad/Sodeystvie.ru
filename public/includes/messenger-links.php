@@ -78,13 +78,23 @@ function site_render_messenger_icon(string $type, bool $flat = false, ?string $i
     require_once __DIR__ . '/site-messengers.php';
 
     $custom = site_messenger_custom_icon_src($type);
+
+    // Плоский режим: MAX из PNG/WebP как маска currentColor (силуэт без фона)
+    if ($flat && $type === 'max' && $custom !== null) {
+        echo '<span class="messenger-links__svg messenger-links__mask messenger-links__mask--max" aria-hidden="true"></span>';
+
+        return;
+    }
+
     if ($custom !== null) {
         echo '<img class="messenger-links__img" src="' . htmlspecialchars($custom, ENT_QUOTES, 'UTF-8') . '" width="24" height="24" alt="" decoding="async">';
+
         return;
     }
 
     if ($flat) {
         echo site_messenger_icon_svg_flat($type);
+
         return;
     }
 
@@ -146,8 +156,10 @@ function site_messenger_icon_svg_flat(string $type): string
             . $close;
     }
 
-    // MAX — сплошной чат-бабл того же веса
+    // MAX — fallback: кольцо с хвостом внутрь
     return $open
-        . '<path fill="currentColor" d="M6.25 3h11.5A3.25 3.25 0 0 1 21 6.25v8a3.25 3.25 0 0 1-3.25 3.25H11.9l-4.55 3.7c-.7.57-1.75.07-1.75-.84v-2.86H6.25A3.25 3.25 0 0 1 3 14.25v-8A3.25 3.25 0 0 1 6.25 3z"/>'
+        . '<path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="'
+        . 'M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2Zm0 4.2A5.8 5.8 0 1 0 12 17.8 5.8 5.8 0 0 0 12 6.2Zm-4.35 9.85c.4-.65.2-1.5-.45-1.85-.55-.3-1.25-.15-1.65.4-.7.95-1.85 1.55-3.15 1.7 1.35.85 3.1 1.05 4.6.3.35-.18.7-.38.9-.65.08-.07.17-.14.25-.2-.08.1-.17.2-.25.2-.1.08-.2.15-.3.2Z'
+        . '"/>'
         . $close;
 }
