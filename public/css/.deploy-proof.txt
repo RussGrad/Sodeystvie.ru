@@ -1,0 +1,30 @@
+deploy-proof.txt — mobile menu CSS verification
+generated_utc: 2026-07-20T02:45:46Z
+git_head: 2a92cf2d8f24356239796ed1406be67f08ca1920
+
+=== LIVE (https://an-sodeystvie.ru/css/main.css) ===
+len: 210509
+header_backdrop_self: True
+header_before_blur: False
+nav_open_aggressive: True
+header_snippet: .site-header{position:sticky;top:0;z-index:100;background:var(--header-bg);border-bottom:1px solid var(--header-border);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:background .2s ease,border-color .2s ease,box-shadow .25s var(--ease-smooth)}.site-header--scrolled{box-shadow:0 8px 28px rgba(0,0,0,.22)}.site-header__inner
+before_snippet: NO BEFORE
+nav_open_root: .site-header--nav-open{overflow:hidden}
+nav_open_bar: .site-header--nav-open .site-header__bar{opacity:1;visibility:visible;pointer-events:auto}
+
+=== LOCAL (public/css/main.css after build) ===
+len: 211051
+header_backdrop_self: False
+header_before_blur: True
+nav_open_aggressive: True
+header_snippet: .site-header{position:sticky;top:0;z-index:100;background:var(--header-bg);border-bottom:1px solid var(--header-border);transition:background .2s ease,border-color .2s ease,box-shadow .25s var(--ease-smooth)}.site-header::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;backdrop-filter:blur(14px);-webkit-backdrop-filter:blu
+before_snippet: .site-header::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}.site-header--scrolled{box-shadow:0 8px 28px rgba(0,0,0,.22)}.site-hea
+nav_open_root: .site-header--nav-open{overflow:hidden}
+nav_open_bar: .site-header--nav-open .site-header__bar{position:fixed !important;inset:0 !important;top:0 !important;left:0 !important;right:0 !important;bottom:0 !important;width:100vw !important;height:100dvh !important;max-height:100dvh !important;z-index:101;opacity:1;visibility:visible;pointer-events:auto}
+
+=== VERDICT ===
+live_broken: True
+local_fix_ok: True
+menu_would_work_live: False
+menu_would_work_local: True
+action: push to trigger GitHub Actions deploy-public.yml
