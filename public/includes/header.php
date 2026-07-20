@@ -37,6 +37,7 @@ $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());
     /* Критичные стили шапки: совпадают с main.css, чтобы не было скачка при догрузке */
     :root[data-theme="dark"]{--header-bg:rgba(18,22,30,.78);--header-border:rgba(255,255,255,.12)}
     :root[data-theme="light"]{--header-bg:#fff;--header-border:rgba(22,22,22,.1)}
+    :root[data-theme="light"] .site-header{--header-bg:rgba(18,22,30,.94);--header-border:rgba(255,255,255,.12);--header-text:#f5f5f5;--header-muted:#a3a3a3;--header-tool-icon:#fff}
     html{scrollbar-gutter:stable}
     body{margin:0;background-color:var(--page-bg,#fff)}
     :root[data-theme="dark"] body{background-color:#121820;background-image:linear-gradient(rgba(10,14,20,.74),rgba(10,14,20,.86)),url('/assets/brand/site-ambient-bg.webp');background-size:cover;background-position:center;background-attachment:fixed}

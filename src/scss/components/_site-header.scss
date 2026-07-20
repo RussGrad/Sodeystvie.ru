@@ -24,6 +24,19 @@
   }
 }
 
+// Светлая тема сайта — тёмная шапка (локальные переменные, без влияния на остальную страницу)
+:root[data-theme="light"] .site-header {
+  --header-bg: rgba(18, 22, 30, 0.94);
+  --header-border: rgba(255, 255, 255, 0.12);
+  --header-text: #f5f5f5;
+  --header-muted: #a3a3a3;
+  --nav-hover: rgba(#{$brand-accent-rgb}, 0.22);
+  --header-tool-icon: #ffffff;
+  --header-tool-hover-bg: rgba(#{$brand-accent-rgb}, 0.22);
+  --messenger-flat-color: #ffffff;
+  --messenger-flat-hover-bg: rgba(255, 255, 255, 0.1);
+}
+
 .site-header--scrolled {
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
 }
@@ -109,18 +122,8 @@
   filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.28));
 }
 
-:root[data-theme="light"] .site-header__logo-premium {
-  background: #161616;
-  border-radius: 8px;
-  padding: 0.16rem 0.4rem;
-  box-sizing: content-box;
-}
-
-// Светлая тема: перекрашиваем только .st26 в тёмный (градиенты АН и подпись не трогаем)
-:root[data-theme="light"] .site-header__logo-svg .st26 {
-  fill: #161616;
-}
-
+// Логотип на тёмной шапке — светлый текст в обеих темах
+:root[data-theme="light"] .site-header__logo-svg .st26,
 :root[data-theme="dark"] .site-header__logo-svg .st26 {
   fill: #ffffff;
 }
