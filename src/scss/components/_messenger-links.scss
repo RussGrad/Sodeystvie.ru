@@ -117,25 +117,41 @@ $messenger-hit-size: 32px;
   border-radius: 4px;
 }
 
-// Шапка и подвал: плоские иконки 24×24 без фона
+// Шапка и подвал: плоские иконки одного размера/цвета
 .messenger-links--flat {
-  gap: 0.35rem;
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.3rem;
 
   .messenger-links__cell {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
     min-width: 0;
+    margin: 0;
+    padding: 0;
   }
 
   .messenger-links__item,
   .site-header__messenger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: $messenger-hit-size;
     height: $messenger-hit-size;
+    min-width: $messenger-hit-size;
+    min-height: $messenger-hit-size;
     padding: 0;
     border: none;
     border-radius: 6px;
     background: transparent !important;
-    color: var(--messenger-flat-color, var(--header-tool-icon, rgba(255, 255, 255, 0.9)));
+    color: var(--messenger-flat-color, var(--header-tool-icon, #ffffff));
     box-shadow: none !important;
     transform: none;
+    line-height: 0;
 
     &:hover {
       transform: none;
@@ -146,16 +162,23 @@ $messenger-hit-size: 32px;
   }
 
   .messenger-links__svg,
-  .messenger-links__img {
+  .messenger-links__img,
+  .messenger-links__mask {
     display: block;
-    width: $messenger-icon-size;
-    height: $messenger-icon-size;
+    box-sizing: border-box;
+    width: $messenger-icon-size !important;
+    height: $messenger-icon-size !important;
+    min-width: $messenger-icon-size;
+    min-height: $messenger-icon-size;
+    max-width: $messenger-icon-size;
+    max-height: $messenger-icon-size;
+    margin: 0;
     border-radius: 0;
     object-fit: contain;
+    vertical-align: middle;
   }
 
   .messenger-links__mask {
-    display: block;
     flex-shrink: 0;
     background-color: currentColor;
     -webkit-mask-position: center;
@@ -175,13 +198,15 @@ $messenger-hit-size: 32px;
 .site-header__messengers {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0;
   margin: 0;
   padding: 0;
+  line-height: 0;
 }
 
 .site-footer__messengers.messenger-links--flat {
-  --messenger-flat-color: rgba(255, 255, 255, 0.92);
+  --messenger-flat-color: #ffffff;
   --messenger-flat-hover-bg: rgba(255, 255, 255, 0.08);
   --messenger-flat-hover-color: #e8bc62;
 }
