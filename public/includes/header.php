@@ -51,8 +51,12 @@ $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());
     .site-header__menu-link{white-space:nowrap}
     .site-header__burger{display:flex;flex-shrink:0;margin-left:auto}
     @media(max-width:1023.98px){
+      .site-header{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
       .site-header__bar{position:fixed;inset:0;z-index:99;visibility:hidden;opacity:0;pointer-events:none}
-      .site-header--nav-open .site-header__bar{visibility:visible;opacity:1;pointer-events:auto}
+      .site-header--nav-open .site-header__bar{
+        position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-height:100dvh!important;
+        z-index:101!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important
+      }
     }
     @media(min-width:1024px){
       .site-header__cluster{display:grid;grid-template-columns:auto 1fr auto;width:100%;column-gap:clamp(1rem,2vw,2rem)}
