@@ -52,6 +52,7 @@ $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());
     .site-header__burger{display:flex;flex-shrink:0;margin-left:auto}
     @media(max-width:1023.98px){
       .site-header__bar{position:fixed;inset:0;z-index:99;visibility:hidden;opacity:0;pointer-events:none}
+      .site-header--nav-open .site-header__bar{visibility:visible;opacity:1;pointer-events:auto}
     }
     @media(min-width:1024px){
       .site-header__cluster{display:grid;grid-template-columns:auto 1fr auto;width:100%;column-gap:clamp(1rem,2vw,2rem)}
