@@ -396,6 +396,13 @@ function site_admin_sanitize_settings(array $input): array
         'footer_reprint_notice' => 500,
         'footer_info_disclaimer' => 1000,
         'privacy_policy' => 30000,
+        'deal_cards_kicker' => 80,
+        'nav_label_home' => 80,
+        'nav_label_catalog' => 80,
+        'nav_label_services' => 80,
+        'nav_label_mortgage' => 80,
+        'nav_label_about' => 80,
+        'nav_label_contacts' => 80,
     ];
     $out = [];
     foreach ($fields as $key => $limit) {
