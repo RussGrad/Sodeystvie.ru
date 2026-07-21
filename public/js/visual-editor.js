@@ -145,12 +145,8 @@
     '<strong class="ve-dock__title" id="ve-dock-title">Правка</strong>' +
     '<button type="button" class="ve-dock__close" id="ve-dock-close" title="Закрыть">×</button>' +
     '</div>' +
-    '<p class="ve-dock__hint" id="ve-dock-hint">Перетащите элемент мышью</p>' +
-    '<div class="ve-dock__tools" id="ve-dock-tools">' +
-    '<button type="button" class="ve-dock__btn" data-ve-dock="rotate-left" title="Повернуть влево">↺</button>' +
-    '<button type="button" class="ve-dock__btn" data-ve-dock="rotate-right" title="Повернуть вправо">↻</button>' +
-    '<button type="button" class="ve-dock__btn" data-ve-dock="zoom-out" title="Уменьшить">−</button>' +
-    '<button type="button" class="ve-dock__btn" data-ve-dock="zoom-in" title="Увеличить">+</button>' +
+    '<p class="ve-dock__hint" id="ve-dock-hint">Стрелки и дуга — положение; перетаскивание тоже работает</p>' +
+    '<div class="ve-dock__tools" id="ve-dock-tools" hidden>' +
     '<label class="ve-dock__btn ve-dock__btn--file" id="ve-dock-file-label" hidden>' +
     'Файл<input type="file" id="ve-dock-file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden>' +
     '</label>' +
@@ -163,6 +159,26 @@
     '<button type="button" class="ve-bar__btn" id="ve-dock-delete" hidden>Удалить</button>' +
     '</div>';
   document.body.appendChild(dock);
+
+  var gizmo = document.createElement('div');
+  gizmo.className = 've-gizmo';
+  gizmo.hidden = true;
+  gizmo.setAttribute('aria-hidden', 'true');
+  gizmo.innerHTML =
+    '<svg class="ve-gizmo__arc" viewBox="0 0 200 200" aria-hidden="true">' +
+    '<circle class="ve-gizmo__ring" cx="100" cy="100" r="78" fill="none" />' +
+    '<path class="ve-gizmo__arc-path" d="M 30 100 A 70 70 0 0 1 170 100" fill="none" />' +
+    '</svg>' +
+    '<button type="button" class="ve-gizmo__btn ve-gizmo__btn--up" data-ve-gizmo="move-up" title="Вверх">↑</button>' +
+    '<button type="button" class="ve-gizmo__btn ve-gizmo__btn--down" data-ve-gizmo="move-down" title="Вниз">↓</button>' +
+    '<button type="button" class="ve-gizmo__btn ve-gizmo__btn--left" data-ve-gizmo="move-left" title="Влево">←</button>' +
+    '<button type="button" class="ve-gizmo__btn ve-gizmo__btn--right" data-ve-gizmo="move-right" title="Вправо">→</button>' +
+    '<button type="button" class="ve-gizmo__btn ve-gizmo__btn--rot-left" data-ve-gizmo="rotate-left" title="Повернуть влево">↺</button>' +
+    '<button type="button" class="ve-gizmo__btn ve-gizmo__btn--rot-right" data-ve-gizmo="rotate-right" title="Повернуть вправо">↻</button>' +
+    '<button type="button" class="ve-gizmo__btn ve-gizmo__btn--zoom-out" data-ve-gizmo="zoom-out" title="Уменьшить">−</button>' +
+    '<button type="button" class="ve-gizmo__btn ve-gizmo__btn--zoom-in" data-ve-gizmo="zoom-in" title="Увеличить">+</button>' +
+    '<span class="ve-gizmo__center" id="ve-gizmo-center"></span>';
+  document.body.appendChild(gizmo);
 
   var statusEl = document.getElementById('ve-status');
   var titleEl = document.getElementById('ve-panel-title');
@@ -195,6 +211,7 @@
   var dockClose = document.getElementById('ve-dock-close');
   var dockFile = document.getElementById('ve-dock-file');
   var dockFileLabel = document.getElementById('ve-dock-file-label');
+  var gizmoCenter = document.getElementById('ve-gizmo-center');
 
   var activeEl = null;
   var activeField = '';
@@ -207,6 +224,8 @@
   var activeY = 0;
   var canvasMode = false;
   var dragState = null;
+  var holdTimer = null;
+  var holdInterval = null;
 
   function isCanvasType(type, field) {
     return (
@@ -320,6 +339,7 @@
     }
     updateMagMeta();
     positionDock();
+    positionGizmo();
   }
 
   function saveMagField(field, value) {
@@ -383,26 +403,86 @@
     return (el.textContent || '').trim();
   }
 
+  function positionGizmo() {
+    if (!canvasMode || !activeEl || gizmo.hidden) {
+      return;
+    }
+    var rect = activeEl.getBoundingClientRect();
+    var size = activeType === 'mag-plate' ? 168 : 220;
+    gizmo.style.width = size + 'px';
+    gizmo.style.height = size + 'px';
+    var left = rect.left + rect.width / 2 - size / 2;
+    var top = rect.top + rect.height / 2 - size / 2;
+    left = clamp(left, 8, window.innerWidth - size - 8);
+    top = clamp(top, 64, window.innerHeight - size - 8);
+    gizmo.style.left = Math.round(left) + 'px';
+    gizmo.style.top = Math.round(top) + 'px';
+    if (gizmoCenter) {
+      if (activeType === 'mag-plate') {
+        gizmoCenter.textContent = Math.round(activeY) + 'px';
+      } else {
+        gizmoCenter.textContent = Math.round(activeRotate) + '° · ×' + activeScale.toFixed(2);
+      }
+    }
+  }
+
   function positionDock() {
     if (!canvasMode || !activeEl || dock.hidden) {
       return;
     }
     var rect = activeEl.getBoundingClientRect();
     var dockW = dock.offsetWidth || 280;
-    var dockH = dock.offsetHeight || 160;
-    var left = rect.left + rect.width / 2 - dockW / 2;
-    var top = rect.top - dockH - 12;
-    if (top < 72) {
-      top = rect.bottom + 12;
+    var dockH = dock.offsetHeight || 120;
+    var left = rect.right + 14;
+    var top = rect.top;
+    if (left + dockW > window.innerWidth - 12) {
+      left = rect.left - dockW - 14;
     }
-    left = clamp(left, 12, window.innerWidth - dockW - 12);
+    if (left < 12) {
+      left = clamp(rect.left + rect.width / 2 - dockW / 2, 12, window.innerWidth - dockW - 12);
+      top = rect.bottom + 14;
+      if (top + dockH > window.innerHeight - 12) {
+        top = Math.max(72, rect.top - dockH - 14);
+      }
+    }
     top = clamp(top, 72, window.innerHeight - dockH - 12);
     dock.style.left = Math.round(left) + 'px';
     dock.style.top = Math.round(top) + 'px';
+    positionGizmo();
+  }
+
+  function stopHold() {
+    if (holdTimer) {
+      clearTimeout(holdTimer);
+      holdTimer = null;
+    }
+    if (holdInterval) {
+      clearInterval(holdInterval);
+      holdInterval = null;
+    }
+  }
+
+  function hideGizmo() {
+    stopHold();
+    gizmo.hidden = true;
+    gizmo.classList.remove('ve-gizmo--plate', 've-gizmo--full');
+  }
+
+  function showGizmo() {
+    var canMove = activeType === 'mag-image' || activeType === 'mag-layout' || activeType === 'mag-plate';
+    if (!canMove) {
+      hideGizmo();
+      return;
+    }
+    gizmo.hidden = false;
+    gizmo.classList.toggle('ve-gizmo--plate', activeType === 'mag-plate');
+    gizmo.classList.toggle('ve-gizmo--full', activeType === 'mag-image' || activeType === 'mag-layout');
+    positionGizmo();
   }
 
   function hideDock() {
     dock.hidden = true;
+    hideGizmo();
     setDockError('');
     if (dockTextarea) {
       dockTextarea.hidden = true;
@@ -420,20 +500,22 @@
     dockTitle.textContent = label || 'Правка на месте';
     setDockError('');
 
-    var showTools = activeType === 'mag-image' || activeType === 'mag-layout';
-    dockTools.hidden = !showTools;
+    dockTools.hidden = activeType !== 'mag-image';
     dockFileLabel.hidden = activeType !== 'mag-image';
     dockDelete.hidden = !(activeType === 'mag-image' && activeEl && activeEl.getAttribute('data-ve-has-image') === '1');
 
     if (activeType === 'mag-plate' || activeField === 'home_lead_badge') {
-      dockHint.textContent = activeType === 'mag-plate' ? 'Текст и вертикальное положение плашки' : 'Текст бейджа';
+      dockHint.textContent =
+        activeType === 'mag-plate'
+          ? 'Дуга и стрелки — сдвиг плашки; текст ниже'
+          : 'Текст бейджа';
       dockTextarea.hidden = false;
       dockTextarea.value = readCurrentValue(activeEl, activeType === 'mag-plate' ? 'mag-plate' : 'textarea');
     } else if (activeType === 'mag-layout') {
-      dockHint.textContent = 'Перетащите журнал · кнопки — наклон и масштаб';
+      dockHint.textContent = 'Дуга со стрелками и +/− · можно перетащить журнал';
       dockTextarea.hidden = true;
     } else if (activeType === 'mag-image') {
-      dockHint.textContent = 'Перетащите фото · кнопки — поворот и зум · Файл — замена';
+      dockHint.textContent = 'Дуга со стрелками и +/− · Файл — замена изображения';
       dockTextarea.hidden = true;
     } else {
       dockHint.textContent = 'Правка на месте';
@@ -441,6 +523,7 @@
     }
 
     updateMagMeta();
+    showGizmo();
     positionDock();
   }
 
@@ -633,7 +716,7 @@
       if (!(target instanceof Element)) {
         return;
       }
-      if (panel.contains(target) || dock.contains(target)) {
+      if (panel.contains(target) || dock.contains(target) || gizmo.contains(target)) {
         return;
       }
 
@@ -685,7 +768,7 @@
     if (!(target instanceof Element)) {
       return;
     }
-    if (dock.contains(target) || panel.contains(target) || bar.contains(target)) {
+    if (dock.contains(target) || panel.contains(target) || bar.contains(target) || gizmo.contains(target)) {
       return;
     }
     if (!activeEl.contains(target) && target !== activeEl) {
@@ -768,28 +851,124 @@
   cancelBtn.addEventListener('click', closePanel);
   dockClose.addEventListener('click', closePanel);
 
-  function nudgeCanvas(action) {
-    if (!activeEl || (activeType !== 'mag-image' && activeType !== 'mag-layout')) {
+  document.addEventListener('keydown', function (event) {
+    if (!canvasMode || !activeEl) {
       return;
     }
-    if (action === 'rotate-left') {
+    if (event.target && (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA')) {
+      return;
+    }
+    var key = event.key;
+    if (key === 'ArrowUp') {
+      event.preventDefault();
+      nudgeCanvas('move-up');
+    } else if (key === 'ArrowDown') {
+      event.preventDefault();
+      nudgeCanvas('move-down');
+    } else if (key === 'ArrowLeft') {
+      event.preventDefault();
+      if (event.shiftKey) {
+        nudgeCanvas('rotate-left');
+      } else {
+        nudgeCanvas('move-left');
+      }
+    } else if (key === 'ArrowRight') {
+      event.preventDefault();
+      if (event.shiftKey) {
+        nudgeCanvas('rotate-right');
+      } else {
+        nudgeCanvas('move-right');
+      }
+    } else if (key === '+' || key === '=') {
+      event.preventDefault();
+      nudgeCanvas('zoom-in');
+    } else if (key === '-' || key === '_') {
+      event.preventDefault();
+      nudgeCanvas('zoom-out');
+    } else if (key === 'Escape') {
+      closePanel();
+    }
+  });
+
+  function nudgeCanvas(action) {
+    if (!activeEl) {
+      return;
+    }
+    var moveStep = activeType === 'mag-plate' ? 2 : 1.5;
+    var canTransform = activeType === 'mag-image' || activeType === 'mag-layout';
+    var canMove =
+      activeType === 'mag-image' || activeType === 'mag-layout' || activeType === 'mag-plate';
+
+    if (!canMove && !canTransform) {
+      return;
+    }
+
+    if (action === 'move-up' && canMove) {
+      if (activeType === 'mag-plate') {
+        activeY = clamp(activeY + moveStep, 0, 120);
+      } else {
+        activeY = clamp(round1(activeY - moveStep), activeType === 'mag-layout' ? -40 : -50, activeType === 'mag-layout' ? 40 : 50);
+      }
+    } else if (action === 'move-down' && canMove) {
+      if (activeType === 'mag-plate') {
+        activeY = clamp(activeY - moveStep, 0, 120);
+      } else {
+        activeY = clamp(round1(activeY + moveStep), activeType === 'mag-layout' ? -40 : -50, activeType === 'mag-layout' ? 40 : 50);
+      }
+    } else if (action === 'move-left' && canMove && activeType !== 'mag-plate') {
+      activeX = clamp(round1(activeX - moveStep), activeType === 'mag-layout' ? -40 : -50, activeType === 'mag-layout' ? 40 : 50);
+    } else if (action === 'move-right' && canMove && activeType !== 'mag-plate') {
+      activeX = clamp(round1(activeX + moveStep), activeType === 'mag-layout' ? -40 : -50, activeType === 'mag-layout' ? 40 : 50);
+    } else if (action === 'rotate-left' && canTransform) {
       activeRotate = clamp(activeRotate - 5, -180, 180);
-    } else if (action === 'rotate-right') {
+    } else if (action === 'rotate-right' && canTransform) {
       activeRotate = clamp(activeRotate + 5, -180, 180);
-    } else if (action === 'zoom-out') {
-      activeScale = clamp(round2(activeScale - 0.05), activeType === 'mag-layout' ? 0.6 : 0.5, activeType === 'mag-layout' ? 1.5 : 2.5);
-    } else if (action === 'zoom-in') {
-      activeScale = clamp(round2(activeScale + 0.05), activeType === 'mag-layout' ? 0.6 : 0.5, activeType === 'mag-layout' ? 1.5 : 2.5);
+    } else if (action === 'zoom-out' && canTransform) {
+      activeScale = clamp(
+        round2(activeScale - 0.05),
+        activeType === 'mag-layout' ? 0.6 : 0.5,
+        activeType === 'mag-layout' ? 1.5 : 2.5
+      );
+    } else if (action === 'zoom-in' && canTransform) {
+      activeScale = clamp(
+        round2(activeScale + 0.05),
+        activeType === 'mag-layout' ? 0.6 : 0.5,
+        activeType === 'mag-layout' ? 1.5 : 2.5
+      );
+    } else {
+      return;
     }
     applyCanvasTransform();
   }
 
-  dockTools.addEventListener('click', function (event) {
-    var btn = event.target.closest('[data-ve-dock]');
+  function startHold(action) {
+    stopHold();
+    nudgeCanvas(action);
+    holdTimer = setTimeout(function () {
+      holdInterval = setInterval(function () {
+        nudgeCanvas(action);
+      }, 55);
+    }, 320);
+  }
+
+  gizmo.addEventListener('pointerdown', function (event) {
+    var btn = event.target.closest('[data-ve-gizmo]');
     if (!btn) {
       return;
     }
-    nudgeCanvas(btn.getAttribute('data-ve-dock') || '');
+    event.preventDefault();
+    event.stopPropagation();
+    startHold(btn.getAttribute('data-ve-gizmo') || '');
+  });
+
+  gizmo.addEventListener('pointerup', stopHold);
+  gizmo.addEventListener('pointerleave', stopHold);
+  gizmo.addEventListener('pointercancel', stopHold);
+
+  // клик по кнопкам дуги не должен всплывать к выбору полей
+  gizmo.addEventListener('click', function (event) {
+    event.preventDefault();
+    event.stopPropagation();
   });
 
   function bindMagTool(btn, handler) {
