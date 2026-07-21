@@ -141,42 +141,44 @@ $magLogoStyle = sprintf(
                 <span class="mortgage-quiz__orbit mortgage-quiz__orbit--large" aria-hidden="true"></span>
                 <span class="mortgage-quiz__orbit mortgage-quiz__orbit--small" aria-hidden="true"></span>
                 <div class="mortgage-quiz__publication-wrap">
-                    <div class="mortgage-quiz__publication<?php echo $leadIsMagazine ? ' mortgage-quiz__publication--magazine mortgage-quiz__publication--layers' : ''; ?>">
+                    <div class="mortgage-quiz__publication<?php echo $leadIsMagazine ? ' mortgage-quiz__publication--magazine' : ''; ?>">
                         <?php if ($leadIsMagazine) { ?>
-                            <div
-                                class="mortgage-quiz__mag-photo"
-                                style="<?php echo htmlspecialchars($magPhotoStyle, ENT_QUOTES, 'UTF-8'); ?>"
-                                <?php echo site_ve_attrs('magazine_photo', 'mag-image', 'Фото в журнале'); ?>
-                            >
-                                <?php if ($magPhotoPath !== '') {
-                                    echo site_render_static_picture(
-                                        $magPhotoPath,
-                                        'Фото в журнале ипотечного центра «Содействие»',
-                                        'mortgage-quiz__mag-photo-img',
-                                        'width="720" height="988"'
-                                    );
-                                } elseif ($veOn) { ?>
-                                    <span class="mortgage-quiz__mag-placeholder">Фото в журнале</span>
-                                <?php } ?>
-                            </div>
-                            <?php if ($magHasCustomLogo || $veOn) { ?>
+                            <div class="mortgage-quiz__mag-frame">
                                 <div
-                                    class="mortgage-quiz__mag-logo<?php echo $magLogoPath === '' && $veOn ? ' mortgage-quiz__mag-logo--empty' : ''; ?>"
-                                    style="<?php echo htmlspecialchars($magLogoStyle, ENT_QUOTES, 'UTF-8'); ?>"
-                                    <?php echo site_ve_attrs('magazine_logo', 'mag-image', 'Логотип в журнале'); ?>
+                                    class="mortgage-quiz__mag-photo"
+                                    style="<?php echo htmlspecialchars($magPhotoStyle, ENT_QUOTES, 'UTF-8'); ?>"
+                                    <?php echo site_ve_attrs('magazine_photo', 'mag-image', 'Фото в журнале'); ?>
                                 >
-                                    <?php if ($magLogoPath !== '') {
+                                    <?php if ($magPhotoPath !== '') {
                                         echo site_render_static_picture(
-                                            $magLogoPath,
-                                            'Логотип в журнале «Содействие»',
-                                            'mortgage-quiz__mag-logo-img',
-                                            'width="320" height="80"'
+                                            $magPhotoPath,
+                                            'Фото в журнале ипотечного центра «Содействие»',
+                                            'mortgage-quiz__mag-photo-img',
+                                            'width="720" height="988"'
                                         );
                                     } elseif ($veOn) { ?>
-                                        <span class="mortgage-quiz__mag-placeholder">Логотип</span>
+                                        <span class="mortgage-quiz__mag-placeholder">Фото в журнале</span>
                                     <?php } ?>
                                 </div>
-                            <?php } ?>
+                                <?php if ($magHasCustomLogo || $veOn) { ?>
+                                    <div
+                                        class="mortgage-quiz__mag-logo<?php echo $magLogoPath === '' && $veOn ? ' mortgage-quiz__mag-logo--empty' : ''; ?>"
+                                        style="<?php echo htmlspecialchars($magLogoStyle, ENT_QUOTES, 'UTF-8'); ?>"
+                                        <?php echo site_ve_attrs('magazine_logo', 'mag-image', 'Логотип в журнале'); ?>
+                                    >
+                                        <?php if ($magLogoPath !== '') {
+                                            echo site_render_static_picture(
+                                                $magLogoPath,
+                                                'Логотип в журнале «Содействие»',
+                                                'mortgage-quiz__mag-logo-img',
+                                                'width="320" height="80"'
+                                            );
+                                        } elseif ($veOn) { ?>
+                                            <span class="mortgage-quiz__mag-placeholder">Логотип</span>
+                                        <?php } ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
                         <?php } elseif ($leadImagePath !== '') {
                             echo site_render_static_picture(
                                 $leadImagePath,
@@ -197,10 +199,22 @@ $magLogoStyle = sprintf(
                 </div>
                 <div class="mortgage-quiz__visual-badge">
                     <span class="mortgage-quiz__visual-mark">С</span>
-                    <span>Персональный расчёт<br>от специалиста</span>
+                    <span<?php echo site_ve_attrs('home_lead_badge', 'textarea', 'Текст бейджа у журнала'); ?>><?php
+                        echo htmlspecialchars(
+                            site_content_setting('home_lead_badge', "Персональный расчёт\nот специалиста"),
+                            ENT_QUOTES,
+                            'UTF-8'
+                        );
+                    ?></span>
                 </div>
                 <a class="mortgage-quiz__calc-link" href="/mortgage/">
-                    Рассчитать примерный платёж
+                    <span<?php echo site_ve_attrs('home_lead_calc_label', 'text', 'Текст плашки под журналом'); ?>><?php
+                        echo htmlspecialchars(
+                            site_content_setting('home_lead_calc_label', 'Рассчитать примерный платёж'),
+                            ENT_QUOTES,
+                            'UTF-8'
+                        );
+                    ?></span>
                     <span aria-hidden="true">→</span>
                 </a>
             </div>

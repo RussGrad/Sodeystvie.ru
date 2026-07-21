@@ -89,6 +89,8 @@ function site_visual_editor_settings_fields(): array
         'home_lead_description' => 800,
         'home_lead_cta' => 80,
         'home_lead_eyebrow' => 120,
+        'home_lead_badge' => 120,
+        'home_lead_calc_label' => 120,
         'nav_label_home' => 80,
         'nav_label_catalog' => 80,
         'nav_label_services' => 80,

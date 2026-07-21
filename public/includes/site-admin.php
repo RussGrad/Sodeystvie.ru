@@ -384,6 +384,8 @@ function site_admin_sanitize_settings(array $input): array
         'home_lead_description' => 800,
         'home_lead_cta' => 80,
         'home_lead_eyebrow' => 120,
+        'home_lead_badge' => 120,
+        'home_lead_calc_label' => 120,
         'reviews_rating' => 400,
         'reviews_count' => 400,
         'telegram_url' => 400,
