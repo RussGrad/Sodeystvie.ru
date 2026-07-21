@@ -98,6 +98,7 @@ function site_visual_editor_settings_fields(): array
         'vk_url' => 400,
         'max_url' => 400,
         'whatsapp_url' => 400,
+        'deal_cards_kicker' => 80,
     ];
 }
 
@@ -125,6 +126,12 @@ function site_visual_editor_dataset_fields(): array
             'title' => 160,
             'result' => 120,
             'text' => 1200,
+        ],
+        'deal-cards' => [
+            'title' => 80,
+            'subtitle' => 80,
+            'imageAlt' => 160,
+            'image' => 0,
         ],
     ];
 }
@@ -164,7 +171,14 @@ function site_ve_attrs(
 
     if ($dataset !== '') {
         $map = site_visual_editor_dataset_fields();
-        if ($itemId === '' || !isset($map[$dataset][$field])) {
+        if ($itemId === '') {
+            return '';
+        }
+        if ($type === 'image') {
+            if ($field !== 'image' || !isset($map[$dataset])) {
+                return '';
+            }
+        } elseif (!isset($map[$dataset][$field])) {
             return '';
         }
         if ($dataset === 'team' && site_ve_team_from_crm()) {
@@ -244,7 +258,7 @@ function site_ve_save_dataset_field(string $dataset, string $itemId, string $fie
     require_once __DIR__ . '/site-content.php';
 
     $map = site_visual_editor_dataset_fields();
-    if (!isset($map[$dataset][$field])) {
+    if ($field === 'image' || !isset($map[$dataset][$field])) {
         throw new RuntimeException('Неизвестное поле датасета');
     }
     if ($itemId === '') {
@@ -295,6 +309,17 @@ function site_ve_save_dataset_field(string $dataset, string $itemId, string $fie
             }
             $rows[$i] = $clean;
             $savedValue = (string) $clean[$field];
+        } elseif ($dataset === 'deal-cards') {
+            if ($field === 'image') {
+                throw new RuntimeException('Изображение загружается файлом');
+            }
+            require_once __DIR__ . '/site-deal-cards.php';
+            $clean = site_admin_sanitize_deal_card_row($row);
+            if ($clean === null) {
+                throw new RuntimeException('Заголовок карточки не может быть пустым');
+            }
+            $rows[$i] = $clean;
+            $savedValue = (string) ($clean[$field] ?? '');
         } else {
             throw new RuntimeException('Неизвестный датасет');
         }
@@ -434,6 +459,84 @@ function site_visual_editor_handle_logo_upload(array $file): array
     }
 
     $public = '/assets/brand/' . basename($destination) . '?v=' . (string) time();
+
+    return ['ok' => true, 'path' => $public];
+}
+
+/**
+ * Загрузка фото карточки направления в assets/deal-cards/{id}.{ext}
+ *
+ * @param array{name?: string, type?: string, tmp_name?: string, error?: int, size?: int} $file
+ * @return array{ok: bool, path?: string, error?: string}
+ */
+function site_visual_editor_handle_deal_card_image_upload(string $itemId, array $file): array
+{
+    $safe = preg_replace('/[^a-z-]/', '', $itemId) ?? '';
+    $allowedIds = ['sell', 'buy', 'rent-out', 'rent-in'];
+    if ($safe === '' || !in_array($safe, $allowedIds, true)) {
+        return ['ok' => false, 'error' => 'Неизвестная карточка'];
+    }
+
+    $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
+    if ($error === UPLOAD_ERR_NO_FILE) {
+        return ['ok' => false, 'error' => 'Выберите изображение'];
+    }
+    if ($error !== UPLOAD_ERR_OK) {
+        return ['ok' => false, 'error' => 'Ошибка загрузки (код ' . $error . ')'];
+    }
+
+    $size = (int) ($file['size'] ?? 0);
+    if ($size <= 0 || $size > 8 * 1024 * 1024) {
+        return ['ok' => false, 'error' => 'Файл должен быть не больше 8 МБ'];
+    }
+
+    $tmp = (string) ($file['tmp_name'] ?? '');
+    if ($tmp === '' || !is_uploaded_file($tmp)) {
+        return ['ok' => false, 'error' => 'Некорректная загрузка'];
+    }
+
+    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($tmp);
+    $ext = match ($mime) {
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+        default => null,
+    };
+    if ($ext === null) {
+        return ['ok' => false, 'error' => 'Допустимы JPG, PNG или WebP'];
+    }
+    if (@getimagesize($tmp) === false) {
+        return ['ok' => false, 'error' => 'Файл не является изображением'];
+    }
+
+    $dir = dirname(__DIR__) . '/assets/deal-cards';
+    if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
+        return ['ok' => false, 'error' => 'Не удалось создать каталог deal-cards'];
+    }
+
+    $staged = $dir . '/.' . $safe . '-' . bin2hex(random_bytes(6)) . '.' . $ext;
+    if (!move_uploaded_file($tmp, $staged)) {
+        return ['ok' => false, 'error' => 'Не удалось сохранить файл'];
+    }
+
+    $destination = $dir . '/' . $safe . '.' . $ext;
+    if (!@rename($staged, $destination)) {
+        @unlink($staged);
+
+        return ['ok' => false, 'error' => 'Не удалось установить изображение'];
+    }
+
+    foreach (['jpg', 'jpeg', 'png', 'webp'] as $other) {
+        if ($other === $ext) {
+            continue;
+        }
+        $old = $dir . '/' . $safe . '.' . $other;
+        if (is_file($old)) {
+            @unlink($old);
+        }
+    }
+
+    $public = '/assets/deal-cards/' . $safe . '.' . $ext . '?v=' . (string) time();
 
     return ['ok' => true, 'path' => $public];
 }

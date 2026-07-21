@@ -230,6 +230,7 @@ function site_admin_dataset_path(string $id): ?string
         'cases' => 'cases.json',
         'vacancies' => 'vacancies.json',
         'services' => 'services.json',
+        'deal-cards' => 'deal-cards.json',
         'settings' => 'site-settings.json',
     ];
 
@@ -248,6 +249,7 @@ function site_admin_dataset_label(string $id): string
         'cases' => 'Кейсы',
         'vacancies' => 'Вакансии',
         'services' => 'Услуги',
+        'deal-cards' => 'Карточки Продать/Купить/Сдать/Снять',
         'settings' => 'Контакты, тексты и политика',
     ];
 

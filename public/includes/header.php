@@ -118,12 +118,19 @@ $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());
                                         <path d="M2.75 4.5 L6 8.25 L9.25 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg></a>
                                 <ul class="site-header__submenu" id="<?php echo htmlspecialchars($dropdownId, ENT_QUOTES, 'UTF-8'); ?>" role="list">
-                                    <?php foreach ($item['children'] as $cslug => $child) { ?>
+                                    <?php foreach ($item['children'] as $cslug => $child) {
+                                        $serviceId = str_starts_with((string) $cslug, 'service-')
+                                            ? substr((string) $cslug, strlen('service-'))
+                                            : '';
+                                        $childVe = $serviceId !== ''
+                                            ? site_ve_attrs('title', 'text', 'Название услуги в меню', 'services', $serviceId)
+                                            : '';
+                                        ?>
                                         <li class="site-header__submenu-item">
                                             <a
                                                 class="site-header__submenu-link<?php echo $currentNav === $cslug ? ' site-header__submenu-link--current' : ''; ?>"
                                                 href="<?php echo htmlspecialchars($child['href'], ENT_QUOTES, 'UTF-8'); ?>"
-                                            ><?php echo htmlspecialchars($child['label'], ENT_QUOTES, 'UTF-8'); ?></a>
+                                            ><span<?php echo $childVe; ?>><?php echo htmlspecialchars($child['label'], ENT_QUOTES, 'UTF-8'); ?></span></a>
                                         </li>
                                     <?php } ?>
                                 </ul>

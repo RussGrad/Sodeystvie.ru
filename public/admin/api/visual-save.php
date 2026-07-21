@@ -146,5 +146,33 @@ if ($action === 'upload_logo') {
     exit;
 }
 
+if ($action === 'upload_image') {
+    $dataset = isset($_POST['dataset']) && is_string($_POST['dataset']) ? $_POST['dataset'] : '';
+    $itemId = isset($_POST['id']) && is_string($_POST['id']) ? $_POST['id'] : '';
+    $file = $_FILES['file'] ?? $_FILES['logo'] ?? null;
+    if (!is_array($file)) {
+        http_response_code(400);
+        echo json_encode(['ok' => false, 'error' => 'Файл не передан'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    if ($dataset === 'deal-cards') {
+        $result = site_visual_editor_handle_deal_card_image_upload($itemId, $file);
+    } else {
+        http_response_code(400);
+        echo json_encode(['ok' => false, 'error' => 'Загрузка для этого блока не поддерживается'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    if (!$result['ok']) {
+        http_response_code(400);
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    echo json_encode($result, JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 http_response_code(400);
 echo json_encode(['ok' => false, 'error' => 'Неизвестное действие'], JSON_UNESCAPED_UNICODE);

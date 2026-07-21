@@ -3,64 +3,12 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/site-image.php';
+require_once __DIR__ . '/site-deal-cards.php';
+require_once __DIR__ . '/visual-editor.php';
 
 /**
  * Блок направлений: Продать / Купить / Сдать / Снять.
  */
-
-$dealCards = [
-    [
-        'variant' => 'sell',
-        'title' => 'Продать',
-        'subtitle' => 'Квартиру',
-        'action' => 'lead',
-        'topic' => 'sell-evaluation',
-        'aria' => 'Оставить заявку на продажу квартиры',
-        'imageAlt' => 'Консультация по продаже квартиры',
-    ],
-    [
-        'variant' => 'buy',
-        'title' => 'Купить',
-        'subtitle' => 'Квартиру',
-        'action' => 'link',
-        'href' => '/catalog/?operation=buy&type=flat',
-        'aria' => 'Перейти в каталог покупки квартир',
-        'imageAlt' => 'Подбор квартиры с риэлтором',
-    ],
-    [
-        'variant' => 'rent-out',
-        'title' => 'Сдать',
-        'subtitle' => 'Квартиру',
-        'action' => 'lead',
-        'topic' => 'rent-out',
-        'aria' => 'Оставить заявку на сдачу квартиры',
-        'imageAlt' => 'Сдача квартиры в аренду',
-    ],
-    [
-        'variant' => 'rent-in',
-        'title' => 'Снять',
-        'subtitle' => 'Квартиру',
-        'action' => 'link',
-        'href' => '/catalog/?operation=rent&type=flat',
-        'aria' => 'Перейти в каталог аренды квартир',
-        'imageAlt' => 'Просмотр квартиры в аренду',
-    ],
-];
-
-function site_deal_card_image_path(string $variant): ?string
-{
-    $safe = preg_replace('/[^a-z-]/', '', $variant) ?: 'sell';
-    $dir = dirname(__DIR__) . '/assets/deal-cards';
-    $webBase = '/assets/deal-cards/' . $safe;
-
-    foreach (['.jpg', '.jpeg', '.png', '.webp'] as $ext) {
-        if (is_file($dir . '/' . $safe . $ext)) {
-            return $webBase . $ext;
-        }
-    }
-
-    return null;
-}
 
 /**
  * @param string $variant
@@ -71,8 +19,9 @@ function site_render_deal_card_visual(string $variant, string $alt = ''): void
     $safe = preg_replace('/[^a-z-]/', '', $variant) ?: 'sell';
     $imagePath = site_deal_card_image_path($variant);
     $photoClass = $imagePath !== null ? ' deal-cards__visual--photo' : '';
+    $veImage = site_ve_attrs('image', 'image', 'Фото карточки', 'deal-cards', $safe);
     ?>
-    <div class="deal-cards__visual deal-cards__visual--<?php echo htmlspecialchars($safe, ENT_QUOTES, 'UTF-8'); ?><?php echo $photoClass; ?>">
+    <div class="deal-cards__visual deal-cards__visual--<?php echo htmlspecialchars($safe, ENT_QUOTES, 'UTF-8'); ?><?php echo $photoClass; ?>"<?php echo $veImage; ?>>
         <?php if ($imagePath !== null) {
             echo site_render_static_picture(
                 $imagePath,
@@ -116,13 +65,14 @@ function site_render_deal_card_inner(array $card): void
 {
     $title = (string) ($card['title'] ?? '');
     $subtitle = (string) ($card['subtitle'] ?? '');
-    $variant = (string) ($card['variant'] ?? 'sell');
+    $variant = (string) ($card['variant'] ?? $card['id'] ?? 'sell');
     $imageAlt = (string) ($card['imageAlt'] ?? $title);
+    $id = (string) ($card['id'] ?? $variant);
     ?>
     <div class="deal-cards__head">
         <div class="deal-cards__labels">
-            <span class="deal-cards__title"><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></span>
-            <span class="deal-cards__subtitle"><?php echo htmlspecialchars($subtitle, ENT_QUOTES, 'UTF-8'); ?></span>
+            <span class="deal-cards__title"<?php echo site_ve_attrs('title', 'text', 'Заголовок карточки', 'deal-cards', $id); ?>><?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></span>
+            <span class="deal-cards__subtitle"<?php echo site_ve_attrs('subtitle', 'text', 'Подзаголовок карточки', 'deal-cards', $id); ?>><?php echo htmlspecialchars($subtitle, ENT_QUOTES, 'UTF-8'); ?></span>
         </div>
         <span class="deal-cards__arrow" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -136,11 +86,14 @@ function site_render_deal_card_inner(array $card): void
     <?php
 }
 
+$dealCards = site_deal_cards_all();
+$dealKicker = site_content_setting('deal_cards_kicker', 'с нами легко');
+
 ?>
 <section class="deal-cards" aria-label="Направления работы с недвижимостью">
     <div class="container">
         <div class="deal-cards__kicker">
-            <p class="deal-cards__kicker-text">с нами легко</p>
+            <p class="deal-cards__kicker-text"<?php echo site_ve_attrs('deal_cards_kicker', 'text', 'Надпись над карточками'); ?>><?php echo htmlspecialchars($dealKicker, ENT_QUOTES, 'UTF-8'); ?></p>
             <img
                 class="deal-cards__kicker-arrow"
                 src="/assets/deal-cards/kicker-arrow.png"
@@ -154,7 +107,7 @@ function site_render_deal_card_inner(array $card): void
         <div class="deal-cards__grid">
             <?php foreach ($dealCards as $card) {
                 $aria = (string) ($card['aria'] ?? ($card['title'] ?? ''));
-                $variant = htmlspecialchars((string) ($card['variant'] ?? ''), ENT_QUOTES, 'UTF-8');
+                $variant = htmlspecialchars((string) ($card['variant'] ?? $card['id'] ?? ''), ENT_QUOTES, 'UTF-8');
                 if (($card['action'] ?? '') === 'lead') {
                     ?>
                     <button

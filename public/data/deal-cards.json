@@ -1,0 +1,38 @@
+[
+    {
+        "id": "sell",
+        "title": "Продать",
+        "subtitle": "Квартиру",
+        "action": "lead",
+        "topic": "sell-evaluation",
+        "aria": "Оставить заявку на продажу квартиры",
+        "imageAlt": "Консультация по продаже квартиры"
+    },
+    {
+        "id": "buy",
+        "title": "Купить",
+        "subtitle": "Квартиру",
+        "action": "link",
+        "href": "/catalog/?operation=buy&type=flat",
+        "aria": "Перейти в каталог покупки квартир",
+        "imageAlt": "Подбор квартиры с риэлтором"
+    },
+    {
+        "id": "rent-out",
+        "title": "Сдать",
+        "subtitle": "Квартиру",
+        "action": "lead",
+        "topic": "rent-out",
+        "aria": "Оставить заявку на сдачу квартиры",
+        "imageAlt": "Сдача квартиры в аренду"
+    },
+    {
+        "id": "rent-in",
+        "title": "Снять",
+        "subtitle": "Квартиру",
+        "action": "link",
+        "href": "/catalog/?operation=rent&type=flat",
+        "aria": "Перейти в каталог аренды квартир",
+        "imageAlt": "Просмотр квартиры в аренду"
+    }
+]

@@ -340,8 +340,16 @@
       }
       var fd = new FormData();
       fd.append('csrf', boot.csrf || '');
-      fd.append('action', 'upload_logo');
-      fd.append('logo', file);
+      if (activeDataset && activeItemId && activeField === 'image') {
+        fd.append('action', 'upload_image');
+        fd.append('dataset', activeDataset);
+        fd.append('id', activeItemId);
+        fd.append('field', activeField);
+        fd.append('file', file);
+      } else {
+        fd.append('action', 'upload_logo');
+        fd.append('logo', file);
+      }
       fetch(boot.saveUrl || '/admin/api/visual-save.php', {
         method: 'POST',
         body: fd,
@@ -356,7 +364,7 @@
           if (!res.ok || !res.data || !res.data.ok) {
             throw new Error((res.data && res.data.error) || 'Ошибка сохранения');
           }
-          setStatus('Логотип сохранён');
+          setStatus('Изображение сохранено');
           window.location.reload();
         })
         .catch(function (err) {
