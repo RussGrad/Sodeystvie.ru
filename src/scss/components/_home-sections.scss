@@ -334,12 +334,40 @@
 }
 
 .team-card {
+  position: relative;
   padding: 1.35rem 1.15rem 1.4rem;
   text-align: center;
   background: var(--services-card-bg);
   border: 1px solid var(--services-card-border);
   border-radius: 12px;
   box-shadow: var(--services-card-shadow);
+  transition:
+    transform var(--duration-normal) var(--ease-smooth),
+    box-shadow var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-fast) var(--ease-smooth);
+
+  &--expandable {
+    cursor: pointer;
+  }
+
+  &.is-expanded {
+    z-index: 3;
+    transform: scale(1.06);
+    border-color: rgba(var(--color-accent-rgb), 0.45);
+    box-shadow:
+      0 16px 40px rgba(0, 0, 0, 0.28),
+      0 2px 8px rgba(0, 0, 0, 0.12);
+
+    .team-card__photo-wrap {
+      width: 11.5rem;
+      height: 11.5rem;
+
+      @media (min-width: 640px) {
+        width: 12.5rem;
+        height: 12.5rem;
+      }
+    }
+  }
 
   &__photo-wrap {
     width: 9rem;
@@ -348,6 +376,9 @@
     overflow: hidden;
     border-radius: 50%;
     border: 2px solid rgba(var(--color-accent-rgb), 0.2);
+    transition:
+      width var(--duration-normal) var(--ease-smooth),
+      height var(--duration-normal) var(--ease-smooth);
 
     @media (min-width: 640px) {
       width: 10rem;
@@ -395,11 +426,34 @@
     color: var(--header-muted);
   }
 
-  &__desc {
+  &__desc-wrap {
     margin: 0 0 0.65rem;
+  }
+
+  &__desc {
+    margin: 0;
     font-size: 0.8125rem;
     line-height: 1.45;
     color: var(--services-text);
+  }
+
+  &__toggle {
+    display: inline-block;
+    margin-top: 0.4rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+
+    &:hover {
+      color: var(--color-accent-hover);
+    }
   }
 
   &__contacts {
@@ -419,6 +473,10 @@
       text-decoration: underline;
     }
   }
+}
+
+.team__grid {
+  overflow: visible;
 }
 
 .cases {

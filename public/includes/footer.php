@@ -228,6 +228,10 @@ $privacyModalJsVersion = (string) (@filemtime(__DIR__ . '/../js/privacy-modal.js
     ?>
     <script src="/js/listing-page.js?v=<?php echo htmlspecialchars($listingPageJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <?php
+    $teamCardsJsVersion = (string) (@filemtime(__DIR__ . '/../js/team-cards.js') ?: time());
+    ?>
+    <script src="/js/team-cards.js?v=<?php echo htmlspecialchars($teamCardsJsVersion, ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+    <?php
     if (!empty($extraDeferScripts) && is_array($extraDeferScripts)) {
         foreach ($extraDeferScripts as $scriptSrc) {
             if (!is_string($scriptSrc) || $scriptSrc === '') {

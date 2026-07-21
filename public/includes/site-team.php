@@ -230,8 +230,11 @@ function site_render_team_card(array $member): void
         ? $experienceRaw
         : site_team_format_experience($experienceRaw);
     $description = trim((string) ($member['description'] ?? ''));
+    $ve = site_visual_editor_enabled();
+    $preview = site_team_description_preview($description);
+    $expandable = !$ve && $preview['expandable'];
     ?>
-    <article class="team-card">
+    <article class="team-card<?php echo $expandable ? ' team-card--expandable' : ''; ?>"<?php echo $expandable ? ' data-team-card' : ''; ?>>
         <div class="team-card__photo-wrap">
             <?php if ($hasLocalPhoto) {
                 echo site_render_static_picture(
@@ -246,14 +249,31 @@ function site_render_team_card(array $member): void
             <?php } ?>
         </div>
         <h3 class="team-card__name"<?php echo site_ve_attrs('name', 'text', 'Имя', 'team', $id); ?>><?php echo htmlspecialchars($member['name'], ENT_QUOTES, 'UTF-8'); ?></h3>
-        <?php if ($member['role'] !== '' || site_visual_editor_enabled()) { ?>
+        <?php if ($member['role'] !== '' || $ve) { ?>
             <p class="team-card__role"<?php echo site_ve_attrs('role', 'text', 'Должность', 'team', $id); ?>><?php echo htmlspecialchars($member['role'], ENT_QUOTES, 'UTF-8'); ?></p>
         <?php } ?>
-        <?php if ($experience !== '' || site_visual_editor_enabled()) { ?>
+        <?php if ($experience !== '' || $ve) { ?>
             <p class="team-card__exp"<?php echo site_ve_attrs('experience', 'text', 'Опыт', 'team', $id); ?>><?php echo htmlspecialchars($experience, ENT_QUOTES, 'UTF-8'); ?></p>
         <?php } ?>
-        <?php if ($description !== '' || site_visual_editor_enabled()) { ?>
-            <p class="team-card__desc"<?php echo site_ve_attrs('description', 'textarea', 'Описание', 'team', $id); ?>><?php echo htmlspecialchars($description, ENT_QUOTES, 'UTF-8'); ?></p>
+        <?php if ($description !== '' || $ve) { ?>
+            <div class="team-card__desc-wrap">
+                <p
+                    class="team-card__desc"
+                    <?php echo site_ve_attrs('description', 'textarea', 'Описание', 'team', $id); ?>
+                    <?php if ($expandable) { ?>
+                        data-team-desc-short="<?php echo htmlspecialchars($preview['short'], ENT_QUOTES, 'UTF-8'); ?>"
+                        data-team-desc-full="<?php echo htmlspecialchars($description, ENT_QUOTES, 'UTF-8'); ?>"
+                    <?php } ?>
+                ><?php echo htmlspecialchars($expandable ? $preview['short'] : $description, ENT_QUOTES, 'UTF-8'); ?></p>
+                <?php if ($expandable) { ?>
+                    <button
+                        type="button"
+                        class="team-card__toggle"
+                        data-team-toggle
+                        aria-expanded="false"
+                    >Подробнее</button>
+                <?php } ?>
+            </div>
         <?php } ?>
         <?php if ($member['telegram'] !== '' || $member['whatsapp'] !== '') { ?>
             <div class="team-card__contacts">
@@ -267,6 +287,29 @@ function site_render_team_card(array $member): void
         <?php } ?>
     </article>
     <?php
+}
+
+/**
+ * @return array{short: string, expandable: bool}
+ */
+function site_team_description_preview(string $description, int $maxLen = 110): array
+{
+    $description = trim($description);
+    if ($description === '') {
+        return ['short' => '', 'expandable' => false];
+    }
+    if (mb_strlen($description) <= $maxLen) {
+        return ['short' => $description, 'expandable' => false];
+    }
+
+    $cut = mb_substr($description, 0, $maxLen);
+    $space = mb_strrpos($cut, ' ');
+    if ($space !== false && $space > (int) ($maxLen * 0.55)) {
+        $cut = mb_substr($cut, 0, $space);
+    }
+    $cut = rtrim($cut, " \t.,;:—-");
+
+    return ['short' => $cut . '…', 'expandable' => true];
 }
 
 /** Если в стаже одно число — показываем «N лет опыта». */
