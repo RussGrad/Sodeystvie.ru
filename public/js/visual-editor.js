@@ -39,6 +39,18 @@
     }
   }
 
+  function clamp(n, min, max) {
+    return Math.max(min, Math.min(max, n));
+  }
+
+  function round1(n) {
+    return Math.round(n * 10) / 10;
+  }
+
+  function round2(n) {
+    return Math.round(n * 100) / 100;
+  }
+
   document.body.classList.add('ve-on');
 
   var pagesHtml = '';
@@ -83,7 +95,7 @@
   bar.innerHTML =
     '<div>' +
     '<p class="ve-bar__title">Визуальный редактор</p>' +
-    '<p class="ve-bar__hint">Клик по подсветке — правка. Переходы по сайту остаются в редакторе. «Смотреть сайт» — выход.</p>' +
+    '<p class="ve-bar__hint">Клик по журналу, фото или плашке — правка на месте. Перетаскивайте выделенное. «Смотреть сайт» — выход.</p>' +
     crmNote +
     pagesHtml +
     '</div>' +
@@ -125,6 +137,33 @@
     '</div>';
   document.body.appendChild(panel);
 
+  var dock = document.createElement('div');
+  dock.className = 've-dock';
+  dock.hidden = true;
+  dock.innerHTML =
+    '<div class="ve-dock__head">' +
+    '<strong class="ve-dock__title" id="ve-dock-title">Правка</strong>' +
+    '<button type="button" class="ve-dock__close" id="ve-dock-close" title="Закрыть">×</button>' +
+    '</div>' +
+    '<p class="ve-dock__hint" id="ve-dock-hint">Перетащите элемент мышью</p>' +
+    '<div class="ve-dock__tools" id="ve-dock-tools">' +
+    '<button type="button" class="ve-dock__btn" data-ve-dock="rotate-left" title="Повернуть влево">↺</button>' +
+    '<button type="button" class="ve-dock__btn" data-ve-dock="rotate-right" title="Повернуть вправо">↻</button>' +
+    '<button type="button" class="ve-dock__btn" data-ve-dock="zoom-out" title="Уменьшить">−</button>' +
+    '<button type="button" class="ve-dock__btn" data-ve-dock="zoom-in" title="Увеличить">+</button>' +
+    '<label class="ve-dock__btn ve-dock__btn--file" id="ve-dock-file-label" hidden>' +
+    'Файл<input type="file" id="ve-dock-file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden>' +
+    '</label>' +
+    '</div>' +
+    '<p class="ve-dock__meta" id="ve-dock-meta"></p>' +
+    '<textarea class="ve-dock__textarea" id="ve-dock-textarea" hidden rows="3"></textarea>' +
+    '<p class="ve-dock__error" id="ve-dock-error" hidden></p>' +
+    '<div class="ve-dock__actions">' +
+    '<button type="button" class="ve-bar__btn ve-bar__btn--primary" id="ve-dock-save">Сохранить</button>' +
+    '<button type="button" class="ve-bar__btn" id="ve-dock-delete" hidden>Удалить</button>' +
+    '</div>';
+  document.body.appendChild(dock);
+
   var statusEl = document.getElementById('ve-status');
   var titleEl = document.getElementById('ve-panel-title');
   var labelEl = document.getElementById('ve-panel-label');
@@ -145,6 +184,18 @@
   var zoomOutBtn = document.getElementById('ve-tool-zoom-out');
   var zoomInBtn = document.getElementById('ve-tool-zoom-in');
 
+  var dockTitle = document.getElementById('ve-dock-title');
+  var dockHint = document.getElementById('ve-dock-hint');
+  var dockTools = document.getElementById('ve-dock-tools');
+  var dockMeta = document.getElementById('ve-dock-meta');
+  var dockTextarea = document.getElementById('ve-dock-textarea');
+  var dockError = document.getElementById('ve-dock-error');
+  var dockSave = document.getElementById('ve-dock-save');
+  var dockDelete = document.getElementById('ve-dock-delete');
+  var dockClose = document.getElementById('ve-dock-close');
+  var dockFile = document.getElementById('ve-dock-file');
+  var dockFileLabel = document.getElementById('ve-dock-file-label');
+
   var activeEl = null;
   var activeField = '';
   var activeType = 'text';
@@ -152,6 +203,19 @@
   var activeItemId = '';
   var activeRotate = 0;
   var activeScale = 1;
+  var activeX = 0;
+  var activeY = 0;
+  var canvasMode = false;
+  var dragState = null;
+
+  function isCanvasType(type, field) {
+    return (
+      type === 'mag-image' ||
+      type === 'mag-layout' ||
+      type === 'mag-plate' ||
+      field === 'home_lead_badge'
+    );
+  }
 
   function magFieldToKind(field) {
     return field === 'magazine_logo' ? 'logo' : 'photo';
@@ -165,22 +229,97 @@
     return field === 'magazine_logo' ? 'magazine_logo_scale' : 'magazine_photo_scale';
   }
 
-  function updateMagMeta() {
-    if (!metaEl) {
-      return;
-    }
-    metaEl.textContent = activeRotate + '° · ×' + activeScale.toFixed(2);
+  function magFieldToXKey(field) {
+    return field === 'magazine_logo' ? 'magazine_logo_x' : 'magazine_photo_x';
   }
 
-  function applyMagTransform() {
+  function magFieldToYKey(field) {
+    return field === 'magazine_logo' ? 'magazine_logo_y' : 'magazine_photo_y';
+  }
+
+  function setStatus(msg) {
+    if (statusEl) {
+      statusEl.textContent = msg || '';
+    }
+  }
+
+  function setError(msg) {
+    if (!errorEl) {
+      return;
+    }
+    if (!msg) {
+      errorEl.hidden = true;
+      errorEl.textContent = '';
+      return;
+    }
+    errorEl.hidden = false;
+    errorEl.textContent = msg;
+  }
+
+  function setDockError(msg) {
+    if (!dockError) {
+      return;
+    }
+    if (!msg) {
+      dockError.hidden = true;
+      dockError.textContent = '';
+      return;
+    }
+    dockError.hidden = false;
+    dockError.textContent = msg;
+  }
+
+  function updateMagMeta() {
+    var text = '';
+    if (activeType === 'mag-plate') {
+      text = 'отступ снизу: ' + Math.round(activeY) + 'px · можно перетащить';
+    } else if (activeType === 'mag-layout' || activeType === 'mag-image') {
+      text =
+        Math.round(activeRotate) +
+        '° · ×' +
+        activeScale.toFixed(2) +
+        ' · ' +
+        round1(activeX) +
+        '% / ' +
+        round1(activeY) +
+        '%';
+    }
+    if (metaEl) {
+      metaEl.textContent = text;
+    }
+    if (dockMeta) {
+      dockMeta.textContent = text;
+    }
+  }
+
+  function applyCanvasTransform() {
     if (!activeEl) {
       return;
     }
-    activeEl.style.setProperty('--mag-rotate', activeRotate + 'deg');
-    activeEl.style.setProperty('--mag-scale', String(activeScale));
-    activeEl.setAttribute('data-ve-rotate', String(activeRotate));
-    activeEl.setAttribute('data-ve-scale', String(activeScale));
+    if (activeType === 'mag-image') {
+      activeEl.style.setProperty('--mag-rotate', activeRotate + 'deg');
+      activeEl.style.setProperty('--mag-scale', String(activeScale));
+      activeEl.style.setProperty('--mag-x', activeX + '%');
+      activeEl.style.setProperty('--mag-y', activeY + '%');
+      activeEl.setAttribute('data-ve-rotate', String(activeRotate));
+      activeEl.setAttribute('data-ve-scale', String(activeScale));
+      activeEl.setAttribute('data-ve-x', String(activeX));
+      activeEl.setAttribute('data-ve-y', String(activeY));
+    } else if (activeType === 'mag-layout') {
+      activeEl.style.setProperty('--mag-layout-rotate', activeRotate + 'deg');
+      activeEl.style.setProperty('--mag-layout-scale', String(activeScale));
+      activeEl.style.setProperty('--mag-layout-x', activeX + '%');
+      activeEl.style.setProperty('--mag-layout-y', activeY + '%');
+      activeEl.setAttribute('data-ve-rotate', String(activeRotate));
+      activeEl.setAttribute('data-ve-scale', String(activeScale));
+      activeEl.setAttribute('data-ve-x', String(activeX));
+      activeEl.setAttribute('data-ve-y', String(activeY));
+    } else if (activeType === 'mag-plate') {
+      activeEl.style.setProperty('--mag-calc-offset', Math.round(activeY) + 'px');
+      activeEl.setAttribute('data-ve-y', String(Math.round(activeY)));
+    }
     updateMagMeta();
+    positionDock();
   }
 
   function saveMagField(field, value) {
@@ -201,36 +340,18 @@
     });
   }
 
-  function saveMagTransform() {
-    return saveMagField(magFieldToRotateKey(activeField), String(activeRotate)).then(function (res) {
-      if (!res.ok || !res.data || !res.data.ok) {
-        throw new Error((res.data && res.data.error) || 'Ошибка сохранения поворота');
-      }
-      return saveMagField(magFieldToScaleKey(activeField), String(activeScale));
-    }).then(function (res) {
-      if (!res.ok || !res.data || !res.data.ok) {
-        throw new Error((res.data && res.data.error) || 'Ошибка сохранения масштаба');
-      }
+  function saveFieldsSequential(pairs) {
+    var chain = Promise.resolve();
+    pairs.forEach(function (pair) {
+      chain = chain.then(function () {
+        return saveMagField(pair[0], pair[1]).then(function (res) {
+          if (!res.ok || !res.data || !res.data.ok) {
+            throw new Error((res.data && res.data.error) || 'Ошибка сохранения');
+          }
+        });
+      });
     });
-  }
-
-  function setStatus(msg) {
-    if (statusEl) {
-      statusEl.textContent = msg || '';
-    }
-  }
-
-  function setError(msg) {
-    if (!errorEl) {
-      return;
-    }
-    if (!msg) {
-      errorEl.hidden = true;
-      errorEl.textContent = '';
-      return;
-    }
-    errorEl.hidden = false;
-    errorEl.textContent = msg;
+    return chain;
   }
 
   function fillIconSelect(current) {
@@ -255,20 +376,92 @@
     if (type === 'url' && el.tagName === 'A') {
       return el.getAttribute('href') || '';
     }
+    if (type === 'mag-plate') {
+      var textNode = el.querySelector('.mortgage-quiz__calc-link-text');
+      return ((textNode && textNode.textContent) || el.textContent || '').trim();
+    }
     return (el.textContent || '').trim();
+  }
+
+  function positionDock() {
+    if (!canvasMode || !activeEl || dock.hidden) {
+      return;
+    }
+    var rect = activeEl.getBoundingClientRect();
+    var dockW = dock.offsetWidth || 280;
+    var dockH = dock.offsetHeight || 160;
+    var left = rect.left + rect.width / 2 - dockW / 2;
+    var top = rect.top - dockH - 12;
+    if (top < 72) {
+      top = rect.bottom + 12;
+    }
+    left = clamp(left, 12, window.innerWidth - dockW - 12);
+    top = clamp(top, 72, window.innerHeight - dockH - 12);
+    dock.style.left = Math.round(left) + 'px';
+    dock.style.top = Math.round(top) + 'px';
+  }
+
+  function hideDock() {
+    dock.hidden = true;
+    setDockError('');
+    if (dockTextarea) {
+      dockTextarea.hidden = true;
+      dockTextarea.value = '';
+    }
+    if (dockFile) {
+      dockFile.value = '';
+    }
+  }
+
+  function showDock(label) {
+    canvasMode = true;
+    panel.hidden = true;
+    dock.hidden = false;
+    dockTitle.textContent = label || 'Правка на месте';
+    setDockError('');
+
+    var showTools = activeType === 'mag-image' || activeType === 'mag-layout';
+    dockTools.hidden = !showTools;
+    dockFileLabel.hidden = activeType !== 'mag-image';
+    dockDelete.hidden = !(activeType === 'mag-image' && activeEl && activeEl.getAttribute('data-ve-has-image') === '1');
+
+    if (activeType === 'mag-plate' || activeField === 'home_lead_badge') {
+      dockHint.textContent = activeType === 'mag-plate' ? 'Текст и вертикальное положение плашки' : 'Текст бейджа';
+      dockTextarea.hidden = false;
+      dockTextarea.value = readCurrentValue(activeEl, activeType === 'mag-plate' ? 'mag-plate' : 'textarea');
+    } else if (activeType === 'mag-layout') {
+      dockHint.textContent = 'Перетащите журнал · кнопки — наклон и масштаб';
+      dockTextarea.hidden = true;
+    } else if (activeType === 'mag-image') {
+      dockHint.textContent = 'Перетащите фото · кнопки — поворот и зум · Файл — замена';
+      dockTextarea.hidden = true;
+    } else {
+      dockHint.textContent = 'Правка на месте';
+      dockTextarea.hidden = true;
+    }
+
+    updateMagMeta();
+    positionDock();
   }
 
   function closePanel() {
     panel.hidden = true;
+    hideDock();
     if (activeEl) {
       activeEl.classList.remove('is-ve-active');
+      activeEl.classList.remove('is-ve-dragging');
     }
     activeEl = null;
     activeField = '';
+    activeType = 'text';
     activeDataset = '';
     activeItemId = '';
     activeRotate = 0;
     activeScale = 1;
+    activeX = 0;
+    activeY = 0;
+    canvasMode = false;
+    dragState = null;
     if (toolsEl) {
       toolsEl.hidden = true;
     }
@@ -277,6 +470,11 @@
       metaEl.textContent = '';
     }
     setError('');
+  }
+
+  function parseNumAttr(el, name, fallback) {
+    var n = parseFloat(el.getAttribute(name) || String(fallback));
+    return Number.isNaN(n) ? fallback : n;
   }
 
   function openPanel(el) {
@@ -289,6 +487,7 @@
 
     if (activeEl) {
       activeEl.classList.remove('is-ve-active');
+      activeEl.classList.remove('is-ve-dragging');
     }
     activeEl = el;
     activeField = field;
@@ -321,29 +520,23 @@
     }
     fileEl.value = '';
 
-    if (type === 'mag-image') {
-      fileEl.hidden = false;
-      labelEl.setAttribute('for', 've-panel-file');
-      labelEl.textContent = 'Изображение';
-      activeRotate = parseInt(el.getAttribute('data-ve-rotate') || '0', 10);
-      if (Number.isNaN(activeRotate)) {
-        activeRotate = 0;
-      }
-      activeScale = parseFloat(el.getAttribute('data-ve-scale') || '1');
-      if (Number.isNaN(activeScale) || activeScale <= 0) {
+    if (isCanvasType(type, field)) {
+      activeRotate = Math.round(parseNumAttr(el, 'data-ve-rotate', type === 'mag-layout' ? 6 : 0));
+      activeScale = parseNumAttr(el, 'data-ve-scale', 1);
+      if (activeScale <= 0) {
         activeScale = 1;
       }
-      applyMagTransform();
-      if (toolsEl) {
-        toolsEl.hidden = false;
-      }
-      if (metaEl) {
-        metaEl.hidden = false;
-      }
-      if (deleteImageBtn && el.getAttribute('data-ve-has-image') === '1') {
-        deleteImageBtn.hidden = false;
-      }
-    } else if (type === 'image') {
+      activeX = parseNumAttr(el, 'data-ve-x', 0);
+      activeY = parseNumAttr(el, 'data-ve-y', type === 'mag-plate' ? 18 : 0);
+      applyCanvasTransform();
+      showDock(label);
+      return;
+    }
+
+    canvasMode = false;
+    hideDock();
+
+    if (type === 'image') {
       fileEl.hidden = false;
       labelEl.setAttribute('for', 've-panel-file');
       if (deleteImageBtn && el.getAttribute('data-ve-has-image') === '1') {
@@ -408,6 +601,24 @@
     return false;
   }
 
+  function pickVeTarget(target) {
+    if (target.closest('[data-ve-select-layout]')) {
+      return document.querySelector('.mortgage-quiz__publication--magazine[data-ve-field="magazine_layout"]');
+    }
+    var nested = target.closest('[data-ve-field]');
+    if (!nested) {
+      return null;
+    }
+    // Предпочитаем фото/логотип внутри журнала, а не сам журнал
+    if (
+      nested.getAttribute('data-ve-type') === 'mag-layout' &&
+      target.closest('.mortgage-quiz__mag-photo[data-ve-field], .mortgage-quiz__mag-logo[data-ve-field]')
+    ) {
+      return target.closest('.mortgage-quiz__mag-photo[data-ve-field], .mortgage-quiz__mag-logo[data-ve-field]');
+    }
+    return nested;
+  }
+
   document.addEventListener(
     'click',
     function (event) {
@@ -422,7 +633,7 @@
       if (!(target instanceof Element)) {
         return;
       }
-      if (panel.contains(target)) {
+      if (panel.contains(target) || dock.contains(target)) {
         return;
       }
 
@@ -442,7 +653,7 @@
         return;
       }
 
-      var veEl = target.closest('[data-ve-field]');
+      var veEl = pickVeTarget(target);
       if (veEl && !bar.contains(veEl)) {
         event.preventDefault();
         event.stopPropagation();
@@ -459,13 +670,94 @@
         return;
       }
 
-      // Cookie уже держит VE: просто переходим без сброса режима
       event.preventDefault();
       event.stopPropagation();
       location.assign(withVe(a.href));
     },
     true
   );
+
+  document.addEventListener('pointerdown', function (event) {
+    if (!canvasMode || !activeEl || event.button !== 0) {
+      return;
+    }
+    var target = event.target;
+    if (!(target instanceof Element)) {
+      return;
+    }
+    if (dock.contains(target) || panel.contains(target) || bar.contains(target)) {
+      return;
+    }
+    if (!activeEl.contains(target) && target !== activeEl) {
+      return;
+    }
+    if (activeType !== 'mag-image' && activeType !== 'mag-layout' && activeType !== 'mag-plate') {
+      return;
+    }
+
+    var parent = activeEl.closest('.mortgage-quiz__visual') || activeEl.parentElement;
+    var bounds = parent ? parent.getBoundingClientRect() : { width: 400, height: 400 };
+    dragState = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      origX: activeX,
+      origY: activeY,
+      unitX: Math.max(bounds.width, 1) / 100,
+      unitY: Math.max(bounds.height, 1) / (activeType === 'mag-plate' ? 1 : 100),
+    };
+    activeEl.classList.add('is-ve-dragging');
+    try {
+      activeEl.setPointerCapture(event.pointerId);
+    } catch (err) {
+      // ignore
+    }
+    event.preventDefault();
+  });
+
+  document.addEventListener('pointermove', function (event) {
+    if (!dragState || !activeEl) {
+      return;
+    }
+    var dx = event.clientX - dragState.startX;
+    var dy = event.clientY - dragState.startY;
+    if (activeType === 'mag-plate') {
+      activeY = clamp(dragState.origY - dy, 0, 120);
+    } else {
+      activeX = clamp(round1(dragState.origX + dx / dragState.unitX), -50, 50);
+      activeY = clamp(round1(dragState.origY + dy / dragState.unitY), -50, 50);
+      if (activeType === 'mag-layout') {
+        activeX = clamp(activeX, -40, 40);
+        activeY = clamp(activeY, -40, 40);
+      }
+    }
+    applyCanvasTransform();
+  });
+
+  function endDrag(event) {
+    if (!dragState) {
+      return;
+    }
+    if (event && dragState.pointerId !== event.pointerId) {
+      return;
+    }
+    if (activeEl) {
+      activeEl.classList.remove('is-ve-dragging');
+      try {
+        if (event) {
+          activeEl.releasePointerCapture(event.pointerId);
+        }
+      } catch (err) {
+        // ignore
+      }
+    }
+    dragState = null;
+  }
+
+  document.addEventListener('pointerup', endDrag);
+  document.addEventListener('pointercancel', endDrag);
+  window.addEventListener('resize', positionDock);
+  window.addEventListener('scroll', positionDock, true);
 
   if (reloadBtn) {
     reloadBtn.addEventListener('click', function () {
@@ -474,83 +766,216 @@
   }
 
   cancelBtn.addEventListener('click', closePanel);
+  dockClose.addEventListener('click', closePanel);
+
+  function nudgeCanvas(action) {
+    if (!activeEl || (activeType !== 'mag-image' && activeType !== 'mag-layout')) {
+      return;
+    }
+    if (action === 'rotate-left') {
+      activeRotate = clamp(activeRotate - 5, -180, 180);
+    } else if (action === 'rotate-right') {
+      activeRotate = clamp(activeRotate + 5, -180, 180);
+    } else if (action === 'zoom-out') {
+      activeScale = clamp(round2(activeScale - 0.05), activeType === 'mag-layout' ? 0.6 : 0.5, activeType === 'mag-layout' ? 1.5 : 2.5);
+    } else if (action === 'zoom-in') {
+      activeScale = clamp(round2(activeScale + 0.05), activeType === 'mag-layout' ? 0.6 : 0.5, activeType === 'mag-layout' ? 1.5 : 2.5);
+    }
+    applyCanvasTransform();
+  }
+
+  dockTools.addEventListener('click', function (event) {
+    var btn = event.target.closest('[data-ve-dock]');
+    if (!btn) {
+      return;
+    }
+    nudgeCanvas(btn.getAttribute('data-ve-dock') || '');
+  });
 
   function bindMagTool(btn, handler) {
     if (!btn) {
       return;
     }
     btn.addEventListener('click', function () {
-      if (activeType !== 'mag-image' || !activeEl) {
+      if (!activeEl) {
         return;
       }
       handler();
-      applyMagTransform();
+      applyCanvasTransform();
     });
   }
 
   bindMagTool(rotateLeftBtn, function () {
-    activeRotate = Math.max(-180, activeRotate - 5);
+    activeRotate = clamp(activeRotate - 5, -180, 180);
   });
   bindMagTool(rotateRightBtn, function () {
-    activeRotate = Math.min(180, activeRotate + 5);
+    activeRotate = clamp(activeRotate + 5, -180, 180);
   });
   bindMagTool(zoomOutBtn, function () {
-    activeScale = Math.max(0.5, Math.round((activeScale - 0.05) * 100) / 100);
+    activeScale = clamp(round2(activeScale - 0.05), 0.5, 2.5);
   });
   bindMagTool(zoomInBtn, function () {
-    activeScale = Math.min(2.5, Math.round((activeScale + 0.05) * 100) / 100);
+    activeScale = clamp(round2(activeScale + 0.05), 0.5, 2.5);
   });
 
-  if (deleteImageBtn) {
-    deleteImageBtn.addEventListener('click', function () {
-      var deleteDataset = activeDataset;
-      var deleteId = activeItemId;
-      if (activeType === 'mag-image') {
-        deleteDataset = 'magazine';
-        deleteId = magFieldToKind(activeField);
-      } else if (!deleteDataset || !deleteId) {
-        return;
-      }
-      setError('');
-      setStatus('Удаление…');
+  function deleteActiveImage() {
+    var deleteDataset = activeDataset;
+    var deleteId = activeItemId;
+    if (activeType === 'mag-image') {
+      deleteDataset = 'magazine';
+      deleteId = magFieldToKind(activeField);
+    } else if (!deleteDataset || !deleteId) {
+      return;
+    }
+    setError('');
+    setDockError('');
+    setStatus('Удаление…');
+    if (deleteImageBtn) {
       deleteImageBtn.disabled = true;
-      saveBtn.disabled = true;
-      fetch(boot.saveUrl || '/admin/api/visual-save.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify({
-          csrf: boot.csrf || '',
-          action: 'delete_image',
-          dataset: deleteDataset,
-          id: deleteId,
-        }),
-      })
-        .then(function (r) {
-          return r.json().then(function (data) {
-            return { ok: r.ok, data: data };
-          });
-        })
-        .then(function (res) {
-          if (!res.ok || !res.data || !res.data.ok) {
-            throw new Error((res.data && res.data.error) || 'Ошибка удаления');
-          }
-          setStatus('Изображение удалено');
-          window.location.reload();
-        })
-        .catch(function (err) {
-          setError(err.message || 'Ошибка');
-          setStatus('');
-        })
-        .finally(function () {
-          deleteImageBtn.disabled = false;
-          saveBtn.disabled = false;
+    }
+    if (dockDelete) {
+      dockDelete.disabled = true;
+    }
+    saveBtn.disabled = true;
+    dockSave.disabled = true;
+    fetch(boot.saveUrl || '/admin/api/visual-save.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        csrf: boot.csrf || '',
+        action: 'delete_image',
+        dataset: deleteDataset,
+        id: deleteId,
+      }),
+    })
+      .then(function (r) {
+        return r.json().then(function (data) {
+          return { ok: r.ok, data: data };
         });
+      })
+      .then(function (res) {
+        if (!res.ok || !res.data || !res.data.ok) {
+          throw new Error((res.data && res.data.error) || 'Ошибка удаления');
+        }
+        setStatus('Изображение удалено');
+        window.location.reload();
+      })
+      .catch(function (err) {
+        setError(err.message || 'Ошибка');
+        setDockError(err.message || 'Ошибка');
+        setStatus('');
+      })
+      .finally(function () {
+        if (deleteImageBtn) {
+          deleteImageBtn.disabled = false;
+        }
+        if (dockDelete) {
+          dockDelete.disabled = false;
+        }
+        saveBtn.disabled = false;
+        dockSave.disabled = false;
+      });
+  }
+
+  if (deleteImageBtn) {
+    deleteImageBtn.addEventListener('click', deleteActiveImage);
+  }
+  if (dockDelete) {
+    dockDelete.addEventListener('click', deleteActiveImage);
+  }
+
+  function uploadMagazineFile(file) {
+    var magFd = new FormData();
+    magFd.append('csrf', boot.csrf || '');
+    magFd.append('action', 'upload_image');
+    magFd.append('dataset', 'magazine');
+    magFd.append('id', magFieldToKind(activeField));
+    magFd.append('file', file);
+    return fetch(boot.saveUrl || '/admin/api/visual-save.php', {
+      method: 'POST',
+      body: magFd,
+      credentials: 'same-origin',
+    }).then(function (r) {
+      return r.json().then(function (data) {
+        return { ok: r.ok, data: data };
+      });
+    }).then(function (res) {
+      if (!res.ok || !res.data || !res.data.ok) {
+        throw new Error((res.data && res.data.error) || 'Ошибка загрузки');
+      }
     });
   }
 
+  function saveCanvasSelection(fileInput) {
+    if (!activeField) {
+      return;
+    }
+    setDockError('');
+    setStatus('Сохранение…');
+    dockSave.disabled = true;
+    saveBtn.disabled = true;
+
+    var file = fileInput && fileInput.files && fileInput.files[0];
+    var uploadPromise = Promise.resolve();
+    if (activeType === 'mag-image' && file) {
+      uploadPromise = uploadMagazineFile(file);
+    }
+
+    var pairs = [];
+    if (activeType === 'mag-image') {
+      pairs = [
+        [magFieldToRotateKey(activeField), String(activeRotate)],
+        [magFieldToScaleKey(activeField), String(activeScale)],
+        [magFieldToXKey(activeField), String(activeX)],
+        [magFieldToYKey(activeField), String(activeY)],
+      ];
+    } else if (activeType === 'mag-layout') {
+      pairs = [
+        ['magazine_layout_rotate', String(activeRotate)],
+        ['magazine_layout_scale', String(activeScale)],
+        ['magazine_layout_x', String(activeX)],
+        ['magazine_layout_y', String(activeY)],
+      ];
+    } else if (activeType === 'mag-plate') {
+      var plateText = (dockTextarea.value || '').trim();
+      pairs = [
+        ['home_lead_calc_label', plateText],
+        ['home_lead_calc_offset', String(Math.round(activeY))],
+      ];
+    } else if (activeField === 'home_lead_badge') {
+      pairs = [['home_lead_badge', dockTextarea.value || '']];
+    }
+
+    uploadPromise
+      .then(function () {
+        return saveFieldsSequential(pairs);
+      })
+      .then(function () {
+        setStatus('Сохранено');
+        window.location.reload();
+      })
+      .catch(function (err) {
+        setDockError(err.message || 'Ошибка');
+        setStatus('');
+      })
+      .finally(function () {
+        dockSave.disabled = false;
+        saveBtn.disabled = false;
+      });
+  }
+
+  dockSave.addEventListener('click', function () {
+    saveCanvasSelection(dockFile);
+  });
+
   saveBtn.addEventListener('click', function () {
     if (!activeField) {
+      return;
+    }
+
+    if (canvasMode) {
+      saveCanvasSelection(dockFile);
       return;
     }
 
@@ -588,52 +1013,6 @@
           setStatus('Изображение сохранено');
           window.location.reload();
         });
-    }
-
-    if (activeType === 'mag-image') {
-      var magFile = fileEl.files && fileEl.files[0];
-      var uploadPromise = Promise.resolve();
-
-      if (magFile) {
-        var magFd = new FormData();
-        magFd.append('csrf', boot.csrf || '');
-        magFd.append('action', 'upload_image');
-        magFd.append('dataset', 'magazine');
-        magFd.append('id', magFieldToKind(activeField));
-        magFd.append('file', magFile);
-        uploadPromise = fetch(boot.saveUrl || '/admin/api/visual-save.php', {
-          method: 'POST',
-          body: magFd,
-          credentials: 'same-origin',
-        })
-          .then(function (r) {
-            return r.json().then(function (data) {
-              return { ok: r.ok, data: data };
-            });
-          })
-          .then(function (res) {
-            if (!res.ok || !res.data || !res.data.ok) {
-              throw new Error((res.data && res.data.error) || 'Ошибка загрузки');
-            }
-          });
-      }
-
-      uploadPromise
-        .then(function () {
-          return saveMagTransform();
-        })
-        .then(function () {
-          setStatus('Сохранено');
-          window.location.reload();
-        })
-        .catch(function (err) {
-          setError(err.message || 'Ошибка');
-          setStatus('');
-        })
-        .finally(function () {
-          saveBtn.disabled = false;
-        });
-      return;
     }
 
     if (activeType === 'image') {

@@ -14,6 +14,8 @@ $magPhotoPath = site_magazine_asset_path('photo');
 $magLogoPath = site_magazine_asset_path('logo');
 $magPhotoTransform = site_magazine_transform('photo');
 $magLogoTransform = site_magazine_transform('logo');
+$magLayout = site_magazine_layout();
+$magCalcOffset = site_home_lead_calc_offset();
 $magHasCustomLogo = site_magazine_has_custom_asset('logo');
 $veOn = site_visual_editor_enabled();
 
@@ -23,15 +25,27 @@ if ($eyebrowText === '') {
 }
 
 $magPhotoStyle = sprintf(
-    '--mag-rotate: %ddeg; --mag-scale: %s;',
+    '--mag-rotate: %ddeg; --mag-scale: %s; --mag-x: %s%%; --mag-y: %s%%;',
     (int) $magPhotoTransform['rotate'],
-    (string) $magPhotoTransform['scale']
+    (string) $magPhotoTransform['scale'],
+    (string) $magPhotoTransform['x'],
+    (string) $magPhotoTransform['y']
 );
 $magLogoStyle = sprintf(
-    '--mag-rotate: %ddeg; --mag-scale: %s;',
+    '--mag-rotate: %ddeg; --mag-scale: %s; --mag-x: %s%%; --mag-y: %s%%;',
     (int) $magLogoTransform['rotate'],
-    (string) $magLogoTransform['scale']
+    (string) $magLogoTransform['scale'],
+    (string) $magLogoTransform['x'],
+    (string) $magLogoTransform['y']
 );
+$magLayoutStyle = sprintf(
+    '--mag-layout-x: %s%%; --mag-layout-y: %s%%; --mag-layout-rotate: %ddeg; --mag-layout-scale: %s;',
+    (string) $magLayout['x'],
+    (string) $magLayout['y'],
+    (int) $magLayout['rotate'],
+    (string) $magLayout['scale']
+);
+$magCalcStyle = sprintf('--mag-calc-offset: %dpx;', $magCalcOffset);
 
 ?>
 <section class="mortgage-quiz" aria-labelledby="mortgage-quiz-title">
@@ -141,9 +155,23 @@ $magLogoStyle = sprintf(
                 <span class="mortgage-quiz__orbit mortgage-quiz__orbit--large" aria-hidden="true"></span>
                 <span class="mortgage-quiz__orbit mortgage-quiz__orbit--small" aria-hidden="true"></span>
                 <div class="mortgage-quiz__publication-wrap">
-                    <div class="mortgage-quiz__publication<?php echo $leadIsMagazine ? ' mortgage-quiz__publication--magazine' : ''; ?>">
+                    <div
+                        class="mortgage-quiz__publication<?php echo $leadIsMagazine ? ' mortgage-quiz__publication--magazine' : ''; ?>"
+                        <?php if ($leadIsMagazine) { ?>
+                            style="<?php echo htmlspecialchars($magLayoutStyle, ENT_QUOTES, 'UTF-8'); ?>"
+                            <?php echo site_ve_attrs('magazine_layout', 'mag-layout', 'Журнал (позиция и наклон)'); ?>
+                        <?php } ?>
+                    >
                         <?php if ($leadIsMagazine) { ?>
                             <div class="mortgage-quiz__mag-frame">
+                                <?php if ($veOn) { ?>
+                                    <button
+                                        type="button"
+                                        class="mortgage-quiz__mag-handle"
+                                        data-ve-select-layout
+                                        title="Выделить весь журнал"
+                                    >Журнал</button>
+                                <?php } ?>
                                 <div
                                     class="mortgage-quiz__mag-photo"
                                     style="<?php echo htmlspecialchars($magPhotoStyle, ENT_QUOTES, 'UTF-8'); ?>"
@@ -207,8 +235,13 @@ $magLogoStyle = sprintf(
                         );
                     ?></span>
                 </div>
-                <a class="mortgage-quiz__calc-link" href="/mortgage/">
-                    <span<?php echo site_ve_attrs('home_lead_calc_label', 'text', 'Текст плашки под журналом'); ?>><?php
+                <a
+                    class="mortgage-quiz__calc-link"
+                    href="/mortgage/"
+                    style="<?php echo htmlspecialchars($magCalcStyle, ENT_QUOTES, 'UTF-8'); ?>"
+                    <?php echo site_ve_attrs('home_lead_calc_label', 'mag-plate', 'Плашка под журналом'); ?>
+                >
+                    <span class="mortgage-quiz__calc-link-text"><?php
                         echo htmlspecialchars(
                             site_content_setting('home_lead_calc_label', 'Рассчитать примерный платёж'),
                             ENT_QUOTES,

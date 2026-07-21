@@ -267,11 +267,223 @@ body.ve-on .mortgage-quiz__visual--magazine .mortgage-quiz__publication-wrap {
   pointer-events: auto;
 }
 
+body.ve-on .mortgage-quiz__publication--magazine[data-ve-field] {
+  outline: 1px dashed rgba(94, 184, 168, 0.55);
+  cursor: grab;
+}
+
+body.ve-on .mortgage-quiz__publication--magazine[data-ve-field].is-ve-active,
+body.ve-on .mortgage-quiz__publication--magazine[data-ve-field].is-ve-dragging {
+  outline-color: #5eb8a8;
+  cursor: grabbing;
+}
+
 body.ve-on .mortgage-quiz__mag-photo[data-ve-field],
 body.ve-on .mortgage-quiz__mag-logo[data-ve-field] {
   outline: 1px dashed rgba(94, 184, 168, 0.7);
-  cursor: pointer;
+  cursor: grab;
   z-index: 8;
+  touch-action: none;
+}
+
+body.ve-on .mortgage-quiz__mag-photo[data-ve-field].is-ve-active,
+body.ve-on .mortgage-quiz__mag-logo[data-ve-field].is-ve-active {
+  outline-width: 2px;
+  outline-color: #5eb8a8;
+  z-index: 9;
+}
+
+body.ve-on .mortgage-quiz__calc-link[data-ve-field] {
+  outline: 1px dashed rgba(94, 184, 168, 0.55);
+  outline-offset: 4px;
+  cursor: grab;
+  touch-action: none;
+}
+
+body.ve-on .mortgage-quiz__calc-link[data-ve-field].is-ve-active {
+  outline-color: #5eb8a8;
+  background: rgba(11, 18, 19, 0.35);
+}
+
+body.ve-on .mortgage-quiz__mag-photo[data-ve-field]::after,
+body.ve-on .mortgage-quiz__mag-logo[data-ve-field]::after,
+body.ve-on .mortgage-quiz__publication--magazine[data-ve-field]::after {
+  position: absolute;
+  z-index: 10;
+  left: 0.5rem;
+  top: 0.5rem;
+  padding: 0.15rem 0.4rem;
+  font: 600 0.65rem/1.2 system-ui, sans-serif;
+  color: #0b1614;
+  background: rgba(159, 210, 199, 0.92);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+body.ve-on .mortgage-quiz__mag-photo[data-ve-field]::after {
+  content: 'Фото';
+}
+
+body.ve-on .mortgage-quiz__mag-logo[data-ve-field]::after {
+  content: 'Логотип';
+}
+
+body.ve-on .mortgage-quiz__publication--magazine[data-ve-field]::after {
+  display: none;
+}
+
+body.ve-on .mortgage-quiz__mag-handle {
+  position: absolute;
+  z-index: 12;
+  left: 0.5rem;
+  bottom: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0.15rem 0.45rem;
+  font: 600 0.65rem/1.2 system-ui, sans-serif;
+  color: #0b1614;
+  cursor: pointer;
+  background: rgba(159, 210, 199, 0.95);
+  border: none;
+  border-radius: 4px;
+}
+
+body.ve-on .mortgage-quiz__calc-link[data-ve-field]::after {
+  content: 'Плашка';
+  position: absolute;
+  right: 0.5rem;
+  top: -0.35rem;
+  z-index: 4;
+  padding: 0.1rem 0.35rem;
+  font: 600 0.6rem/1 system-ui, sans-serif;
+  color: #0b1614;
+  background: rgba(159, 210, 199, 0.95);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.ve-dock {
+  position: fixed;
+  z-index: 100002;
+  width: min(18.5rem, calc(100vw - 1.5rem));
+  padding: 0.75rem;
+  color: #f5f5f5;
+  background: #171c26;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+}
+
+.ve-dock[hidden] {
+  display: none !important;
+}
+
+.ve-dock__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.ve-dock__title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.ve-dock__close {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: #fff;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+}
+
+.ve-dock__hint {
+  margin: 0 0 0.55rem;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.ve-dock__tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0 0 0.5rem;
+}
+
+.ve-dock__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0.2rem 0.45rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+}
+
+.ve-dock__btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.ve-dock__btn--file {
+  cursor: pointer;
+}
+
+.ve-dock__meta {
+  margin: 0 0 0.55rem;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.ve-dock__textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 0.55rem;
+  padding: 0.5rem 0.6rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  resize: vertical;
+}
+
+.ve-dock__textarea[hidden] {
+  display: none !important;
+}
+
+.ve-dock__error {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  color: #ffb4ab;
+}
+
+.ve-dock__error[hidden] {
+  display: none !important;
+}
+
+.ve-dock__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
 .ve-panel__tools {

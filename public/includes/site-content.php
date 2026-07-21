@@ -280,13 +280,15 @@ function site_magazine_has_custom_asset(string $kind): bool
 }
 
 /**
- * @return array{rotate: int, scale: float}
+ * @return array{rotate: int, scale: float, x: float, y: float}
  */
 function site_magazine_transform(string $kind): array
 {
     $kind = $kind === 'logo' ? 'logo' : 'photo';
     $rotateKey = 'magazine_' . $kind . '_rotate';
     $scaleKey = 'magazine_' . $kind . '_scale';
+    $xKey = 'magazine_' . $kind . '_x';
+    $yKey = 'magazine_' . $kind . '_y';
     $rotate = (int) round((float) site_content_setting($rotateKey, '0'));
     $rotate = max(-180, min(180, $rotate));
     $scale = (float) site_content_setting($scaleKey, '1');
@@ -294,8 +296,50 @@ function site_magazine_transform(string $kind): array
         $scale = 1.0;
     }
     $scale = max(0.5, min(2.5, $scale));
+    $x = (float) site_content_setting($xKey, '0');
+    $y = (float) site_content_setting($yKey, '0');
+    $x = max(-50.0, min(50.0, $x));
+    $y = max(-50.0, min(50.0, $y));
 
-    return ['rotate' => $rotate, 'scale' => round($scale, 2)];
+    return [
+        'rotate' => $rotate,
+        'scale' => round($scale, 2),
+        'x' => round($x, 1),
+        'y' => round($y, 1),
+    ];
+}
+
+/**
+ * Позиция и наклон всего журнала.
+ *
+ * @return array{x: float, y: float, rotate: int, scale: float}
+ */
+function site_magazine_layout(): array
+{
+    $x = (float) site_content_setting('magazine_layout_x', '0');
+    $y = (float) site_content_setting('magazine_layout_y', '0');
+    $rotate = (int) round((float) site_content_setting('magazine_layout_rotate', '6'));
+    $scale = (float) site_content_setting('magazine_layout_scale', '1');
+    if ($scale <= 0) {
+        $scale = 1.0;
+    }
+
+    return [
+        'x' => round(max(-40.0, min(40.0, $x)), 1),
+        'y' => round(max(-40.0, min(40.0, $y)), 1),
+        'rotate' => max(-45, min(45, $rotate)),
+        'scale' => round(max(0.6, min(1.5, $scale)), 2),
+    ];
+}
+
+/**
+ * Смещение плашки под журналом (px от низа).
+ */
+function site_home_lead_calc_offset(): int
+{
+    $offset = (int) round((float) site_content_setting('home_lead_calc_offset', '18'));
+
+    return max(0, min(120, $offset));
 }
 
 /**

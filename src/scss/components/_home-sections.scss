@@ -1009,7 +1009,7 @@
     inset: auto;
     top: -4%;
     right: -6%;
-    bottom: 5.5rem;
+    bottom: 4.75rem;
     left: -34%;
     z-index: 5;
     place-items: center;
@@ -1019,7 +1019,7 @@
     @media (max-width: 980px) {
       top: 2%;
       right: 6%;
-      bottom: 4.5rem;
+      bottom: 4.25rem;
       left: 18%;
       place-items: center;
     }
@@ -1027,7 +1027,7 @@
     @media (max-width: 620px) {
       top: 4%;
       right: 8%;
-      bottom: 4.25rem;
+      bottom: 4rem;
       left: 10%;
     }
   }
@@ -1063,8 +1063,13 @@
       border: none;
       border-radius: 0;
       box-shadow: none;
-      transform: rotate(6deg);
+      transform:
+        translate(var(--mag-layout-x, 0%), var(--mag-layout-y, 0%))
+        rotate(var(--mag-layout-rotate, 6deg))
+        scale(var(--mag-layout-scale, 1));
+      transform-origin: center center;
       pointer-events: auto;
+      will-change: transform;
 
       &::after {
         display: none;
@@ -1076,12 +1081,10 @@
 
       @media (max-width: 980px) {
         width: min(72%, 23rem);
-        transform: rotate(5deg);
       }
 
       @media (max-width: 620px) {
         width: min(82%, 18rem);
-        transform: rotate(4deg);
       }
     }
 
@@ -1114,6 +1117,10 @@
     filter: drop-shadow(-18px 28px 42px rgba(0, 0, 0, 0.58));
   }
 
+  &__mag-handle {
+    display: none;
+  }
+
   &__publication--layers {
     // legacy class kept for safety; frame is now separate
   }
@@ -1132,7 +1139,10 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transform: rotate(var(--mag-rotate, 0deg)) scale(var(--mag-scale, 1));
+    transform:
+      translate(var(--mag-x, 0%), var(--mag-y, 0%))
+      rotate(var(--mag-rotate, 0deg))
+      scale(var(--mag-scale, 1));
     transform-origin: center center;
   }
 
@@ -1159,7 +1169,10 @@
     width: auto;
     height: auto;
     object-fit: contain;
-    transform: rotate(var(--mag-rotate, 0deg)) scale(var(--mag-scale, 1));
+    transform:
+      translate(var(--mag-x, 0%), var(--mag-y, 0%))
+      rotate(var(--mag-rotate, 0deg))
+      scale(var(--mag-scale, 1));
     transform-origin: center center;
   }
 
@@ -1286,7 +1299,7 @@
     position: absolute;
     z-index: 3;
     right: clamp(1rem, 3vw, 2rem);
-    bottom: 1.15rem;
+    bottom: var(--mag-calc-offset, 1.15rem);
     left: clamp(1rem, 3vw, 2rem);
     display: flex;
     align-items: center;
@@ -1303,6 +1316,10 @@
     &:hover {
       color: #b3dfd6;
     }
+  }
+
+  &__calc-link-text {
+    min-width: 0;
   }
 
   &__visual--magazine &__visual-badge {

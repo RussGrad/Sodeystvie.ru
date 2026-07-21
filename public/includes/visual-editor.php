@@ -91,6 +91,7 @@ function site_visual_editor_settings_fields(): array
         'home_lead_eyebrow' => 120,
         'home_lead_badge' => 120,
         'home_lead_calc_label' => 120,
+        'home_lead_calc_offset' => 8,
         'nav_label_home' => 80,
         'nav_label_catalog' => 80,
         'nav_label_services' => 80,
@@ -106,8 +107,16 @@ function site_visual_editor_settings_fields(): array
         'cases_section_lead' => 400,
         'magazine_photo_rotate' => 8,
         'magazine_photo_scale' => 8,
+        'magazine_photo_x' => 8,
+        'magazine_photo_y' => 8,
         'magazine_logo_rotate' => 8,
         'magazine_logo_scale' => 8,
+        'magazine_logo_x' => 8,
+        'magazine_logo_y' => 8,
+        'magazine_layout_x' => 8,
+        'magazine_layout_y' => 8,
+        'magazine_layout_rotate' => 8,
+        'magazine_layout_scale' => 8,
     ];
 }
 
@@ -201,6 +210,14 @@ function site_ve_attrs(
             if (!in_array($field, ['magazine_photo', 'magazine_logo'], true)) {
                 return '';
             }
+        } elseif ($type === 'mag-layout') {
+            if ($field !== 'magazine_layout') {
+                return '';
+            }
+        } elseif ($type === 'mag-plate') {
+            if ($field !== 'home_lead_calc_label') {
+                return '';
+            }
         } elseif ($type !== 'image' && !isset($allowed[$field]) && $field !== 'logo') {
             return '';
         }
@@ -225,9 +242,34 @@ function site_ve_attrs(
         $transform = site_magazine_transform($kind);
         $parts[] = 'data-ve-rotate="' . (string) $transform['rotate'] . '"';
         $parts[] = 'data-ve-scale="' . (string) $transform['scale'] . '"';
+        $parts[] = 'data-ve-x="' . (string) $transform['x'] . '"';
+        $parts[] = 'data-ve-y="' . (string) $transform['y'] . '"';
         if (site_magazine_has_custom_asset($kind) || ($kind === 'photo' && site_magazine_asset_path('photo') !== '')) {
             $parts[] = 'data-ve-has-image="1"';
         }
+    }
+    if ($type === 'mag-layout') {
+        $layout = site_magazine_layout();
+        $parts[] = 'data-ve-x="' . (string) $layout['x'] . '"';
+        $parts[] = 'data-ve-y="' . (string) $layout['y'] . '"';
+        $parts[] = 'data-ve-rotate="' . (string) $layout['rotate'] . '"';
+        $parts[] = 'data-ve-scale="' . (string) $layout['scale'] . '"';
+    }
+    if ($type === 'mag-plate') {
+        $parts[] = 'data-ve-y="' . (string) site_home_lead_calc_offset() . '"';
+        if ($currentValue === '') {
+            $parts[] = 'data-ve-value="' . htmlspecialchars(
+                site_content_setting('home_lead_calc_label', 'Рассчитать примерный платёж'),
+                ENT_QUOTES,
+                'UTF-8'
+            ) . '"';
+        }
+    }
+    if (
+        in_array($type, ['mag-image', 'mag-layout', 'mag-plate'], true)
+        || $field === 'home_lead_badge'
+    ) {
+        $parts[] = 'data-ve-canvas="1"';
     }
 
     return ' ' . implode(' ', $parts);

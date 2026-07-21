@@ -386,6 +386,7 @@ function site_admin_sanitize_settings(array $input): array
         'home_lead_eyebrow' => 120,
         'home_lead_badge' => 120,
         'home_lead_calc_label' => 120,
+        'home_lead_calc_offset' => 8,
         'reviews_rating' => 400,
         'reviews_count' => 400,
         'telegram_url' => 400,
@@ -410,8 +411,16 @@ function site_admin_sanitize_settings(array $input): array
         'nav_label_contacts' => 80,
         'magazine_photo_rotate' => 8,
         'magazine_photo_scale' => 8,
+        'magazine_photo_x' => 8,
+        'magazine_photo_y' => 8,
         'magazine_logo_rotate' => 8,
         'magazine_logo_scale' => 8,
+        'magazine_logo_x' => 8,
+        'magazine_logo_y' => 8,
+        'magazine_layout_x' => 8,
+        'magazine_layout_y' => 8,
+        'magazine_layout_rotate' => 8,
+        'magazine_layout_scale' => 8,
     ];
     $out = [];
     foreach ($fields as $key => $limit) {
