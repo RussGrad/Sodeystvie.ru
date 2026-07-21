@@ -17,7 +17,7 @@ $magLogoTransform = site_magazine_transform('logo');
 $magHasCustomLogo = site_magazine_has_custom_asset('logo');
 $veOn = site_visual_editor_enabled();
 
-$eyebrowText = site_content_setting('slogan_short', '');
+$eyebrowText = site_content_setting('home_lead_eyebrow', '');
 if ($eyebrowText === '') {
     $eyebrowText = 'Ипотечный центр «Содействие»';
 }
@@ -39,7 +39,7 @@ $magLogoStyle = sprintf(
         <div class="mortgage-quiz__card">
             <div class="mortgage-quiz__content">
                 <header class="mortgage-quiz__head">
-                    <p class="mortgage-quiz__eyebrow"<?php echo site_ve_attrs('slogan_short', 'text', 'Короткий слоган'); ?>>
+                    <p class="mortgage-quiz__eyebrow"<?php echo site_ve_attrs('home_lead_eyebrow', 'text', 'Надзаголовок ипотечного блока'); ?>>
                         <?php echo htmlspecialchars($eyebrowText, ENT_QUOTES, 'UTF-8'); ?>
                     </p>
                     <h2 class="mortgage-quiz__title" id="mortgage-quiz-title"<?php echo site_ve_attrs('home_lead_title', 'textarea', 'Заголовок ипотечного блока'); ?>>
