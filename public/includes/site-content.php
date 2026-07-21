@@ -314,8 +314,9 @@ function site_magazine_transform(string $kind): array
     $scale = max(0.5, min(2.5, $scale));
     $x = (float) site_content_setting($xKey, '0');
     $y = (float) site_content_setting($yKey, '0');
-    $x = max(-50.0, min(50.0, $x));
-    $y = max(-50.0, min(50.0, $y));
+    $limit = $kind === 'pen' ? 80.0 : 50.0;
+    $x = max(-$limit, min($limit, $x));
+    $y = max(-$limit, min($limit, $y));
 
     return [
         'rotate' => $rotate,

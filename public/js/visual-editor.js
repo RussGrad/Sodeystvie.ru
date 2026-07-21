@@ -678,6 +678,10 @@
     if (activeType === 'mag-layout') {
       return { min: -40, max: 40 };
     }
+    // ручка должна свободно выходить за край обложки
+    if (activeField === 'magazine_pen') {
+      return { min: -80, max: 80 };
+    }
     return { min: -50, max: 50 };
   }
 

@@ -298,9 +298,12 @@ body.ve-on .mortgage-quiz__mag-logo[data-ve-field].is-ve-active,
 body.ve-on .mortgage-quiz__mag-pen[data-ve-field].is-ve-active {
   outline-width: 2px;
   outline-color: #5eb8a8;
-  z-index: 9;
-  /* критично: не перебивать position:absolute */
   position: absolute !important;
+}
+
+body.ve-on .mortgage-quiz__mag-pen[data-ve-field],
+body.ve-on .mortgage-quiz__mag-pen[data-ve-field].is-ve-active {
+  z-index: 40 !important;
 }
 
 body.ve-on .mortgage-quiz__calc-link[data-ve-field] {
