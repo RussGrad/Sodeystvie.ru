@@ -113,6 +113,10 @@ function site_visual_editor_settings_fields(): array
         'magazine_logo_scale' => 8,
         'magazine_logo_x' => 8,
         'magazine_logo_y' => 8,
+        'magazine_pen_rotate' => 8,
+        'magazine_pen_scale' => 8,
+        'magazine_pen_x' => 8,
+        'magazine_pen_y' => 8,
         'magazine_layout_x' => 8,
         'magazine_layout_y' => 8,
         'magazine_layout_rotate' => 8,
@@ -207,7 +211,7 @@ function site_ve_attrs(
     } else {
         $allowed = site_visual_editor_settings_fields();
         if ($type === 'mag-image') {
-            if (!in_array($field, ['magazine_photo', 'magazine_logo'], true)) {
+            if (!in_array($field, ['magazine_photo', 'magazine_logo', 'magazine_pen'], true)) {
                 return '';
             }
         } elseif ($type === 'mag-layout') {
@@ -238,7 +242,11 @@ function site_ve_attrs(
         $parts[] = 'data-ve-value="' . htmlspecialchars($currentValue, ENT_QUOTES, 'UTF-8') . '"';
     }
     if ($type === 'mag-image') {
-        $kind = $field === 'magazine_logo' ? 'logo' : 'photo';
+        $kind = match ($field) {
+            'magazine_logo' => 'logo',
+            'magazine_pen' => 'pen',
+            default => 'photo',
+        };
         $transform = site_magazine_transform($kind);
         $parts[] = 'data-ve-rotate="' . (string) $transform['rotate'] . '"';
         $parts[] = 'data-ve-scale="' . (string) $transform['scale'] . '"';
@@ -952,8 +960,8 @@ function site_visual_editor_delete_item_image(string $dataset, string $itemId): 
  */
 function site_visual_editor_handle_magazine_asset_upload(string $kind, array $file): array
 {
-    $kind = $kind === 'logo' ? 'logo' : 'photo';
-    $base = $kind === 'logo' ? 'magazine-logo' : 'magazine-photo';
+    $kind = site_magazine_kind($kind);
+    $base = 'magazine-' . $kind;
 
     $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
     if ($error === UPLOAD_ERR_NO_FILE) {
@@ -974,15 +982,16 @@ function site_visual_editor_handle_magazine_asset_upload(string $kind, array $fi
     }
 
     $mime = (new finfo(FILEINFO_MIME_TYPE))->file($tmp);
+    $allowSvg = $kind === 'logo' || $kind === 'pen';
     $ext = match ($mime) {
         'image/jpeg' => 'jpg',
         'image/png' => 'png',
         'image/webp' => 'webp',
-        'image/svg+xml' => $kind === 'logo' ? 'svg' : null,
+        'image/svg+xml' => $allowSvg ? 'svg' : null,
         default => null,
     };
     if ($ext === null) {
-        return ['ok' => false, 'error' => $kind === 'logo' ? 'Допустимы JPG, PNG, WebP или SVG' : 'Допустимы JPG, PNG или WebP'];
+        return ['ok' => false, 'error' => $allowSvg ? 'Допустимы JPG, PNG, WebP или SVG' : 'Допустимы JPG, PNG или WebP'];
     }
     if ($ext !== 'svg' && @getimagesize($tmp) === false) {
         return ['ok' => false, 'error' => 'Файл не является изображением'];
@@ -1023,8 +1032,8 @@ function site_visual_editor_handle_magazine_asset_upload(string $kind, array $fi
  */
 function site_visual_editor_delete_magazine_asset(string $kind): array
 {
-    $kind = $kind === 'logo' ? 'logo' : 'photo';
-    $base = $kind === 'logo' ? 'magazine-logo' : 'magazine-photo';
+    $kind = site_magazine_kind($kind);
+    $base = 'magazine-' . $kind;
     $dir = dirname(__DIR__) . '/assets/mortgage';
     $removed = false;
     foreach (['jpg', 'jpeg', 'png', 'webp', 'svg'] as $ext) {
@@ -1036,5 +1045,5 @@ function site_visual_editor_delete_magazine_asset(string $kind): array
 
     return $removed
         ? ['ok' => true]
-        : ['ok' => false, 'error' => 'Своё изображение не найдено (используется обложка по умолчанию)'];
+        : ['ok' => false, 'error' => 'Своё изображение не найдено'];
 }

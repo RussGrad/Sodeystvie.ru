@@ -12,11 +12,14 @@ $leadIsMagazine = site_home_lead_image_is_magazine();
 
 $magPhotoPath = site_magazine_asset_path('photo');
 $magLogoPath = site_magazine_asset_path('logo');
+$magPenPath = site_magazine_asset_path('pen');
 $magPhotoTransform = site_magazine_transform('photo');
 $magLogoTransform = site_magazine_transform('logo');
+$magPenTransform = site_magazine_transform('pen');
 $magLayout = site_magazine_layout();
 $magCalcOffset = site_home_lead_calc_offset();
 $magHasCustomLogo = site_magazine_has_custom_asset('logo');
+$magHasCustomPen = site_magazine_has_custom_asset('pen');
 $veOn = site_visual_editor_enabled();
 
 $eyebrowText = site_content_setting('home_lead_eyebrow', '');
@@ -37,6 +40,13 @@ $magLogoStyle = sprintf(
     (string) $magLogoTransform['scale'],
     (string) $magLogoTransform['x'],
     (string) $magLogoTransform['y']
+);
+$magPenStyle = sprintf(
+    '--mag-rotate: %ddeg; --mag-scale: %s; --mag-x: %s%%; --mag-y: %s%%;',
+    (int) $magPenTransform['rotate'],
+    (string) $magPenTransform['scale'],
+    (string) $magPenTransform['x'],
+    (string) $magPenTransform['y']
 );
 $magLayoutStyle = sprintf(
     '--mag-layout-x: %s%%; --mag-layout-y: %s%%; --mag-layout-rotate: %ddeg; --mag-layout-scale: %s;',
@@ -203,6 +213,24 @@ $magCalcStyle = sprintf('--mag-calc-offset: %dpx;', $magCalcOffset);
                                             );
                                         } elseif ($veOn) { ?>
                                             <span class="mortgage-quiz__mag-placeholder">Логотип</span>
+                                        <?php } ?>
+                                    </div>
+                                <?php } ?>
+                                <?php if ($magHasCustomPen || $veOn) { ?>
+                                    <div
+                                        class="mortgage-quiz__mag-pen<?php echo $magPenPath === '' && $veOn ? ' mortgage-quiz__mag-pen--empty' : ''; ?>"
+                                        style="<?php echo htmlspecialchars($magPenStyle, ENT_QUOTES, 'UTF-8'); ?>"
+                                        <?php echo site_ve_attrs('magazine_pen', 'mag-image', 'Ручка в журнале'); ?>
+                                    >
+                                        <?php if ($magPenPath !== '') {
+                                            echo site_render_static_picture(
+                                                $magPenPath,
+                                                'Перьевая ручка с чернилами',
+                                                'mortgage-quiz__mag-pen-img',
+                                                'width="640" height="280"'
+                                            );
+                                        } elseif ($veOn) { ?>
+                                            <span class="mortgage-quiz__mag-placeholder">Ручка</span>
                                         <?php } ?>
                                     </div>
                                 <?php } ?>

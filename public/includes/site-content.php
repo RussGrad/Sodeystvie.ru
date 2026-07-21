@@ -215,16 +215,28 @@ function site_home_lead_cta(): string
 }
 
 /**
- * Путь к ассету журнала: photo | logo.
+ * Нормализация вида ассета журнала: photo | logo | pen.
+ */
+function site_magazine_kind(string $kind): string
+{
+    return match ($kind) {
+        'logo' => 'logo',
+        'pen' => 'pen',
+        default => 'photo',
+    };
+}
+
+/**
+ * Путь к ассету журнала: photo | logo | pen.
  */
 function site_magazine_asset_path(string $kind): string
 {
-    $kind = $kind === 'logo' ? 'logo' : 'photo';
+    $kind = site_magazine_kind($kind);
     $dir = dirname(__DIR__) . '/assets/mortgage';
-    $base = $kind === 'logo' ? 'magazine-logo' : 'magazine-photo';
+    $base = 'magazine-' . $kind;
 
     foreach (['webp', 'png', 'jpg', 'jpeg', 'svg'] as $ext) {
-        if ($ext === 'svg' && $kind !== 'logo') {
+        if ($ext === 'svg' && $kind === 'photo') {
             continue;
         }
         $absolutePath = $dir . '/' . $base . '.' . $ext;
@@ -237,17 +249,19 @@ function site_magazine_asset_path(string $kind): string
         return site_home_lead_image_path();
     }
 
-    $premiumWebp = dirname(__DIR__) . '/assets/brand/logo-premium.webp';
-    $premiumPng = dirname(__DIR__) . '/assets/brand/logo-premium.png';
-    if (is_readable($premiumWebp)) {
-        return '/assets/brand/logo-premium.webp';
-    }
-    if (is_readable($premiumPng)) {
-        return '/assets/brand/logo-premium.png';
-    }
-    $textLogo = dirname(__DIR__) . '/assets/brand/logo-text.svg';
-    if (is_readable($textLogo)) {
-        return '/assets/brand/logo-text.svg';
+    if ($kind === 'logo') {
+        $premiumWebp = dirname(__DIR__) . '/assets/brand/logo-premium.webp';
+        $premiumPng = dirname(__DIR__) . '/assets/brand/logo-premium.png';
+        if (is_readable($premiumWebp)) {
+            return '/assets/brand/logo-premium.webp';
+        }
+        if (is_readable($premiumPng)) {
+            return '/assets/brand/logo-premium.png';
+        }
+        $textLogo = dirname(__DIR__) . '/assets/brand/logo-text.svg';
+        if (is_readable($textLogo)) {
+            return '/assets/brand/logo-text.svg';
+        }
     }
 
     return '';
@@ -267,8 +281,8 @@ function site_magazine_asset_src(string $kind): string
 
 function site_magazine_has_custom_asset(string $kind): bool
 {
-    $kind = $kind === 'logo' ? 'logo' : 'photo';
-    $base = $kind === 'logo' ? 'magazine-logo' : 'magazine-photo';
+    $kind = site_magazine_kind($kind);
+    $base = 'magazine-' . $kind;
     $dir = dirname(__DIR__) . '/assets/mortgage';
     foreach (['webp', 'png', 'jpg', 'jpeg', 'svg'] as $ext) {
         if (is_readable($dir . '/' . $base . '.' . $ext)) {
@@ -284,14 +298,16 @@ function site_magazine_has_custom_asset(string $kind): bool
  */
 function site_magazine_transform(string $kind): array
 {
-    $kind = $kind === 'logo' ? 'logo' : 'photo';
+    $kind = site_magazine_kind($kind);
     $rotateKey = 'magazine_' . $kind . '_rotate';
     $scaleKey = 'magazine_' . $kind . '_scale';
     $xKey = 'magazine_' . $kind . '_x';
     $yKey = 'magazine_' . $kind . '_y';
-    $rotate = (int) round((float) site_content_setting($rotateKey, '0'));
+    $defaultRotate = $kind === 'pen' ? '-18' : '0';
+    $defaultScale = $kind === 'pen' ? '1' : '1';
+    $rotate = (int) round((float) site_content_setting($rotateKey, $defaultRotate));
     $rotate = max(-180, min(180, $rotate));
-    $scale = (float) site_content_setting($scaleKey, '1');
+    $scale = (float) site_content_setting($scaleKey, $defaultScale);
     if ($scale <= 0) {
         $scale = 1.0;
     }

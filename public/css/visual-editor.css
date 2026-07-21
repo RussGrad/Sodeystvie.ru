@@ -279,7 +279,8 @@ body.ve-on .mortgage-quiz__publication--magazine[data-ve-field].is-ve-dragging {
 }
 
 body.ve-on .mortgage-quiz__mag-photo[data-ve-field],
-body.ve-on .mortgage-quiz__mag-logo[data-ve-field] {
+body.ve-on .mortgage-quiz__mag-logo[data-ve-field],
+body.ve-on .mortgage-quiz__mag-pen[data-ve-field] {
   outline: 1px dashed rgba(94, 184, 168, 0.7);
   cursor: grab;
   z-index: 8;
@@ -287,7 +288,8 @@ body.ve-on .mortgage-quiz__mag-logo[data-ve-field] {
 }
 
 body.ve-on .mortgage-quiz__mag-photo[data-ve-field].is-ve-active,
-body.ve-on .mortgage-quiz__mag-logo[data-ve-field].is-ve-active {
+body.ve-on .mortgage-quiz__mag-logo[data-ve-field].is-ve-active,
+body.ve-on .mortgage-quiz__mag-pen[data-ve-field].is-ve-active {
   outline-width: 2px;
   outline-color: #5eb8a8;
   z-index: 9;
@@ -307,6 +309,7 @@ body.ve-on .mortgage-quiz__calc-link[data-ve-field].is-ve-active {
 
 body.ve-on .mortgage-quiz__mag-photo[data-ve-field]::after,
 body.ve-on .mortgage-quiz__mag-logo[data-ve-field]::after,
+body.ve-on .mortgage-quiz__mag-pen[data-ve-field]::after,
 body.ve-on .mortgage-quiz__publication--magazine[data-ve-field]::after {
   position: absolute;
   z-index: 10;
@@ -326,6 +329,10 @@ body.ve-on .mortgage-quiz__mag-photo[data-ve-field]::after {
 
 body.ve-on .mortgage-quiz__mag-logo[data-ve-field]::after {
   content: 'Логотип';
+}
+
+body.ve-on .mortgage-quiz__mag-pen[data-ve-field]::after {
+  content: 'Ручка';
 }
 
 body.ve-on .mortgage-quiz__publication--magazine[data-ve-field]::after {
@@ -559,6 +566,7 @@ body.ve-is-transforming * {
 
 body.ve-canvas-editing .mortgage-quiz__mag-photo[data-ve-field].is-ve-active,
 body.ve-canvas-editing .mortgage-quiz__mag-logo[data-ve-field].is-ve-active,
+body.ve-canvas-editing .mortgage-quiz__mag-pen[data-ve-field].is-ve-active,
 body.ve-canvas-editing .mortgage-quiz__publication--magazine[data-ve-field].is-ve-active,
 body.ve-canvas-editing .mortgage-quiz__calc-link[data-ve-field].is-ve-active {
   outline-color: transparent;
@@ -567,7 +575,8 @@ body.ve-canvas-editing .mortgage-quiz__calc-link[data-ve-field].is-ve-active {
 
 body.ve-on .mortgage-quiz__publication--magazine[data-ve-field].is-ve-active,
 body.ve-on .mortgage-quiz__mag-photo[data-ve-field].is-ve-active,
-body.ve-on .mortgage-quiz__mag-logo[data-ve-field].is-ve-active {
+body.ve-on .mortgage-quiz__mag-logo[data-ve-field].is-ve-active,
+body.ve-on .mortgage-quiz__mag-pen[data-ve-field].is-ve-active {
   z-index: 9;
 }
 

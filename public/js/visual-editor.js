@@ -226,23 +226,53 @@
   }
 
   function magFieldToKind(field) {
-    return field === 'magazine_logo' ? 'logo' : 'photo';
+    if (field === 'magazine_logo') {
+      return 'logo';
+    }
+    if (field === 'magazine_pen') {
+      return 'pen';
+    }
+    return 'photo';
   }
 
   function magFieldToRotateKey(field) {
-    return field === 'magazine_logo' ? 'magazine_logo_rotate' : 'magazine_photo_rotate';
+    if (field === 'magazine_logo') {
+      return 'magazine_logo_rotate';
+    }
+    if (field === 'magazine_pen') {
+      return 'magazine_pen_rotate';
+    }
+    return 'magazine_photo_rotate';
   }
 
   function magFieldToScaleKey(field) {
-    return field === 'magazine_logo' ? 'magazine_logo_scale' : 'magazine_photo_scale';
+    if (field === 'magazine_logo') {
+      return 'magazine_logo_scale';
+    }
+    if (field === 'magazine_pen') {
+      return 'magazine_pen_scale';
+    }
+    return 'magazine_photo_scale';
   }
 
   function magFieldToXKey(field) {
-    return field === 'magazine_logo' ? 'magazine_logo_x' : 'magazine_photo_x';
+    if (field === 'magazine_logo') {
+      return 'magazine_logo_x';
+    }
+    if (field === 'magazine_pen') {
+      return 'magazine_pen_x';
+    }
+    return 'magazine_photo_x';
   }
 
   function magFieldToYKey(field) {
-    return field === 'magazine_logo' ? 'magazine_logo_y' : 'magazine_photo_y';
+    if (field === 'magazine_logo') {
+      return 'magazine_logo_y';
+    }
+    if (field === 'magazine_pen') {
+      return 'magazine_pen_y';
+    }
+    return 'magazine_photo_y';
   }
 
   function setStatus(msg) {
@@ -625,9 +655,13 @@
     }
     if (
       nested.getAttribute('data-ve-type') === 'mag-layout' &&
-      target.closest('.mortgage-quiz__mag-photo[data-ve-field], .mortgage-quiz__mag-logo[data-ve-field]')
+      target.closest(
+        '.mortgage-quiz__mag-photo[data-ve-field], .mortgage-quiz__mag-logo[data-ve-field], .mortgage-quiz__mag-pen[data-ve-field]'
+      )
     ) {
-      return target.closest('.mortgage-quiz__mag-photo[data-ve-field], .mortgage-quiz__mag-logo[data-ve-field]');
+      return target.closest(
+        '.mortgage-quiz__mag-photo[data-ve-field], .mortgage-quiz__mag-logo[data-ve-field], .mortgage-quiz__mag-pen[data-ve-field]'
+      );
     }
     return nested;
   }

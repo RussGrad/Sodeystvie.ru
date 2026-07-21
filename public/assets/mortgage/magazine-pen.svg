@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 280" fill="none" aria-hidden="true">
+  <!-- ink blot -->
+  <ellipse cx="92" cy="168" rx="46" ry="28" fill="#0a0a0a" opacity="0.92"/>
+  <ellipse cx="78" cy="158" rx="22" ry="14" fill="#151515"/>
+  <path d="M54 170c8-18 22-28 38-30 4 10-2 24-14 34-10 8-22 8-24-4z" fill="#111" opacity="0.85"/>
+  <circle cx="108" cy="152" r="7" fill="#1a1a1a"/>
+  <circle cx="64" cy="180" r="5" fill="#121212"/>
+  <!-- fountain pen body -->
+  <g transform="rotate(-28 360 140)">
+    <!-- barrel -->
+    <rect x="210" y="118" width="260" height="28" rx="10" fill="url(#penBarrel)"/>
+    <rect x="210" y="118" width="260" height="10" rx="6" fill="#ffffff" opacity="0.08"/>
+    <!-- grip -->
+    <rect x="170" y="120" width="48" height="24" rx="6" fill="#1c1c1c"/>
+    <rect x="176" y="124" width="36" height="3" fill="#c9a24d" opacity="0.75"/>
+    <rect x="176" y="130" width="36" height="3" fill="#c9a24d" opacity="0.55"/>
+    <rect x="176" y="136" width="36" height="3" fill="#c9a24d" opacity="0.35"/>
+    <!-- clip ring -->
+    <rect x="458" y="114" width="14" height="36" rx="3" fill="#d4b46a"/>
+    <!-- cap section -->
+    <rect x="470" y="116" width="78" height="32" rx="10" fill="url(#penCap)"/>
+    <path d="M538 116h18a8 8 0 0 1 8 8v16a8 8 0 0 1-8 8h-18V116z" fill="#0f0f0f"/>
+    <!-- clip -->
+    <path d="M520 112c18-10 42-8 48 6 2 5-2 10-8 10h-18c-4 0-6-2-6-6v-10z" fill="#d4b46a"/>
+    <!-- nib -->
+    <path d="M170 132 L118 118 L108 132 L118 146 Z" fill="url(#penNib)"/>
+    <path d="M170 132 L128 132" stroke="#7a6a3a" stroke-width="1.2"/>
+    <circle cx="124" cy="132" r="3.2" fill="#2a2414"/>
+    <path d="M118 132 L108 132" stroke="#5c4f2a" stroke-width="1"/>
+  </g>
+  <!-- ink trail from nib -->
+  <path d="M118 156c12 8 28 14 40 10-8 8-22 12-36 8-10-2-12-10-4-18z" fill="#0d0d0d" opacity="0.9"/>
+  <defs>
+    <linearGradient id="penBarrel" x1="210" y1="118" x2="470" y2="146" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2a2a2a"/>
+      <stop offset="0.45" stop-color="#111"/>
+      <stop offset="1" stop-color="#3a3a3a"/>
+    </linearGradient>
+    <linearGradient id="penCap" x1="470" y1="116" x2="548" y2="148" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#222"/>
+      <stop offset="1" stop-color="#0a0a0a"/>
+    </linearGradient>
+    <linearGradient id="penNib" x1="170" y1="118" x2="108" y2="146" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f0d78a"/>
+      <stop offset="0.55" stop-color="#c9a24d"/>
+      <stop offset="1" stop-color="#8a7338"/>
+    </linearGradient>
+  </defs>
+</svg>
