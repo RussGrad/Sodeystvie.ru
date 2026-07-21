@@ -1,0 +1,162 @@
+/* Визуальный редактор — оверлей поверх публичного сайта */
+
+body.ve-on {
+  padding-top: 52px;
+}
+
+.ve-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 52px;
+  padding: 0.55rem 1rem;
+  color: #f5f5f5;
+  background: #12161e;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+}
+
+.ve-bar__title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.ve-bar__hint {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.ve-bar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.ve-bar__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.9rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.ve-bar__btn--primary {
+  border-color: transparent;
+  background: linear-gradient(135deg, #5eb8a8, #3d8f82);
+  color: #0b1614;
+}
+
+.ve-bar__btn--ghost {
+  background: transparent;
+}
+
+.ve-bar__status {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #9fd2c7;
+  min-width: 8rem;
+  text-align: right;
+}
+
+[data-ve-field] {
+  outline: 1px dashed transparent;
+  outline-offset: 3px;
+  cursor: pointer !important;
+  transition: outline-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.ve-on [data-ve-field]:hover,
+body.ve-on [data-ve-field].is-ve-active {
+  outline-color: #5eb8a8;
+  box-shadow: 0 0 0 3px rgba(94, 184, 168, 0.22);
+  position: relative;
+  z-index: 2;
+}
+
+.ve-panel {
+  position: fixed;
+  z-index: 100001;
+  right: 1rem;
+  top: 4.25rem;
+  width: min(22rem, calc(100vw - 2rem));
+  padding: 1rem;
+  color: #f5f5f5;
+  background: #171c26;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+}
+
+.ve-panel[hidden] {
+  display: none !important;
+}
+
+.ve-panel__title {
+  margin: 0 0 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.ve-panel__label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.ve-panel__input,
+.ve-panel__textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 0.85rem;
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+  font-size: 0.875rem;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+}
+
+.ve-panel__textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.ve-panel__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ve-panel__error {
+  margin: 0 0 0.65rem;
+  font-size: 0.8125rem;
+  color: #ffb4ab;
+}
+
+.ve-panel__error[hidden] {
+  display: none !important;
+}

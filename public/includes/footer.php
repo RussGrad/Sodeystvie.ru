@@ -110,22 +110,22 @@ $privacyModalJsVersion = (string) (@filemtime(__DIR__ . '/../js/privacy-modal.js
                     <div class="site-footer__requisite">
                         <dt class="site-footer__requisite-label">Телефон</dt>
                         <dd class="site-footer__requisite-value">
-                            <a class="site-footer__requisite-link" href="tel:<?php echo htmlspecialchars(site_phone_tel(), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(site_phone_display(), ENT_QUOTES, 'UTF-8'); ?></a>
+                            <a class="site-footer__requisite-link" href="tel:<?php echo htmlspecialchars(site_phone_tel(), ENT_QUOTES, 'UTF-8'); ?>"<?php echo site_ve_attrs('phone_display', 'tel', 'Телефон'); ?>><?php echo htmlspecialchars(site_phone_display(), ENT_QUOTES, 'UTF-8'); ?></a>
                         </dd>
                     </div>
                     <div class="site-footer__requisite">
                         <dt class="site-footer__requisite-label">Email</dt>
                         <dd class="site-footer__requisite-value">
-                            <a class="site-footer__requisite-link" href="mailto:<?php echo htmlspecialchars(site_email_address(), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(site_email_address(), ENT_QUOTES, 'UTF-8'); ?></a>
+                            <a class="site-footer__requisite-link" href="mailto:<?php echo htmlspecialchars(site_email_address(), ENT_QUOTES, 'UTF-8'); ?>"<?php echo site_ve_attrs('email', 'email', 'Email'); ?>><?php echo htmlspecialchars(site_email_address(), ENT_QUOTES, 'UTF-8'); ?></a>
                         </dd>
                     </div>
                     <div class="site-footer__requisite">
                         <dt class="site-footer__requisite-label">Адрес</dt>
-                        <dd class="site-footer__requisite-value"><?php echo htmlspecialchars(site_postal_address(), ENT_QUOTES, 'UTF-8'); ?></dd>
+                        <dd class="site-footer__requisite-value"<?php echo site_ve_attrs('address', 'textarea', 'Адрес'); ?>><?php echo htmlspecialchars(site_postal_address(), ENT_QUOTES, 'UTF-8'); ?></dd>
                     </div>
                     <div class="site-footer__requisite">
                         <dt class="site-footer__requisite-label">Режим работы</dt>
-                        <dd class="site-footer__requisite-value"><?php echo htmlspecialchars(site_office_hours(), ENT_QUOTES, 'UTF-8'); ?></dd>
+                        <dd class="site-footer__requisite-value"<?php echo site_ve_attrs('work_hours', 'text', 'Часы работы'); ?>><?php echo htmlspecialchars(site_office_hours(), ENT_QUOTES, 'UTF-8'); ?></dd>
                     </div>
                     <div class="site-footer__requisite site-footer__requisite--messengers">
                         <dt class="site-footer__requisite-label">Мессенджеры</dt>

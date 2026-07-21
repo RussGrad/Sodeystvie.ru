@@ -21,6 +21,10 @@ site_admin_render_nav('');
         <?php } ?>
 
         <div class="admin-cards">
+            <a class="admin-card admin-card--accent" href="/admin/visual.php">
+                <h2 class="admin-card__title">Визуальный редактор</h2>
+                <p class="admin-card__text">Копия сайта: кликайте по логотипу, меню, телефону, заголовкам и сохраняйте на месте. Только для администратора.</p>
+            </a>
             <?php foreach (site_admin_editable_datasets() as $section) { ?>
                 <a class="admin-card" href="/admin/edit.php?section=<?php echo htmlspecialchars($section, ENT_QUOTES, 'UTF-8'); ?>">
                     <h2 class="admin-card__title"><?php echo htmlspecialchars(site_admin_dataset_label($section), ENT_QUOTES, 'UTF-8'); ?></h2>

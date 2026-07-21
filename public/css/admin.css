@@ -278,6 +278,11 @@ html:not([data-theme="light"]) .admin-theme-toggle__icon--moon {
   box-shadow: var(--admin-shadow);
 }
 
+.admin-card--accent {
+  border-color: rgba(94, 184, 168, 0.45);
+  background: linear-gradient(145deg, rgba(94, 184, 168, 0.12), var(--admin-surface));
+}
+
 .admin-card__title {
   margin: 0 0 0.35rem;
   font-size: 1rem;

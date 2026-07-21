@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/messenger-links.php';
+require_once __DIR__ . '/visual-editor.php';
 
 $pageTitle = $pageTitle ?? site_format_page_title();
 $pageDescription = $pageDescription ?? null;
@@ -18,6 +19,7 @@ site_send_security_headers();
 
 $nav = site_nav_items();
 $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());
+$veEnabled = site_visual_editor_enabled();
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -33,6 +35,7 @@ $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Montserrat:wght@400;600;700&display=swap">
     <link rel="stylesheet" href="/css/main.css?v=<?php echo htmlspecialchars($cssVersion, ENT_QUOTES, 'UTF-8'); ?>">
+    <?php if ($veEnabled) { site_visual_editor_render_assets(); } ?>
     <style>
     /* Критичные стили шапки: совпадают с main.css, чтобы не было скачка при догрузке */
     :root[data-theme="dark"]{--header-bg:rgba(18,22,30,.78);--header-border:rgba(255,255,255,.12)}
@@ -87,7 +90,7 @@ $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());
     <div class="site-header__inner container">
         <div class="site-header__cluster">
             <div class="site-header__brand">
-                <a class="site-header__logo-link" href="/" aria-label="<?php echo htmlspecialchars(site_brand_full() . ' — на главную', ENT_QUOTES, 'UTF-8'); ?>">
+                <a class="site-header__logo-link" href="/" aria-label="<?php echo htmlspecialchars(site_brand_full() . ' — на главную', ENT_QUOTES, 'UTF-8'); ?>"<?php echo site_ve_attrs('logo', 'image', 'Логотип'); ?>>
                     <?php require __DIR__ . '/logo-markup.php'; ?>
                 </a>
             </div>
@@ -109,7 +112,7 @@ $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());
                                     aria-expanded="false"
                                     aria-controls="<?php echo htmlspecialchars($dropdownId, ENT_QUOTES, 'UTF-8'); ?>"
                                     aria-haspopup="true"
-                                ><?php echo htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8'); ?><svg class="site-header__dropdown-icon" width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                ><span<?php echo site_ve_attrs('nav_label_' . $slug, 'text', 'Пункт меню'); ?>><?php echo htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8'); ?></span><svg class="site-header__dropdown-icon" width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                         <path d="M2.75 4.5 L6 8.25 L9.25 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg></a>
                                 <ul class="site-header__submenu" id="<?php echo htmlspecialchars($dropdownId, ENT_QUOTES, 'UTF-8'); ?>" role="list">
@@ -129,7 +132,7 @@ $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());
                             <a
                                 class="site-header__menu-link<?php echo $currentNav === $slug ? ' site-header__menu-link--current' : ''; ?>"
                                 href="<?php echo htmlspecialchars($item['href'], ENT_QUOTES, 'UTF-8'); ?>"
-                            ><?php echo htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8'); ?></a>
+                            ><span<?php echo site_ve_attrs('nav_label_' . $slug, 'text', 'Пункт меню'); ?>><?php echo htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8'); ?></span></a>
                         </li>
                     <?php } ?>
                 <?php } ?>
@@ -137,8 +140,8 @@ $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());
             </nav>
             <div class="site-header__actions">
                 <div class="site-header__contact">
-                    <p class="site-header__hours"><?php echo htmlspecialchars(site_office_hours(), ENT_QUOTES, 'UTF-8'); ?></p>
-                    <a class="site-header__phone" href="tel:<?php echo htmlspecialchars(site_phone_tel(), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(site_phone_display(), ENT_QUOTES, 'UTF-8'); ?></a>
+                    <p class="site-header__hours"<?php echo site_ve_attrs('work_hours', 'text', 'Часы работы'); ?>><?php echo htmlspecialchars(site_office_hours(), ENT_QUOTES, 'UTF-8'); ?></p>
+                    <a class="site-header__phone" href="tel:<?php echo htmlspecialchars(site_phone_tel(), ENT_QUOTES, 'UTF-8'); ?>"<?php echo site_ve_attrs('phone_display', 'tel', 'Телефон'); ?>><?php echo htmlspecialchars(site_phone_display(), ENT_QUOTES, 'UTF-8'); ?></a>
                 </div>
                 <div class="site-header__toolbar">
                     <?php site_render_messenger_links(

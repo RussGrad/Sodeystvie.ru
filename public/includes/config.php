@@ -834,26 +834,33 @@ function site_http_public_api_get(string $url, int $timeoutSeconds = 8): array
 function site_nav_items(): array
 {
     require_once __DIR__ . '/services-catalog.php';
+    require_once __DIR__ . '/site-content.php';
+
+    $label = static function (string $key, string $fallback): string {
+        $from = site_content_setting('nav_label_' . $key, '');
+
+        return $from !== '' ? $from : $fallback;
+    };
 
     return [
-        'home' => ['href' => '/', 'label' => 'Главная'],
-        'catalog' => ['href' => '/catalog/', 'label' => 'Каталог'],
+        'home' => ['href' => '/', 'label' => $label('home', 'Главная')],
+        'catalog' => ['href' => '/catalog/', 'label' => $label('catalog', 'Каталог')],
         'services' => [
             'href' => '/services/',
-            'label' => 'Услуги',
+            'label' => $label('services', 'Услуги'),
             'children' => sodeystvie_services_nav_children(),
         ],
-        'mortgage' => ['href' => '/mortgage/', 'label' => 'ИПОТЕКА'],
+        'mortgage' => ['href' => '/mortgage/', 'label' => $label('mortgage', 'ИПОТЕКА')],
         'about' => [
             'href' => '/about/',
-            'label' => 'О компании',
+            'label' => $label('about', 'О компании'),
             'children' => [
                 'reviews' => ['href' => '/reviews/', 'label' => 'Отзывы'],
             ],
         ],
         'contacts' => [
             'href' => '/contacts/',
-            'label' => 'Контакты',
+            'label' => $label('contacts', 'Контакты'),
             'children' => [
                 'vacancies' => ['href' => '/vacancies/', 'label' => 'Вакансии'],
             ],

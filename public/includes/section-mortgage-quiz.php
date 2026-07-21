@@ -15,10 +15,10 @@ $leadIsMagazine = site_home_lead_image_is_magazine();
             <div class="mortgage-quiz__content">
                 <header class="mortgage-quiz__head">
                     <p class="mortgage-quiz__eyebrow">Ипотечный центр «Содействие»</p>
-                    <h2 class="mortgage-quiz__title" id="mortgage-quiz-title">
+                    <h2 class="mortgage-quiz__title" id="mortgage-quiz-title"<?php echo site_ve_attrs('home_lead_title', 'textarea', 'Заголовок ипотечного блока'); ?>>
                         <?php echo htmlspecialchars(site_home_lead_title(), ENT_QUOTES, 'UTF-8'); ?>
                     </h2>
-                    <p class="mortgage-quiz__lead">
+                    <p class="mortgage-quiz__lead"<?php echo site_ve_attrs('home_lead_description', 'textarea', 'Описание ипотечного блока'); ?>>
                         <?php echo htmlspecialchars(site_home_lead_description(), ENT_QUOTES, 'UTF-8'); ?>
                     </p>
                 </header>
