@@ -13,6 +13,16 @@ const SITE_VE_COOKIE = 'sodeystvie_ve';
 
 function site_ve_set_active_cookie(bool $active): void
 {
+    if ($active) {
+        $_COOKIE[SITE_VE_COOKIE] = '1';
+    } else {
+        unset($_COOKIE[SITE_VE_COOKIE]);
+    }
+
+    if (headers_sent()) {
+        return;
+    }
+
     $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
@@ -23,33 +33,38 @@ function site_ve_set_active_cookie(bool $active): void
         'httponly' => true,
         'samesite' => 'Lax',
     ]);
-
-    if ($active) {
-        $_COOKIE[SITE_VE_COOKIE] = '1';
-    } else {
-        unset($_COOKIE[SITE_VE_COOKIE]);
-    }
 }
 
 function site_visual_editor_enabled(): bool
 {
+    static $enabled = null;
+    if ($enabled !== null) {
+        return $enabled;
+    }
+
     if (!site_admin_is_logged_in()) {
+        $enabled = false;
+
         return false;
     }
 
     $flag = isset($_GET['ve']) ? (string) $_GET['ve'] : '';
     if ($flag === '0' || $flag === 'off' || $flag === 'false') {
         site_ve_set_active_cookie(false);
+        $enabled = false;
 
         return false;
     }
     if ($flag === '1' || $flag === 'true') {
         site_ve_set_active_cookie(true);
+        $enabled = true;
 
         return true;
     }
 
-    return isset($_COOKIE[SITE_VE_COOKIE]) && $_COOKIE[SITE_VE_COOKIE] === '1';
+    $enabled = isset($_COOKIE[SITE_VE_COOKIE]) && $_COOKIE[SITE_VE_COOKIE] === '1';
+
+    return $enabled;
 }
 
 /**

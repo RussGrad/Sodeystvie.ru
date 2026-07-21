@@ -10,6 +10,9 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/messenger-links.php';
 require_once __DIR__ . '/visual-editor.php';
 
+// До любого HTML: cookie VE и кэш флага (setcookie нельзя после вывода).
+$veEnabled = site_visual_editor_enabled();
+
 $pageTitle = $pageTitle ?? site_format_page_title();
 $pageDescription = $pageDescription ?? null;
 $currentNav = $currentNav ?? '';
@@ -19,7 +22,6 @@ site_send_security_headers();
 
 $nav = site_nav_items();
 $cssVersion = (string) (@filemtime(__DIR__ . '/../css/main.css') ?: time());
-$veEnabled = site_visual_editor_enabled();
 ?>
 <!DOCTYPE html>
 <html lang="ru">
