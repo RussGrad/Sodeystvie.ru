@@ -612,22 +612,36 @@ $header-tool-size: 2rem; // 32px
   flex-wrap: nowrap;
   align-items: center;
   justify-content: center;
-  gap: 0.3rem;
+  gap: 0.25rem;
   line-height: 0;
 
   > * {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .messenger-links__svg,
+  .site-header__fav-icon,
+  .site-header__cta-icon,
+  .site-header__theme-icon {
+    display: block;
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    min-width: 1.25rem;
+    min-height: 1.25rem;
+    color: inherit;
+    fill: currentColor;
   }
 
   @media (min-width: $breakpoint-nav) {
-    gap: 0.3rem;
+    gap: 0.25rem;
     align-self: center;
   }
 
   @media (min-width: $breakpoint-header-comfort) {
-    gap: 0.35rem;
+    gap: 0.3rem;
   }
 }
 
@@ -654,10 +668,9 @@ $header-tool-size: 2rem; // 32px
   @include header-toolbar-interactive;
   text-decoration: none;
   line-height: 0;
+  color: var(--header-tool-icon);
 
-  .messenger-links__svg,
-  .messenger-links__mask,
-  .messenger-links__img {
+  .messenger-links__svg {
     width: 1.25rem !important;
     height: 1.25rem !important;
   }
@@ -746,10 +759,13 @@ $header-tool-size: 2rem; // 32px
     padding: 0;
     transform: translate(-50%, -50%);
     pointer-events: none;
+    color: inherit;
+    fill: currentColor;
 
     path,
     circle {
-      stroke: currentColor;
+      fill: currentColor;
+      stroke: none;
     }
   }
 

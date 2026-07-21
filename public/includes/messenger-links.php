@@ -77,23 +77,16 @@ function site_render_messenger_icon(string $type, bool $flat = false, ?string $i
 {
     require_once __DIR__ . '/site-messengers.php';
 
-    $custom = site_messenger_custom_icon_src($type);
-
-    // Плоский режим: MAX из PNG/WebP как маска currentColor (силуэт без фона)
-    if ($flat && $type === 'max' && $custom !== null) {
-        echo '<span class="messenger-links__svg messenger-links__mask messenger-links__mask--max" aria-hidden="true"></span>';
-
-        return;
-    }
-
-    if ($custom !== null) {
-        echo '<img class="messenger-links__img" src="' . htmlspecialchars($custom, ENT_QUOTES, 'UTF-8') . '" width="24" height="24" alt="" decoding="async">';
-
-        return;
-    }
-
+    // Плоский режим (шапка/подвал): только SVG currentColor — один размер и цвет
     if ($flat) {
         echo site_messenger_icon_svg_flat($type);
+
+        return;
+    }
+
+    $custom = site_messenger_custom_icon_src($type);
+    if ($custom !== null) {
+        echo '<img class="messenger-links__img" src="' . htmlspecialchars($custom, ENT_QUOTES, 'UTF-8') . '" width="24" height="24" alt="" decoding="async">';
 
         return;
     }
@@ -101,9 +94,7 @@ function site_render_messenger_icon(string $type, bool $flat = false, ?string $i
     if ($type === 'telegram' || $type === 'vk') {
         echo site_messenger_icon_svg_branded($type);
     } elseif ($type === 'max') {
-        $maxIconWebp = __DIR__ . '/../assets/icons/max-messenger.webp';
-        $legacySrc = is_readable($maxIconWebp) ? '/assets/icons/max-messenger.webp' : '/assets/icons/max-messenger.png';
-        echo '<img class="messenger-links__img" src="' . htmlspecialchars($legacySrc, ENT_QUOTES, 'UTF-8') . '" width="24" height="24" alt="" decoding="async">';
+        echo site_messenger_icon_svg_flat('max');
     } elseif ($type === 'whatsapp') {
         echo site_messenger_icon_svg_flat('whatsapp');
     } elseif ($imgSrc !== null) {
@@ -128,18 +119,18 @@ function site_messenger_icon_svg_branded(string $type): string
 }
 
 /**
- * Плоские монохромные иконки одного стиля (сплошной силуэт, currentColor).
+ * Плоские монохромные иконки: один viewBox 24×24, fill currentColor, схожий визуальный вес.
  *
  * @param 'telegram'|'vk'|'max'|'whatsapp' $type
  */
 function site_messenger_icon_svg_flat(string $type): string
 {
-    $open = '<svg class="messenger-links__svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">';
+    $open = '<svg class="messenger-links__svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">';
     $close = '</svg>';
 
     if ($type === 'telegram') {
         return $open
-            . '<path fill="currentColor" d="M21.55 3.12 2.72 10.55c-.92.36-.9 1.68.04 2l4.95 1.68 1.9 5.72c.3.92 1.48 1.12 2.08.35l2.72-3.48 4.55 3.35c.74.54 1.78.16 2.02-.74L22.9 4.55c.28-.98-.6-1.8-1.35-1.43z"/>'
+            . '<path fill="currentColor" d="M21.8 3.05 2.55 10.7c-.95.37-.93 1.72.04 2.05l5.1 1.73 1.95 5.9c.31.95 1.52 1.15 2.14.36l2.8-3.58 4.7 3.46c.76.56 1.84.17 2.08-.76L22.95 4.55c.28-1.02-.62-1.85-1.15-1.5z"/>'
             . $close;
     }
 
@@ -150,16 +141,15 @@ function site_messenger_icon_svg_flat(string $type): string
     }
 
     if ($type === 'whatsapp') {
-        // Сплошной диск с хвостом + вырез телефона (тот же визуальный вес, что у Telegram)
         return $open
             . '<path fill="currentColor" fill-rule="evenodd" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.33 4.95L2 22l5.25-1.38a9.86 9.86 0 0 0 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2Zm3.95 11.78c-.22-.11-1.32-.65-1.52-.72-.2-.08-.35-.11-.5.11-.15.22-.57.72-.7.87-.13.15-.26.17-.48.06-.22-.11-.93-.34-1.77-1.09-.66-.58-1.1-1.3-1.23-1.52-.12-.22-.01-.34.1-.45.1-.1.22-.26.33-.39.11-.13.15-.22.22-.37.07-.15.04-.28-.02-.39-.06-.11-.5-1.2-.68-1.64-.18-.44-.36-.38-.5-.39h-.42c-.15 0-.39.06-.59.28-.2.22-.77.75-.77 1.84s.79 2.13.9 2.28c.11.15 1.55 2.37 3.76 3.32.53.23.94.37 1.26.47.53.17 1.01.14 1.39.09.42-.06 1.32-.54 1.51-1.06.19-.52.19-.97.13-1.06-.06-.1-.2-.15-.42-.26Z"/>'
             . $close;
     }
 
-    // MAX — fallback: кольцо с хвостом внутрь
+    // MAX — кольцо с хвостом внутрь
     return $open
-        . '<path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="'
-        . 'M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2Zm0 4.2A5.8 5.8 0 1 0 12 17.8 5.8 5.8 0 0 0 12 6.2Zm-4.35 9.85c.4-.65.2-1.5-.45-1.85-.55-.3-1.25-.15-1.65.4-.7.95-1.85 1.55-3.15 1.7 1.35.85 3.1 1.05 4.6.3.35-.18.7-.38.9-.65.08-.07.17-.14.25-.2-.08.1-.17.2-.25.2-.1.08-.2.15-.3.2Z'
+        . '<path fill="currentColor" fill-rule="evenodd" d="'
+        . 'M12 2.25c5.385 0 9.75 4.365 9.75 9.75s-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25Zm0 3.9a5.85 5.85 0 1 0 0 11.7 5.85 5.85 0 0 0 0-11.7ZM8.1 16.2c.35-.55.2-1.25-.35-1.55-.5-.28-1.15-.15-1.5.35-.65.85-1.7 1.4-2.9 1.55 1.2.75 2.75.9 4.1.25.3-.15.55-.3.7-.5.05-.05.1-.07.15-.1Z'
         . '"/>'
         . $close;
 }
