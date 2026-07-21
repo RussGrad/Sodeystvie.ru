@@ -253,7 +253,7 @@ function site_render_team_card(array $member): void
             <p class="team-card__exp"<?php echo site_ve_attrs('experience', 'text', 'Опыт', 'team', $id); ?>><?php echo htmlspecialchars($experience, ENT_QUOTES, 'UTF-8'); ?></p>
         <?php } ?>
         <?php if ($description !== '' || site_visual_editor_enabled()) { ?>
-            <p class="team-card__desc"<?php echo site_ve_attrs('description', 'text', 'Описание', 'team', $id); ?>><?php echo htmlspecialchars($description, ENT_QUOTES, 'UTF-8'); ?></p>
+            <p class="team-card__desc"<?php echo site_ve_attrs('description', 'textarea', 'Описание', 'team', $id); ?>><?php echo htmlspecialchars($description, ENT_QUOTES, 'UTF-8'); ?></p>
         <?php } ?>
         <?php if ($member['telegram'] !== '' || $member['whatsapp'] !== '') { ?>
             <div class="team-card__contacts">
