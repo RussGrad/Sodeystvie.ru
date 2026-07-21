@@ -2,19 +2,15 @@
 
 .deal-cards {
   position: relative;
-  padding: 0 0 clamp(2rem, 4vw, 2.75rem);
+  padding: 0 0 clamp(1.25rem, 3vw, 2rem);
   background: var(--featured-strip-bg);
   border-top: 1px solid var(--header-border);
   color: var(--services-title);
   --deal-kicker-text: var(--color-accent);
 
-  @media (max-width: 768px) {
-    padding-bottom: clamp(4.75rem, 12vw, 5.5rem);
-  }
-
   .container {
     position: relative;
-    padding-top: clamp(4.75rem, 12vw, 7rem);
+    padding-top: clamp(3.25rem, 8vw, 7rem);
   }
 
   &__kicker {
