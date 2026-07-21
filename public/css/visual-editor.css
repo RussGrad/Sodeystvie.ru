@@ -132,6 +132,12 @@ body.ve-on [data-ve-field]:hover,
 body.ve-on [data-ve-field].is-ve-active {
   outline-color: #5eb8a8;
   box-shadow: 0 0 0 3px rgba(94, 184, 168, 0.22);
+}
+
+/* Абсолютные слои журнала не должны получать position:relative — это даёт мигание */
+body.ve-on .deal-cards__visual[data-ve-field].is-ve-active,
+body.ve-on .case-card__media[data-ve-field].is-ve-active,
+body.ve-on .services__icon-wrap[data-ve-field].is-ve-active {
   position: relative;
   z-index: 2;
 }
@@ -293,6 +299,8 @@ body.ve-on .mortgage-quiz__mag-pen[data-ve-field].is-ve-active {
   outline-width: 2px;
   outline-color: #5eb8a8;
   z-index: 9;
+  /* критично: не перебивать position:absolute */
+  position: absolute !important;
 }
 
 body.ve-on .mortgage-quiz__calc-link[data-ve-field] {

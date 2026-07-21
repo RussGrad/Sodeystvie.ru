@@ -422,24 +422,14 @@
     if (!canvasMode || !activeEl || frame.hidden) {
       return;
     }
+    // Ось-выровненная рамка по реальному bbox — без повторного rotate (иначе мигание)
     var rect = activeEl.getBoundingClientRect();
-    var cx = rect.left + rect.width / 2;
-    var cy = rect.top + rect.height / 2;
-    var w;
-    var h;
-    if (canFreeTransform()) {
-      w = Math.max(48, activeEl.offsetWidth * activeScale);
-      h = Math.max(48, activeEl.offsetHeight * activeScale);
-      frame.style.transform = 'rotate(' + activeRotate + 'deg)';
-    } else {
-      w = Math.max(48, rect.width);
-      h = Math.max(24, rect.height);
-      frame.style.transform = '';
-    }
-    frame.style.width = Math.round(w) + 'px';
-    frame.style.height = Math.round(h) + 'px';
-    frame.style.left = Math.round(cx - w / 2) + 'px';
-    frame.style.top = Math.round(cy - h / 2) + 'px';
+    var pad = 2;
+    frame.style.transform = '';
+    frame.style.width = Math.round(Math.max(48, rect.width) + pad * 2) + 'px';
+    frame.style.height = Math.round(Math.max(24, rect.height) + pad * 2) + 'px';
+    frame.style.left = Math.round(rect.left - pad) + 'px';
+    frame.style.top = Math.round(rect.top - pad) + 'px';
   }
 
   function hideFrame() {
@@ -753,7 +743,10 @@
     if (!activeEl) {
       return;
     }
-    var parent = activeEl.closest('.mortgage-quiz__visual') || activeEl.parentElement;
+    var parent =
+      activeEl.closest('.mortgage-quiz__mag-frame') ||
+      activeEl.closest('.mortgage-quiz__visual') ||
+      activeEl.parentElement;
     var bounds = parent ? parent.getBoundingClientRect() : { width: 400, height: 400 };
     var center = getActiveCenter();
     dragState = {
@@ -776,7 +769,7 @@
     activeEl.classList.add('is-ve-dragging');
     document.body.classList.add('ve-is-transforming');
     try {
-      (event.currentTarget || frame).setPointerCapture(event.pointerId);
+      frame.setPointerCapture(event.pointerId);
     } catch (err) {
       // ignore
     }

@@ -1127,14 +1127,14 @@
 
   &__mag-photo {
     position: absolute;
-    inset: 0;
+    top: var(--mag-y, 0%);
+    left: var(--mag-x, 0%);
+    width: 100%;
+    height: 100%;
     overflow: hidden;
     display: grid;
     place-items: center;
-    transform:
-      translate(var(--mag-x, 0%), var(--mag-y, 0%))
-      rotate(var(--mag-rotate, 0deg))
-      scale(var(--mag-scale, 1));
+    transform: rotate(var(--mag-rotate, 0deg)) scale(var(--mag-scale, 1));
     transform-origin: center center;
     will-change: transform;
   }
@@ -1155,17 +1155,14 @@
 
   &__mag-logo {
     position: absolute;
-    top: 4%;
-    left: 6%;
-    right: 6%;
+    top: calc(4% + var(--mag-y, 0%));
+    left: calc(6% + var(--mag-x, 0%));
+    right: calc(6% - var(--mag-x, 0%));
     z-index: 2;
     height: 14%;
     display: grid;
     place-items: center;
-    transform:
-      translate(var(--mag-x, 0%), var(--mag-y, 0%))
-      rotate(var(--mag-rotate, 0deg))
-      scale(var(--mag-scale, 1));
+    transform: rotate(var(--mag-rotate, 0deg)) scale(var(--mag-scale, 1));
     transform-origin: center center;
     will-change: transform;
   }
@@ -1182,18 +1179,15 @@
 
   &__mag-pen {
     position: absolute;
-    left: 6%;
-    right: 4%;
-    bottom: 4%;
+    left: calc(5% + var(--mag-x, 0%));
+    width: 90%;
+    bottom: calc(3% - var(--mag-y, 0%));
     z-index: 3;
-    height: 28%;
+    height: 30%;
     display: grid;
     place-items: center;
     pointer-events: auto;
-    transform:
-      translate(var(--mag-x, 0%), var(--mag-y, 0%))
-      rotate(var(--mag-rotate, -18deg))
-      scale(var(--mag-scale, 1));
+    transform: rotate(var(--mag-rotate, -18deg)) scale(var(--mag-scale, 1));
     transform-origin: center center;
     will-change: transform;
   }
@@ -1208,6 +1202,7 @@
     object-fit: contain;
     object-position: center bottom;
     filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.55));
+    pointer-events: none;
   }
 
   &__mag-pen--empty {
