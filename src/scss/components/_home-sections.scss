@@ -1131,6 +1131,12 @@
     overflow: hidden;
     display: grid;
     place-items: center;
+    transform:
+      translate(var(--mag-x, 0%), var(--mag-y, 0%))
+      rotate(var(--mag-rotate, 0deg))
+      scale(var(--mag-scale, 1));
+    transform-origin: center center;
+    will-change: transform;
   }
 
   &__mag-photo-img,
@@ -1139,15 +1145,12 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transform:
-      translate(var(--mag-x, 0%), var(--mag-y, 0%))
-      rotate(var(--mag-rotate, 0deg))
-      scale(var(--mag-scale, 1));
-    transform-origin: center center;
   }
 
   &__mag-photo picture {
     display: block;
+    width: 100%;
+    height: 100%;
   }
 
   &__mag-logo {
@@ -1159,6 +1162,12 @@
     height: 14%;
     display: grid;
     place-items: center;
+    transform:
+      translate(var(--mag-x, 0%), var(--mag-y, 0%))
+      rotate(var(--mag-rotate, 0deg))
+      scale(var(--mag-scale, 1));
+    transform-origin: center center;
+    will-change: transform;
   }
 
   &__mag-logo-img,
@@ -1169,11 +1178,6 @@
     width: auto;
     height: auto;
     object-fit: contain;
-    transform:
-      translate(var(--mag-x, 0%), var(--mag-y, 0%))
-      rotate(var(--mag-rotate, 0deg))
-      scale(var(--mag-scale, 1));
-    transform-origin: center center;
   }
 
   &__mag-placeholder {

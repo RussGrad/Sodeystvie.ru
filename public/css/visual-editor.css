@@ -363,104 +363,166 @@ body.ve-on .mortgage-quiz__calc-link[data-ve-field]::after {
   pointer-events: none;
 }
 
-.ve-dock {
+/* Рамка выделения объекта (как в Canva/Figma) */
+.ve-frame {
   position: fixed;
-  z-index: 100002;
-  width: min(16.5rem, calc(100vw - 1.5rem));
-  padding: 0.75rem;
-  color: #f5f5f5;
-  background: #171c26;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 12px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
-  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+  z-index: 100003;
+  box-sizing: border-box;
+  pointer-events: none;
+  transform-origin: center center;
 }
 
-.ve-dock[hidden] {
+.ve-frame[hidden] {
   display: none !important;
 }
 
-.ve-dock__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 0.35rem;
+.ve-frame__box {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  pointer-events: auto;
+  cursor: move;
+  border: 2px solid #5eb8a8;
+  box-shadow: 0 0 0 1px rgba(11, 18, 19, 0.35);
+  background: rgba(94, 184, 168, 0.06);
 }
 
-.ve-dock__title {
-  font-size: 0.8125rem;
+.ve-frame__handle {
+  position: absolute;
+  z-index: 2;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  pointer-events: auto;
+  cursor: nwse-resize;
+  background: #fff;
+  border: 2px solid #5eb8a8;
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.ve-frame__handle--nw {
+  left: -7px;
+  top: -7px;
+  cursor: nwse-resize;
+}
+
+.ve-frame__handle--ne {
+  right: -7px;
+  top: -7px;
+  cursor: nesw-resize;
+}
+
+.ve-frame__handle--sw {
+  left: -7px;
+  bottom: -7px;
+  cursor: nesw-resize;
+}
+
+.ve-frame__handle--se {
+  right: -7px;
+  bottom: -7px;
+  cursor: nwse-resize;
+}
+
+.ve-frame__rot-line {
+  position: absolute;
+  left: 50%;
+  top: -28px;
+  width: 2px;
+  height: 28px;
+  pointer-events: none;
+  background: #5eb8a8;
+  transform: translateX(-50%);
+}
+
+.ve-frame__handle--rotate {
+  left: 50%;
+  top: -42px;
+  width: 18px;
+  height: 18px;
+  cursor: grab;
+  border-radius: 50%;
+  background: #9fd2c7;
+  border-color: #0b1614;
+  transform: translateX(-50%);
+}
+
+.ve-frame__handle--rotate:active {
+  cursor: grabbing;
+}
+
+.ve-frame--plate .ve-frame__handle--nw,
+.ve-frame--plate .ve-frame__handle--ne,
+.ve-frame--plate .ve-frame__handle--sw,
+.ve-frame--plate .ve-frame__handle--se,
+.ve-frame--plate .ve-frame__handle--rotate,
+.ve-frame--plate .ve-frame__rot-line {
+  display: none;
+}
+
+.ve-frame--plate .ve-frame__box {
+  cursor: ns-resize;
+}
+
+body.ve-is-transforming {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+body.ve-is-transforming * {
+  cursor: inherit !important;
+}
+
+/* Нижняя панель действий */
+.ve-actions {
+  position: fixed;
+  z-index: 100004;
+  left: 50%;
+  bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 0.85rem;
+  width: min(46rem, calc(100vw - 1.5rem));
+  padding: 0.75rem 1rem;
+  color: #f5f5f5;
+  background: rgba(23, 28, 38, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+  transform: translateX(-50%);
+}
+
+.ve-actions[hidden] {
+  display: none !important;
+}
+
+.ve-actions__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 8rem;
+  margin-right: auto;
+}
+
+.ve-actions__title {
+  font-size: 0.875rem;
   font-weight: 700;
 }
 
-.ve-dock__close {
-  width: 1.75rem;
-  height: 1.75rem;
-  padding: 0;
-  font-size: 1.1rem;
-  line-height: 1;
-  color: #fff;
-  cursor: pointer;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 8px;
-}
-
-.ve-dock__hint {
-  margin: 0 0 0.55rem;
-  font-size: 0.7rem;
-  line-height: 1.35;
-  color: rgba(255, 255, 255, 0.62);
-}
-
-.ve-dock__tools {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin: 0 0 0.5rem;
-}
-
-.ve-dock__tools[hidden] {
-  display: none !important;
-}
-
-.ve-dock__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 2rem;
-  min-height: 2rem;
-  padding: 0.2rem 0.45rem;
-  font: inherit;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #fff;
-  cursor: pointer;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 8px;
-}
-
-.ve-dock__btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.ve-dock__btn--file {
-  cursor: pointer;
-}
-
-.ve-dock__meta {
-  margin: 0 0 0.55rem;
+.ve-actions__meta {
   font-size: 0.7rem;
   color: rgba(255, 255, 255, 0.62);
 }
 
-.ve-dock__textarea {
-  display: block;
-  width: 100%;
+.ve-actions__textarea {
+  flex: 1 1 12rem;
+  min-width: 10rem;
   box-sizing: border-box;
-  margin: 0 0 0.55rem;
-  padding: 0.5rem 0.6rem;
+  margin: 0;
+  padding: 0.5rem 0.65rem;
   font: inherit;
   font-size: 0.8125rem;
   color: #fff;
@@ -470,215 +532,43 @@ body.ve-on .mortgage-quiz__calc-link[data-ve-field]::after {
   resize: vertical;
 }
 
-.ve-dock__textarea[hidden] {
+.ve-actions__textarea[hidden] {
   display: none !important;
 }
 
-.ve-dock__error {
-  margin: 0 0 0.5rem;
+.ve-actions__error {
+  flex: 1 1 100%;
+  margin: 0;
   font-size: 0.75rem;
   color: #ffb4ab;
 }
 
-.ve-dock__error[hidden] {
+.ve-actions__error[hidden] {
   display: none !important;
 }
 
-.ve-dock__actions {
+.ve-actions__btns {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
 }
 
-.ve-gizmo {
-  position: fixed;
-  z-index: 100003;
-  width: 220px;
-  height: 220px;
-  pointer-events: none;
-  user-select: none;
-}
-
-.ve-gizmo[hidden] {
-  display: none !important;
-}
-
-.ve-gizmo__arc {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.35));
-}
-
-.ve-gizmo__ring {
-  stroke: rgba(94, 184, 168, 0.28);
-  stroke-width: 2;
-  stroke-dasharray: 4 6;
-}
-
-.ve-gizmo__arc-path {
-  stroke: #9fd2c7;
-  stroke-width: 3.5;
-  stroke-linecap: round;
-}
-
-.ve-gizmo__btn {
-  position: absolute;
-  z-index: 2;
-  display: grid;
-  place-items: center;
-  width: 2.15rem;
-  height: 2.15rem;
-  padding: 0;
-  font: 700 0.95rem/1 system-ui, sans-serif;
-  color: #0b1614;
-  pointer-events: auto;
+.ve-actions__file {
   cursor: pointer;
-  background: rgba(159, 210, 199, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  border-radius: 999px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
-  transition: transform 0.12s ease, background 0.12s ease;
 }
 
-.ve-gizmo__btn:hover {
-  background: #b7e2d8;
-  transform: scale(1.06);
+body.ve-canvas-editing .mortgage-quiz__mag-photo[data-ve-field].is-ve-active,
+body.ve-canvas-editing .mortgage-quiz__mag-logo[data-ve-field].is-ve-active,
+body.ve-canvas-editing .mortgage-quiz__publication--magazine[data-ve-field].is-ve-active,
+body.ve-canvas-editing .mortgage-quiz__calc-link[data-ve-field].is-ve-active {
+  outline-color: transparent;
+  box-shadow: none;
 }
 
-.ve-gizmo__btn:active {
-  transform: scale(0.96);
-}
-
-.ve-gizmo__btn--up {
-  left: 50%;
-  top: 0.15rem;
-  transform: translateX(-50%);
-}
-
-.ve-gizmo__btn--up:hover {
-  transform: translateX(-50%) scale(1.06);
-}
-
-.ve-gizmo__btn--down {
-  left: 50%;
-  bottom: 0.15rem;
-  transform: translateX(-50%);
-}
-
-.ve-gizmo__btn--down:hover {
-  transform: translateX(-50%) scale(1.06);
-}
-
-.ve-gizmo__btn--left {
-  left: 0.15rem;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.ve-gizmo__btn--left:hover {
-  transform: translateY(-50%) scale(1.06);
-}
-
-.ve-gizmo__btn--right {
-  right: 0.15rem;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.ve-gizmo__btn--right:hover {
-  transform: translateY(-50%) scale(1.06);
-}
-
-.ve-gizmo__btn--rot-left {
-  left: 18%;
-  top: 14%;
-  background: rgba(23, 28, 38, 0.92);
-  color: #9fd2c7;
-}
-
-.ve-gizmo__btn--rot-right {
-  right: 18%;
-  top: 14%;
-  background: rgba(23, 28, 38, 0.92);
-  color: #9fd2c7;
-}
-
-.ve-gizmo__btn--zoom-out {
-  left: 28%;
-  bottom: 18%;
-  width: 2rem;
-  height: 2rem;
-  background: rgba(23, 28, 38, 0.92);
-  color: #fff;
-}
-
-.ve-gizmo__btn--zoom-in {
-  right: 28%;
-  bottom: 18%;
-  width: 2rem;
-  height: 2rem;
-  background: rgba(23, 28, 38, 0.92);
-  color: #fff;
-}
-
-.ve-gizmo__center {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 1;
-  min-width: 4.5rem;
-  padding: 0.35rem 0.45rem;
-  font: 600 0.65rem/1.25 system-ui, sans-serif;
-  text-align: center;
-  color: #e8fff8;
-  pointer-events: none;
-  background: rgba(11, 18, 19, 0.72);
-  border: 1px solid rgba(159, 210, 199, 0.35);
-  border-radius: 999px;
-  transform: translate(-50%, -50%);
-  white-space: nowrap;
-}
-
-.ve-gizmo--plate .ve-gizmo__btn--left,
-.ve-gizmo--plate .ve-gizmo__btn--right,
-.ve-gizmo--plate .ve-gizmo__btn--rot-left,
-.ve-gizmo--plate .ve-gizmo__btn--rot-right,
-.ve-gizmo--plate .ve-gizmo__btn--zoom-out,
-.ve-gizmo--plate .ve-gizmo__btn--zoom-in {
-  display: none;
-}
-
-.ve-panel__tools {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin: 0 0 0.75rem;
-}
-
-.ve-panel__tool {
-  min-height: 2rem;
-  padding: 0.25rem 0.55rem;
-  font: inherit;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #fff;
-  cursor: pointer;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 8px;
-}
-
-.ve-panel__tool:hover {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.ve-panel__meta {
-  margin: 0 0 0.75rem;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.62);
+body.ve-on .mortgage-quiz__publication--magazine[data-ve-field].is-ve-active,
+body.ve-on .mortgage-quiz__mag-photo[data-ve-field].is-ve-active,
+body.ve-on .mortgage-quiz__mag-logo[data-ve-field].is-ve-active {
+  z-index: 9;
 }
 
 .ve-add-btn {
