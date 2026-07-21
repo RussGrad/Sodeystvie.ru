@@ -233,6 +233,7 @@ function site_render_team_card(array $member): void
     $ve = site_visual_editor_enabled();
     $preview = site_team_description_preview($description);
     $expandable = !$ve && $preview['expandable'];
+    $nameParts = site_team_split_name((string) ($member['name'] ?? ''));
     ?>
     <article class="team-card<?php echo $expandable ? ' team-card--expandable' : ''; ?>"<?php echo $expandable ? ' data-team-card' : ''; ?>>
         <div class="team-card__photo-wrap">
@@ -248,7 +249,16 @@ function site_render_team_card(array $member): void
                 <span class="team-card__initials" aria-hidden="true"><?php echo htmlspecialchars(site_team_initials($member['name']), ENT_QUOTES, 'UTF-8'); ?></span>
             <?php } ?>
         </div>
-        <h3 class="team-card__name"<?php echo site_ve_attrs('name', 'text', 'Имя', 'team', $id); ?>><?php echo htmlspecialchars($member['name'], ENT_QUOTES, 'UTF-8'); ?></h3>
+        <?php if ($ve) { ?>
+            <h3 class="team-card__name"<?php echo site_ve_attrs('name', 'text', 'ФИО', 'team', $id); ?>><?php echo htmlspecialchars($member['name'], ENT_QUOTES, 'UTF-8'); ?></h3>
+        <?php } else { ?>
+            <h3 class="team-card__name">
+                <span class="team-card__surname"><?php echo htmlspecialchars($nameParts['surname'], ENT_QUOTES, 'UTF-8'); ?></span>
+                <?php if ($nameParts['given'] !== '') { ?>
+                    <span class="team-card__given"><?php echo htmlspecialchars($nameParts['given'], ENT_QUOTES, 'UTF-8'); ?></span>
+                <?php } ?>
+            </h3>
+        <?php } ?>
         <?php if ($member['role'] !== '' || $ve) { ?>
             <p class="team-card__role"<?php echo site_ve_attrs('role', 'text', 'Должность', 'team', $id); ?>><?php echo htmlspecialchars($member['role'], ENT_QUOTES, 'UTF-8'); ?></p>
         <?php } ?>
@@ -287,6 +297,27 @@ function site_render_team_card(array $member): void
         <?php } ?>
     </article>
     <?php
+}
+
+/**
+ * Фамилия крупно, имя и отчество ниже.
+ *
+ * @return array{surname: string, given: string}
+ */
+function site_team_split_name(string $fullName): array
+{
+    $parts = preg_split('/\s+/u', trim($fullName), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+    if (count($parts) === 0) {
+        return ['surname' => '', 'given' => ''];
+    }
+    if (count($parts) === 1) {
+        return ['surname' => $parts[0], 'given' => ''];
+    }
+
+    return [
+        'surname' => $parts[0],
+        'given' => implode(' ', array_slice($parts, 1)),
+    ];
 }
 
 /**
