@@ -8,13 +8,21 @@ declare(strict_types=1);
  */
 
 require_once __DIR__ . '/crm-listing-helpers.php';
+require_once __DIR__ . '/site-brand.php';
+require_once __DIR__ . '/visual-editor.php';
 
-$heroTabsMain = [
-    'buy' => 'Купить',
-    'sell' => 'Продать',
-    'rent_in' => 'Снять',
-    'rent_out' => 'Сдать',
-    'new' => 'Новостройки',
+$heroTabsMain = site_hero_tabs();
+$heroTabAbroad = site_hero_tab_abroad();
+$heroCtaFind = site_hero_cta_find();
+$heroCtaMap = site_hero_cta_map();
+$heroEyebrow = site_hero_eyebrow();
+
+$heroTabFields = [
+    'buy' => 'hero_tab_buy',
+    'sell' => 'hero_tab_sell',
+    'rent_in' => 'hero_tab_rent_in',
+    'rent_out' => 'hero_tab_rent_out',
+    'new' => 'hero_tab_new',
 ];
 
 $heroSlides = site_hero_slides_cached(5);
@@ -61,7 +69,7 @@ $heroSliderEnabled = $heroSlideCount > 1;
     </div>
 
     <div class="container hero__layout">
-        <p class="hero__eyebrow"><?php echo htmlspecialchars(site_brand_full(), ENT_QUOTES, 'UTF-8'); ?></p>
+        <p class="hero__eyebrow"<?php echo site_ve_attrs('hero_eyebrow', 'text', 'Надзаголовок hero'); ?>><?php echo htmlspecialchars($heroEyebrow, ENT_QUOTES, 'UTF-8'); ?></p>
         <h1 class="hero__title" id="hero-title"<?php echo site_ve_attrs('hero_headline', 'textarea', 'Заголовок на главной'); ?>><?php echo htmlspecialchars(site_hero_headline(), ENT_QUOTES, 'UTF-8'); ?></h1>
         <p class="hero__lead"<?php echo site_ve_attrs('slogan_hero', 'textarea', 'Подзаголовок hero'); ?>><?php echo htmlspecialchars(site_slogan_hero(), ENT_QUOTES, 'UTF-8'); ?></p>
 
@@ -73,6 +81,7 @@ $heroSliderEnabled = $heroSlideCount > 1;
                     $selected = $first ? 'true' : 'false';
                     $activeClass = $first ? ' hero__tab--active' : '';
                     $first = false;
+                    $tabField = $heroTabFields[$id] ?? '';
                     ?>
                     <button
                         type="button"
@@ -81,6 +90,7 @@ $heroSliderEnabled = $heroSlideCount > 1;
                         aria-selected="<?php echo $selected; ?>"
                         data-deal="<?php echo htmlspecialchars($id, ENT_QUOTES, 'UTF-8'); ?>"
                         id="hero-tab-<?php echo htmlspecialchars($id, ENT_QUOTES, 'UTF-8'); ?>"
+                        <?php echo $tabField !== '' ? site_ve_attrs($tabField, 'text', 'Вкладка hero: ' . $label) : ''; ?>
                     ><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></button>
                 <?php } ?>
                 <button
@@ -90,7 +100,8 @@ $heroSliderEnabled = $heroSlideCount > 1;
                     aria-selected="false"
                     data-deal="abroad"
                     id="hero-tab-abroad"
-                >Зарубежная</button>
+                    <?php echo site_ve_attrs('hero_tab_abroad', 'text', 'Вкладка hero: Зарубежная'); ?>
+                ><?php echo htmlspecialchars($heroTabAbroad, ENT_QUOTES, 'UTF-8'); ?></button>
             </div>
 
             <div class="hero__search-card">
@@ -182,8 +193,8 @@ $heroSliderEnabled = $heroSlideCount > 1;
             </div>
 
             <div class="hero__actions">
-                <button id="hero-primary-action" type="submit" class="hero__btn hero__btn--find" form="hero-search-form">Найти</button>
-                <a class="hero__btn hero__btn--map" id="hero-map-link" href="/catalog/map/">На карте</a>
+                <button id="hero-primary-action" type="submit" class="hero__btn hero__btn--find" form="hero-search-form"<?php echo site_ve_attrs('hero_cta_find', 'text', 'Кнопка «Найти»'); ?>><?php echo htmlspecialchars($heroCtaFind, ENT_QUOTES, 'UTF-8'); ?></button>
+                <a class="hero__btn hero__btn--map" id="hero-map-link" href="/catalog/map/"<?php echo site_ve_attrs('hero_cta_map', 'text', 'Кнопка «На карте»'); ?>><?php echo htmlspecialchars($heroCtaMap, ENT_QUOTES, 'UTF-8'); ?></a>
             </div>
         </div>
     </div>

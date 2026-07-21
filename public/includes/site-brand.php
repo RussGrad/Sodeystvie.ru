@@ -55,6 +55,64 @@ function site_hero_headline(): string
     ));
 }
 
+/** Надзаголовок первого экрана (по умолчанию бренд). */
+function site_hero_eyebrow(): string
+{
+    $fromContent = site_content_setting('hero_eyebrow', '');
+    if ($fromContent !== '') {
+        return $fromContent;
+    }
+
+    return site_brand_full();
+}
+
+/** @return array<string, string> */
+function site_hero_tabs(): array
+{
+    $defaults = [
+        'buy' => 'Купить',
+        'sell' => 'Продать',
+        'rent_in' => 'Снять',
+        'rent_out' => 'Сдать',
+        'new' => 'Новостройки',
+    ];
+    $keys = [
+        'buy' => 'hero_tab_buy',
+        'sell' => 'hero_tab_sell',
+        'rent_in' => 'hero_tab_rent_in',
+        'rent_out' => 'hero_tab_rent_out',
+        'new' => 'hero_tab_new',
+    ];
+    $out = [];
+    foreach ($keys as $id => $settingKey) {
+        $value = trim(site_content_setting($settingKey, ''));
+        $out[$id] = $value !== '' ? $value : $defaults[$id];
+    }
+
+    return $out;
+}
+
+function site_hero_tab_abroad(): string
+{
+    $fromContent = site_content_setting('hero_tab_abroad', '');
+
+    return $fromContent !== '' ? $fromContent : 'Зарубежная';
+}
+
+function site_hero_cta_find(): string
+{
+    $fromContent = site_content_setting('hero_cta_find', '');
+
+    return $fromContent !== '' ? $fromContent : 'Найти';
+}
+
+function site_hero_cta_map(): string
+{
+    $fromContent = site_content_setting('hero_cta_map', '');
+
+    return $fromContent !== '' ? $fromContent : 'На карте';
+}
+
 /** Подпись у логотипа в шапке: «в Иркутске с 2015 года». */
 function site_header_tagline_geo(): string
 {
