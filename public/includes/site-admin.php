@@ -405,6 +405,10 @@ function site_admin_sanitize_settings(array $input): array
         'nav_label_mortgage' => 80,
         'nav_label_about' => 80,
         'nav_label_contacts' => 80,
+        'magazine_photo_rotate' => 8,
+        'magazine_photo_scale' => 8,
+        'magazine_logo_rotate' => 8,
+        'magazine_logo_scale' => 8,
     ];
     $out = [];
     foreach ($fields as $key => $limit) {

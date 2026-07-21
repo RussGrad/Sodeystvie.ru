@@ -162,6 +162,8 @@ if ($action === 'upload_image') {
         $result = site_visual_editor_handle_case_image_upload($itemId, $file);
     } elseif ($dataset === 'services') {
         $result = site_visual_editor_handle_service_image_upload($itemId, $file);
+    } elseif ($dataset === 'magazine') {
+        $result = site_visual_editor_handle_magazine_asset_upload($itemId, $file);
     } else {
         http_response_code(400);
         echo json_encode(['ok' => false, 'error' => 'Загрузка для этого блока не поддерживается'], JSON_UNESCAPED_UNICODE);
@@ -189,7 +191,11 @@ if ($action === 'delete_image') {
         $itemId = isset($json['id']) && is_string($json['id']) ? $json['id'] : '';
     }
 
-    $result = site_visual_editor_delete_item_image($dataset, $itemId);
+    if ($dataset === 'magazine') {
+        $result = site_visual_editor_delete_magazine_asset($itemId);
+    } else {
+        $result = site_visual_editor_delete_item_image($dataset, $itemId);
+    }
     if (!$result['ok']) {
         http_response_code(400);
         echo json_encode($result, JSON_UNESCAPED_UNICODE);

@@ -101,6 +101,10 @@ function site_visual_editor_settings_fields(): array
         'deal_cards_kicker' => 80,
         'cases_section_title' => 120,
         'cases_section_lead' => 400,
+        'magazine_photo_rotate' => 8,
+        'magazine_photo_scale' => 8,
+        'magazine_logo_rotate' => 8,
+        'magazine_logo_scale' => 8,
     ];
 }
 
@@ -159,7 +163,7 @@ function site_ve_service_icon_options(): array
 /**
  * HTML-атрибуты для кликабельного элемента в режиме VE.
  *
- * @param 'text'|'textarea'|'tel'|'email'|'url'|'image'|'icon' $type
+ * @param 'text'|'textarea'|'tel'|'email'|'url'|'image'|'icon'|'mag-image' $type
  */
 function site_ve_attrs(
     string $field,
@@ -190,7 +194,11 @@ function site_ve_attrs(
         }
     } else {
         $allowed = site_visual_editor_settings_fields();
-        if ($type !== 'image' && !isset($allowed[$field]) && $field !== 'logo') {
+        if ($type === 'mag-image') {
+            if (!in_array($field, ['magazine_photo', 'magazine_logo'], true)) {
+                return '';
+            }
+        } elseif ($type !== 'image' && !isset($allowed[$field]) && $field !== 'logo') {
             return '';
         }
     }
@@ -208,6 +216,15 @@ function site_ve_attrs(
     }
     if ($currentValue !== '') {
         $parts[] = 'data-ve-value="' . htmlspecialchars($currentValue, ENT_QUOTES, 'UTF-8') . '"';
+    }
+    if ($type === 'mag-image') {
+        $kind = $field === 'magazine_logo' ? 'logo' : 'photo';
+        $transform = site_magazine_transform($kind);
+        $parts[] = 'data-ve-rotate="' . (string) $transform['rotate'] . '"';
+        $parts[] = 'data-ve-scale="' . (string) $transform['scale'] . '"';
+        if (site_magazine_has_custom_asset($kind) || ($kind === 'photo' && site_magazine_asset_path('photo') !== '')) {
+            $parts[] = 'data-ve-has-image="1"';
+        }
     }
 
     return ' ' . implode(' ', $parts);
@@ -384,7 +401,21 @@ function site_visual_editor_patch_settings(array $patch): bool
         if (!is_string($key) || !isset($allowed[$key])) {
             continue;
         }
-        $current[$key] = mb_substr(trim((string) $value), 0, $allowed[$key]);
+        $raw = trim((string) $value);
+        if (str_ends_with($key, '_rotate')) {
+            $deg = (int) round((float) $raw);
+            $current[$key] = (string) max(-180, min(180, $deg));
+            continue;
+        }
+        if (str_ends_with($key, '_scale')) {
+            $scale = (float) str_replace(',', '.', $raw);
+            if ($scale <= 0) {
+                $scale = 1.0;
+            }
+            $current[$key] = (string) round(max(0.5, min(2.5, $scale)), 2);
+            continue;
+        }
+        $current[$key] = mb_substr($raw, 0, $allowed[$key]);
     }
 
     return site_admin_write_dataset('settings', $current);
@@ -766,4 +797,99 @@ function site_visual_editor_delete_item_image(string $dataset, string $itemId): 
     }
 
     return ['ok' => false, 'error' => 'Удаление для этого блока не поддерживается'];
+}
+
+/**
+ * Загрузка ассета журнала: photo | logo → assets/mortgage/magazine-{kind}.*
+ *
+ * @param array{name?: string, type?: string, tmp_name?: string, error?: int, size?: int} $file
+ * @return array{ok: bool, path?: string, error?: string}
+ */
+function site_visual_editor_handle_magazine_asset_upload(string $kind, array $file): array
+{
+    $kind = $kind === 'logo' ? 'logo' : 'photo';
+    $base = $kind === 'logo' ? 'magazine-logo' : 'magazine-photo';
+
+    $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
+    if ($error === UPLOAD_ERR_NO_FILE) {
+        return ['ok' => false, 'error' => 'Выберите изображение'];
+    }
+    if ($error !== UPLOAD_ERR_OK) {
+        return ['ok' => false, 'error' => 'Ошибка загрузки (код ' . $error . ')'];
+    }
+
+    $size = (int) ($file['size'] ?? 0);
+    if ($size <= 0 || $size > 8 * 1024 * 1024) {
+        return ['ok' => false, 'error' => 'Файл должен быть не больше 8 МБ'];
+    }
+
+    $tmp = (string) ($file['tmp_name'] ?? '');
+    if ($tmp === '' || !is_uploaded_file($tmp)) {
+        return ['ok' => false, 'error' => 'Некорректная загрузка'];
+    }
+
+    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($tmp);
+    $ext = match ($mime) {
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+        'image/svg+xml' => $kind === 'logo' ? 'svg' : null,
+        default => null,
+    };
+    if ($ext === null) {
+        return ['ok' => false, 'error' => $kind === 'logo' ? 'Допустимы JPG, PNG, WebP или SVG' : 'Допустимы JPG, PNG или WebP'];
+    }
+    if ($ext !== 'svg' && @getimagesize($tmp) === false) {
+        return ['ok' => false, 'error' => 'Файл не является изображением'];
+    }
+
+    $dir = dirname(__DIR__) . '/assets/mortgage';
+    if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
+        return ['ok' => false, 'error' => 'Не удалось создать каталог mortgage'];
+    }
+
+    $staged = $dir . '/.' . $base . '-' . bin2hex(random_bytes(6)) . '.' . $ext;
+    if (!move_uploaded_file($tmp, $staged)) {
+        return ['ok' => false, 'error' => 'Не удалось сохранить файл'];
+    }
+
+    $destination = $dir . '/' . $base . '.' . $ext;
+    if (!@rename($staged, $destination)) {
+        @unlink($staged);
+
+        return ['ok' => false, 'error' => 'Не удалось установить изображение'];
+    }
+
+    foreach (['jpg', 'jpeg', 'png', 'webp', 'svg'] as $other) {
+        if ($other === $ext) {
+            continue;
+        }
+        $old = $dir . '/' . $base . '.' . $other;
+        if (is_file($old)) {
+            @unlink($old);
+        }
+    }
+
+    return ['ok' => true, 'path' => '/assets/mortgage/' . $base . '.' . $ext . '?v=' . (string) time()];
+}
+
+/**
+ * @return array{ok: bool, error?: string}
+ */
+function site_visual_editor_delete_magazine_asset(string $kind): array
+{
+    $kind = $kind === 'logo' ? 'logo' : 'photo';
+    $base = $kind === 'logo' ? 'magazine-logo' : 'magazine-photo';
+    $dir = dirname(__DIR__) . '/assets/mortgage';
+    $removed = false;
+    foreach (['jpg', 'jpeg', 'png', 'webp', 'svg'] as $ext) {
+        $path = $dir . '/' . $base . '.' . $ext;
+        if (is_file($path) && @unlink($path)) {
+            $removed = true;
+        }
+    }
+
+    return $removed
+        ? ['ok' => true]
+        : ['ok' => false, 'error' => 'Своё изображение не найдено (используется обложка по умолчанию)'];
 }

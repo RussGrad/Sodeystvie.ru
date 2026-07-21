@@ -111,6 +111,13 @@
     '<select class="ve-panel__select" id="ve-panel-select" hidden></select>' +
     '<p class="ve-panel__hint" id="ve-panel-hint" hidden></p>' +
     '<input class="ve-panel__input" id="ve-panel-file" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden>' +
+    '<div class="ve-panel__tools" id="ve-panel-tools" hidden>' +
+    '<button type="button" class="ve-bar__btn ve-panel__tool" id="ve-tool-rotate-left" title="Повернуть влево">↺</button>' +
+    '<button type="button" class="ve-bar__btn ve-panel__tool" id="ve-tool-rotate-right" title="Повернуть вправо">↻</button>' +
+    '<button type="button" class="ve-bar__btn ve-panel__tool" id="ve-tool-zoom-out" title="Уменьшить">−</button>' +
+    '<button type="button" class="ve-bar__btn ve-panel__tool" id="ve-tool-zoom-in" title="Увеличить">+</button>' +
+    '</div>' +
+    '<p class="ve-panel__meta" id="ve-panel-meta" hidden></p>' +
     '<div class="ve-panel__actions">' +
     '<button type="button" class="ve-bar__btn ve-bar__btn--primary" id="ve-panel-save">Сохранить</button>' +
     '<button type="button" class="ve-bar__btn" id="ve-panel-delete-image" hidden>Удалить изображение</button>' +
@@ -131,12 +138,81 @@
   var deleteImageBtn = document.getElementById('ve-panel-delete-image');
   var cancelBtn = document.getElementById('ve-panel-cancel');
   var reloadBtn = document.getElementById('ve-reload');
+  var toolsEl = document.getElementById('ve-panel-tools');
+  var metaEl = document.getElementById('ve-panel-meta');
+  var rotateLeftBtn = document.getElementById('ve-tool-rotate-left');
+  var rotateRightBtn = document.getElementById('ve-tool-rotate-right');
+  var zoomOutBtn = document.getElementById('ve-tool-zoom-out');
+  var zoomInBtn = document.getElementById('ve-tool-zoom-in');
 
   var activeEl = null;
   var activeField = '';
   var activeType = 'text';
   var activeDataset = '';
   var activeItemId = '';
+  var activeRotate = 0;
+  var activeScale = 1;
+
+  function magFieldToKind(field) {
+    return field === 'magazine_logo' ? 'logo' : 'photo';
+  }
+
+  function magFieldToRotateKey(field) {
+    return field === 'magazine_logo' ? 'magazine_logo_rotate' : 'magazine_photo_rotate';
+  }
+
+  function magFieldToScaleKey(field) {
+    return field === 'magazine_logo' ? 'magazine_logo_scale' : 'magazine_photo_scale';
+  }
+
+  function updateMagMeta() {
+    if (!metaEl) {
+      return;
+    }
+    metaEl.textContent = activeRotate + '° · ×' + activeScale.toFixed(2);
+  }
+
+  function applyMagTransform() {
+    if (!activeEl) {
+      return;
+    }
+    activeEl.style.setProperty('--mag-rotate', activeRotate + 'deg');
+    activeEl.style.setProperty('--mag-scale', String(activeScale));
+    activeEl.setAttribute('data-ve-rotate', String(activeRotate));
+    activeEl.setAttribute('data-ve-scale', String(activeScale));
+    updateMagMeta();
+  }
+
+  function saveMagField(field, value) {
+    return fetch(boot.saveUrl || '/admin/api/visual-save.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        csrf: boot.csrf || '',
+        action: 'save_field',
+        field: field,
+        value: value,
+      }),
+    }).then(function (r) {
+      return r.json().then(function (data) {
+        return { ok: r.ok, data: data };
+      });
+    });
+  }
+
+  function saveMagTransform() {
+    return saveMagField(magFieldToRotateKey(activeField), String(activeRotate)).then(function (res) {
+      if (!res.ok || !res.data || !res.data.ok) {
+        throw new Error((res.data && res.data.error) || 'Ошибка сохранения поворота');
+      }
+      return saveMagField(magFieldToScaleKey(activeField), String(activeScale));
+    }).then(function (res) {
+      if (!res.ok || !res.data || !res.data.ok) {
+        throw new Error((res.data && res.data.error) || 'Ошибка сохранения масштаба');
+      }
+    });
+  }
 
   function setStatus(msg) {
     if (statusEl) {
@@ -191,6 +267,15 @@
     activeField = '';
     activeDataset = '';
     activeItemId = '';
+    activeRotate = 0;
+    activeScale = 1;
+    if (toolsEl) {
+      toolsEl.hidden = true;
+    }
+    if (metaEl) {
+      metaEl.hidden = true;
+      metaEl.textContent = '';
+    }
     setError('');
   }
 
@@ -227,9 +312,38 @@
     if (deleteImageBtn) {
       deleteImageBtn.hidden = true;
     }
+    if (toolsEl) {
+      toolsEl.hidden = true;
+    }
+    if (metaEl) {
+      metaEl.hidden = true;
+      metaEl.textContent = '';
+    }
     fileEl.value = '';
 
-    if (type === 'image') {
+    if (type === 'mag-image') {
+      fileEl.hidden = false;
+      labelEl.setAttribute('for', 've-panel-file');
+      labelEl.textContent = 'Изображение';
+      activeRotate = parseInt(el.getAttribute('data-ve-rotate') || '0', 10);
+      if (Number.isNaN(activeRotate)) {
+        activeRotate = 0;
+      }
+      activeScale = parseFloat(el.getAttribute('data-ve-scale') || '1');
+      if (Number.isNaN(activeScale) || activeScale <= 0) {
+        activeScale = 1;
+      }
+      applyMagTransform();
+      if (toolsEl) {
+        toolsEl.hidden = false;
+      }
+      if (metaEl) {
+        metaEl.hidden = false;
+      }
+      if (deleteImageBtn && el.getAttribute('data-ve-has-image') === '1') {
+        deleteImageBtn.hidden = false;
+      }
+    } else if (type === 'image') {
       fileEl.hidden = false;
       labelEl.setAttribute('for', 've-panel-file');
       if (deleteImageBtn && el.getAttribute('data-ve-has-image') === '1') {
@@ -345,9 +459,40 @@
 
   cancelBtn.addEventListener('click', closePanel);
 
+  function bindMagTool(btn, handler) {
+    if (!btn) {
+      return;
+    }
+    btn.addEventListener('click', function () {
+      if (activeType !== 'mag-image' || !activeEl) {
+        return;
+      }
+      handler();
+      applyMagTransform();
+    });
+  }
+
+  bindMagTool(rotateLeftBtn, function () {
+    activeRotate = Math.max(-180, activeRotate - 5);
+  });
+  bindMagTool(rotateRightBtn, function () {
+    activeRotate = Math.min(180, activeRotate + 5);
+  });
+  bindMagTool(zoomOutBtn, function () {
+    activeScale = Math.max(0.5, Math.round((activeScale - 0.05) * 100) / 100);
+  });
+  bindMagTool(zoomInBtn, function () {
+    activeScale = Math.min(2.5, Math.round((activeScale + 0.05) * 100) / 100);
+  });
+
   if (deleteImageBtn) {
     deleteImageBtn.addEventListener('click', function () {
-      if (!activeDataset || !activeItemId) {
+      var deleteDataset = activeDataset;
+      var deleteId = activeItemId;
+      if (activeType === 'mag-image') {
+        deleteDataset = 'magazine';
+        deleteId = magFieldToKind(activeField);
+      } else if (!deleteDataset || !deleteId) {
         return;
       }
       setError('');
@@ -361,8 +506,8 @@
         body: JSON.stringify({
           csrf: boot.csrf || '',
           action: 'delete_image',
-          dataset: activeDataset,
-          id: activeItemId,
+          dataset: deleteDataset,
+          id: deleteId,
         }),
       })
         .then(function (r) {
@@ -427,6 +572,52 @@
           setStatus('Изображение сохранено');
           window.location.reload();
         });
+    }
+
+    if (activeType === 'mag-image') {
+      var magFile = fileEl.files && fileEl.files[0];
+      var uploadPromise = Promise.resolve();
+
+      if (magFile) {
+        var magFd = new FormData();
+        magFd.append('csrf', boot.csrf || '');
+        magFd.append('action', 'upload_image');
+        magFd.append('dataset', 'magazine');
+        magFd.append('id', magFieldToKind(activeField));
+        magFd.append('file', magFile);
+        uploadPromise = fetch(boot.saveUrl || '/admin/api/visual-save.php', {
+          method: 'POST',
+          body: magFd,
+          credentials: 'same-origin',
+        })
+          .then(function (r) {
+            return r.json().then(function (data) {
+              return { ok: r.ok, data: data };
+            });
+          })
+          .then(function (res) {
+            if (!res.ok || !res.data || !res.data.ok) {
+              throw new Error((res.data && res.data.error) || 'Ошибка загрузки');
+            }
+          });
+      }
+
+      uploadPromise
+        .then(function () {
+          return saveMagTransform();
+        })
+        .then(function () {
+          setStatus('Сохранено');
+          window.location.reload();
+        })
+        .catch(function (err) {
+          setError(err.message || 'Ошибка');
+          setStatus('');
+        })
+        .finally(function () {
+          saveBtn.disabled = false;
+        });
+      return;
     }
 
     if (activeType === 'image') {

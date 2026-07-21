@@ -3,10 +3,35 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/messenger-links.php';
+require_once __DIR__ . '/site-image.php';
+require_once __DIR__ . '/visual-editor.php';
 
 $leadImage = site_home_lead_image_src();
 $leadImagePath = site_home_lead_image_path();
 $leadIsMagazine = site_home_lead_image_is_magazine();
+
+$magPhotoPath = site_magazine_asset_path('photo');
+$magLogoPath = site_magazine_asset_path('logo');
+$magPhotoTransform = site_magazine_transform('photo');
+$magLogoTransform = site_magazine_transform('logo');
+$magHasCustomLogo = site_magazine_has_custom_asset('logo');
+$veOn = site_visual_editor_enabled();
+
+$eyebrowText = site_content_setting('slogan_short', '');
+if ($eyebrowText === '') {
+    $eyebrowText = 'Ипотечный центр «Содействие»';
+}
+
+$magPhotoStyle = sprintf(
+    '--mag-rotate: %ddeg; --mag-scale: %s;',
+    (int) $magPhotoTransform['rotate'],
+    (string) $magPhotoTransform['scale']
+);
+$magLogoStyle = sprintf(
+    '--mag-rotate: %ddeg; --mag-scale: %s;',
+    (int) $magLogoTransform['rotate'],
+    (string) $magLogoTransform['scale']
+);
 
 ?>
 <section class="mortgage-quiz" aria-labelledby="mortgage-quiz-title">
@@ -14,7 +39,9 @@ $leadIsMagazine = site_home_lead_image_is_magazine();
         <div class="mortgage-quiz__card">
             <div class="mortgage-quiz__content">
                 <header class="mortgage-quiz__head">
-                    <p class="mortgage-quiz__eyebrow">Ипотечный центр «Содействие»</p>
+                    <p class="mortgage-quiz__eyebrow"<?php echo site_ve_attrs('slogan_short', 'text', 'Короткий слоган'); ?>>
+                        <?php echo htmlspecialchars($eyebrowText, ENT_QUOTES, 'UTF-8'); ?>
+                    </p>
                     <h2 class="mortgage-quiz__title" id="mortgage-quiz-title"<?php echo site_ve_attrs('home_lead_title', 'textarea', 'Заголовок ипотечного блока'); ?>>
                         <?php echo htmlspecialchars(site_home_lead_title(), ENT_QUOTES, 'UTF-8'); ?>
                     </h2>
@@ -92,7 +119,7 @@ $leadIsMagazine = site_home_lead_image_is_magazine();
                         <div class="mortgage-quiz__actions">
                             <button type="button" class="mortgage-quiz__btn mortgage-quiz__btn--back" id="mortgage-quiz-back" hidden>Назад</button>
                             <button type="button" class="mortgage-quiz__btn mortgage-quiz__btn--next" id="mortgage-quiz-next">Далее</button>
-                            <button type="submit" class="mortgage-quiz__btn mortgage-quiz__btn--submit" id="mortgage-quiz-submit" hidden><?php echo htmlspecialchars(site_home_lead_cta(), ENT_QUOTES, 'UTF-8'); ?></button>
+                            <button type="submit" class="mortgage-quiz__btn mortgage-quiz__btn--submit" id="mortgage-quiz-submit" hidden<?php echo site_ve_attrs('home_lead_cta', 'text', 'Текст кнопки заявки'); ?>><?php echo htmlspecialchars(site_home_lead_cta(), ENT_QUOTES, 'UTF-8'); ?></button>
                         </div>
 
                         <p class="mortgage-quiz__error" id="mortgage-quiz-error" hidden role="alert"></p>
@@ -114,12 +141,47 @@ $leadIsMagazine = site_home_lead_image_is_magazine();
                 <span class="mortgage-quiz__orbit mortgage-quiz__orbit--large" aria-hidden="true"></span>
                 <span class="mortgage-quiz__orbit mortgage-quiz__orbit--small" aria-hidden="true"></span>
                 <div class="mortgage-quiz__publication-wrap">
-                    <div class="mortgage-quiz__publication<?php echo $leadIsMagazine ? ' mortgage-quiz__publication--magazine' : ''; ?>">
-                        <?php if ($leadImagePath !== '') {
+                    <div class="mortgage-quiz__publication<?php echo $leadIsMagazine ? ' mortgage-quiz__publication--magazine mortgage-quiz__publication--layers' : ''; ?>">
+                        <?php if ($leadIsMagazine) { ?>
+                            <div
+                                class="mortgage-quiz__mag-photo"
+                                style="<?php echo htmlspecialchars($magPhotoStyle, ENT_QUOTES, 'UTF-8'); ?>"
+                                <?php echo site_ve_attrs('magazine_photo', 'mag-image', 'Фото в журнале'); ?>
+                            >
+                                <?php if ($magPhotoPath !== '') {
+                                    echo site_render_static_picture(
+                                        $magPhotoPath,
+                                        'Фото в журнале ипотечного центра «Содействие»',
+                                        'mortgage-quiz__mag-photo-img',
+                                        'width="720" height="988"'
+                                    );
+                                } elseif ($veOn) { ?>
+                                    <span class="mortgage-quiz__mag-placeholder">Фото в журнале</span>
+                                <?php } ?>
+                            </div>
+                            <?php if ($magHasCustomLogo || $veOn) { ?>
+                                <div
+                                    class="mortgage-quiz__mag-logo<?php echo $magLogoPath === '' && $veOn ? ' mortgage-quiz__mag-logo--empty' : ''; ?>"
+                                    style="<?php echo htmlspecialchars($magLogoStyle, ENT_QUOTES, 'UTF-8'); ?>"
+                                    <?php echo site_ve_attrs('magazine_logo', 'mag-image', 'Логотип в журнале'); ?>
+                                >
+                                    <?php if ($magLogoPath !== '') {
+                                        echo site_render_static_picture(
+                                            $magLogoPath,
+                                            'Логотип в журнале «Содействие»',
+                                            'mortgage-quiz__mag-logo-img',
+                                            'width="320" height="80"'
+                                        );
+                                    } elseif ($veOn) { ?>
+                                        <span class="mortgage-quiz__mag-placeholder">Логотип</span>
+                                    <?php } ?>
+                                </div>
+                            <?php } ?>
+                        <?php } elseif ($leadImagePath !== '') {
                             echo site_render_static_picture(
                                 $leadImagePath,
                                 'Промоматериал ипотечного центра «Содействие»',
-                                $leadIsMagazine ? 'mortgage-quiz__magazine-cover' : 'mortgage-quiz__photo',
+                                'mortgage-quiz__photo',
                                 'width="720" height="988"'
                             );
                         } else { ?>
