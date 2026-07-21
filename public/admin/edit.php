@@ -223,6 +223,21 @@ function site_admin_render_messengers_settings(array $data): void
  */
 function site_admin_render_list_form(string $section, array $rows): void
 {
+    if ($section === 'team') {
+        $crmCount = count(site_team_all_from_crm());
+        $jsonCount = count(site_team_all_from_json());
+        if ($jsonCount === 0 && $crmCount > 0) {
+            echo '<p class="admin-flash admin-flash--warn" role="status">На сайте сейчас показывается команда из CRM ('
+                . $crmCount
+                . '). Заполните ID и имя ниже и нажмите «Сохранить» — тогда будут сотрудники из этой формы.</p>';
+        } elseif ($jsonCount > 0) {
+            echo '<p class="admin-flash admin-flash--ok" role="status">На сайте показывается команда из админки ('
+                . $jsonCount
+                . '). Без ID и имени запись не сохранится.</p>';
+        } else {
+            echo '<p class="admin-flash admin-flash--warn" role="status">Обязательны поля ID и «Имя». Без имени запись при сохранении пропускается. Фото — после заполнения ID.</p>';
+        }
+    }
     ?>
     <div class="admin-items" data-admin-items data-section="<?php echo htmlspecialchars($section, ENT_QUOTES, 'UTF-8'); ?>">
         <?php
@@ -264,7 +279,7 @@ function site_admin_render_item_row(string $section, int $index, array $row): vo
                     ?>
                     <label class="admin-field admin-field--wide">
                         <span class="admin-field__label">Фото (JPG/PNG/WebP, до 5 МБ)</span>
-                        <input class="admin-field__input" type="file" name="photo_file[<?php echo htmlspecialchars($memberId, ENT_QUOTES, 'UTF-8'); ?>]" accept="image/jpeg,image/png,image/webp">
+                        <input class="admin-field__input" type="file" name="photo_file[<?php echo (int) $index; ?>]" accept="image/jpeg,image/png,image/webp" data-admin-photo-index>
                         <?php if ($memberId !== '') {
                             $photoPath = site_team_photo_path($memberId);
                             if ($photoPath !== '') { ?>

@@ -483,7 +483,31 @@ function site_admin_sanitize_dataset(string $id, $payload)
 }
 
 /**
- * @return array{ok: bool, error?: string}
+ * Файл фото из photo_file[index] (привязка к строке формы, не к ID).
+ *
+ * @return array{name: string, type: string, tmp_name: string, error: int, size: int}|null
+ */
+function site_admin_team_photo_file_at_index(int $index): ?array
+{
+    if (!isset($_FILES['photo_file']) || !is_array($_FILES['photo_file'])) {
+        return null;
+    }
+    $error = $_FILES['photo_file']['error'][$index] ?? UPLOAD_ERR_NO_FILE;
+    if ((int) $error === UPLOAD_ERR_NO_FILE) {
+        return null;
+    }
+
+    return [
+        'name' => (string) ($_FILES['photo_file']['name'][$index] ?? ''),
+        'type' => (string) ($_FILES['photo_file']['type'][$index] ?? ''),
+        'tmp_name' => (string) ($_FILES['photo_file']['tmp_name'][$index] ?? ''),
+        'error' => (int) $error,
+        'size' => (int) ($_FILES['photo_file']['size'][$index] ?? 0),
+    ];
+}
+
+/**
+ * @return array{ok: bool, path?: string, error?: string}
  */
 function site_admin_handle_team_photo_upload(string $memberId): array
 {

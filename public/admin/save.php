@@ -26,6 +26,9 @@ if (!in_array($section, site_admin_editable_datasets(), true)) {
     exit;
 }
 
+$teamSkipped = 0;
+$teamPhotoErrors = [];
+
 if ($section === 'settings') {
     $payload = site_admin_sanitize_settings($_POST);
     foreach (['telegram', 'vk', 'max', 'whatsapp'] as $messengerType) {
@@ -58,6 +61,42 @@ if ($section === 'settings') {
         }
         $payload['home_lead_image'] = (string) ($upload['path'] ?? '');
     }
+} elseif ($section === 'team') {
+    require_once __DIR__ . '/../includes/site-team.php';
+    $raw = $_POST['items'] ?? [];
+    if (!is_array($raw)) {
+        $raw = [];
+    }
+    $raw = array_values($raw);
+    $payload = [];
+    foreach ($raw as $index => $row) {
+        if (!is_array($row)) {
+            continue;
+        }
+        $sanitized = site_admin_sanitize_team_row($row);
+        if ($sanitized['id'] === '' || $sanitized['name'] === '') {
+            $teamSkipped++;
+            continue;
+        }
+
+        $existingPhoto = site_team_photo_path($sanitized['id']);
+        if ($existingPhoto !== '') {
+            $sanitized['photo'] = $existingPhoto;
+        }
+
+        $single = site_admin_team_photo_file_at_index((int) $index);
+        if ($single !== null) {
+            $_FILES['photo'] = $single;
+            $upload = site_admin_handle_team_photo_upload($sanitized['id']);
+            if (!$upload['ok']) {
+                $teamPhotoErrors[] = $sanitized['name'] . ': ' . ($upload['error'] ?? 'ошибка фото');
+            } elseif (!empty($upload['path'])) {
+                $sanitized['photo'] = (string) $upload['path'];
+            }
+        }
+
+        $payload[] = $sanitized;
+    }
 } else {
     $raw = $_POST['items'] ?? [];
     if (!is_array($raw)) {
@@ -72,34 +111,20 @@ if (!site_admin_write_dataset($section, $payload)) {
     exit;
 }
 
-// Загрузка фото команды (опционально, отдельные поля photo_file[id])
-if ($section === 'team' && isset($_FILES['photo_file']) && is_array($_FILES['photo_file'])) {
-    $names = $_FILES['photo_file']['name'] ?? [];
-    if (is_array($names)) {
-        foreach (array_keys($names) as $memberId) {
-            if (!is_string($memberId) || $memberId === '') {
-                continue;
-            }
-            $single = [
-                'name' => $_FILES['photo_file']['name'][$memberId] ?? '',
-                'type' => $_FILES['photo_file']['type'][$memberId] ?? '',
-                'tmp_name' => $_FILES['photo_file']['tmp_name'][$memberId] ?? '',
-                'error' => $_FILES['photo_file']['error'][$memberId] ?? UPLOAD_ERR_NO_FILE,
-                'size' => $_FILES['photo_file']['size'][$memberId] ?? 0,
-            ];
-            if (($single['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
-                continue;
-            }
-            $_FILES['photo'] = $single;
-            site_admin_handle_team_photo_upload($memberId);
-        }
-    }
-}
-
 if ($section === 'settings' && isset($_FILES['messenger_icon']) && is_array($_FILES['messenger_icon'])) {
     site_admin_handle_messenger_icons_upload($_FILES['messenger_icon']);
 }
 
-site_admin_flash_set('Сохранено: ' . site_admin_dataset_label($section) . '.');
+$flash = 'Сохранено: ' . site_admin_dataset_label($section) . '.';
+if ($section === 'team') {
+    $flash .= ' На сайте: ' . count($payload) . ' чел.';
+    if ($teamSkipped > 0) {
+        $flash .= ' Пропущено без ID/имени: ' . $teamSkipped . '.';
+    }
+    if (count($teamPhotoErrors) > 0) {
+        $flash .= ' Фото: ' . implode('; ', $teamPhotoErrors) . '.';
+    }
+}
+site_admin_flash_set($flash);
 header('Location: /admin/edit.php?section=' . rawurlencode($section), true, 302);
 exit;

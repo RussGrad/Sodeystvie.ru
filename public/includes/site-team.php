@@ -5,7 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/site-image.php';
 
 /**
- * Команда на витрине: CRM (сотрудники с showOnSite) → fallback public/data/team.json.
+ * Команда на витрине: public/data/team.json (админка) → fallback CRM (showOnSite).
  * Фото локально: public/assets/team/{id}.jpg; из CRM — avatarUrl через CRM_PUBLIC_BASE.
  */
 
@@ -24,16 +24,22 @@ function site_team_all(): array
         return $cache;
     }
 
-    $fromCrm = site_team_all_from_crm();
-    if (count($fromCrm) > 0) {
-        $cache = $fromCrm;
+    $fromJson = site_team_all_from_json();
+    if (count($fromJson) > 0) {
+        $cache = $fromJson;
 
         return $cache;
     }
 
-    $cache = site_team_all_from_json();
+    $cache = site_team_all_from_crm();
 
     return $cache;
+}
+
+/** Сайт сейчас показывает команду из CRM (в админке записей нет). */
+function site_team_display_from_crm(): bool
+{
+    return count(site_team_all_from_json()) === 0 && count(site_team_all_from_crm()) > 0;
 }
 
 /**

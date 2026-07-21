@@ -300,7 +300,7 @@ function site_ve_team_from_crm(): bool
     }
 
     require_once __DIR__ . '/site-team.php';
-    $fromCrm = count(site_team_all_from_crm()) > 0;
+    $fromCrm = site_team_display_from_crm();
 
     return $fromCrm;
 }
@@ -423,7 +423,7 @@ function site_ve_save_dataset_field(string $dataset, string $itemId, string $fie
 
     $warning = null;
     if ($dataset === 'team' && site_ve_team_from_crm()) {
-        $warning = 'Команда сейчас из CRM — правка записана в team.json, но на сайте не отобразится.';
+        $warning = 'Команда сейчас из CRM — правка записана в team.json и начнёт показываться, когда в админке будет хотя бы одна запись с именем.';
     }
 
     return ['value' => $savedValue, 'warning' => $warning];

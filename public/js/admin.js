@@ -55,6 +55,9 @@
       item.querySelectorAll('[name]').forEach(function (el) {
         if (!el.name) return;
         el.name = el.name.replace(/items\[\d+]/, 'items[' + index + ']');
+        if (el.hasAttribute('data-admin-photo-index') || /^photo_file\[\d*\]$/.test(el.name)) {
+          el.name = 'photo_file[' + index + ']';
+        }
       });
     });
   }

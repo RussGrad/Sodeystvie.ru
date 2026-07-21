@@ -256,6 +256,12 @@ html:not([data-theme="light"]) .admin-theme-toggle__icon--moon {
   border: 1px solid var(--admin-accent-border);
 }
 
+.admin-flash--warn {
+  background: #fff8e8;
+  color: #8a5a00;
+  border: 1px solid #f0d090;
+}
+
 .admin-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));

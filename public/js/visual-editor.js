@@ -97,7 +97,7 @@
   }
 
   var crmNote = boot.teamFromCrm
-    ? '<p class="ve-bar__hint">Команда сейчас из CRM — карточки сотрудников на сайте не редактируются здесь</p>'
+    ? '<p class="ve-bar__hint">Команда сейчас из CRM. Чтобы править карточки здесь — добавьте сотрудника в админке «Команда» (ID + имя) и сохраните</p>'
     : '';
 
   var bar = document.createElement('div');
