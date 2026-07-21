@@ -397,6 +397,8 @@ function site_admin_sanitize_settings(array $input): array
         'footer_info_disclaimer' => 1000,
         'privacy_policy' => 30000,
         'deal_cards_kicker' => 80,
+        'cases_section_title' => 120,
+        'cases_section_lead' => 400,
         'nav_label_home' => 80,
         'nav_label_catalog' => 80,
         'nav_label_services' => 80,

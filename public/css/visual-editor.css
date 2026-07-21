@@ -152,6 +152,26 @@ body.ve-on .deal-cards__visual[data-ve-field]::after {
   pointer-events: none;
 }
 
+body.ve-on .case-card__media[data-ve-field]::after {
+  content: 'Сменить фото';
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  z-index: 3;
+  padding: 0.35rem 0.5rem;
+  font: 600 0.7rem/1.2 system-ui, sans-serif;
+  text-align: center;
+  color: #0b1614;
+  background: rgba(159, 210, 199, 0.92);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+body.ve-on .case-card__media--empty[data-ve-field]::after {
+  content: 'Добавить фото';
+}
+
 .ve-panel {
   position: fixed;
   z-index: 100001;

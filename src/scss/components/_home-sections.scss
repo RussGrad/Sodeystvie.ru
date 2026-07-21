@@ -444,11 +444,45 @@
 }
 
 .case-card {
-  padding: 1.35rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
   background: var(--services-card-bg);
   border: 1px solid var(--services-card-border);
   border-radius: 12px;
   box-shadow: var(--services-card-shadow);
+
+  &__media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: rgba(var(--color-accent-rgb), 0.08);
+    overflow: hidden;
+  }
+
+  &__media--empty {
+    display: grid;
+    place-items: center;
+    min-height: 9rem;
+    border-bottom: 1px dashed var(--services-card-border);
+  }
+
+  &__media-hint {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+
+  &__photo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &__body {
+    padding: 1.35rem 1.25rem;
+  }
 
   &__tag {
     display: inline-block;

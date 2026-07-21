@@ -99,6 +99,8 @@ function site_visual_editor_settings_fields(): array
         'max_url' => 400,
         'whatsapp_url' => 400,
         'deal_cards_kicker' => 80,
+        'cases_section_title' => 120,
+        'cases_section_lead' => 400,
     ];
 }
 
@@ -126,6 +128,7 @@ function site_visual_editor_dataset_fields(): array
             'title' => 160,
             'result' => 120,
             'text' => 1200,
+            'image' => 0,
         ],
         'deal-cards' => [
             'title' => 80,
@@ -303,6 +306,9 @@ function site_ve_save_dataset_field(string $dataset, string $itemId, string $fie
             $rows[$i] = $clean;
             $savedValue = (string) $clean[$field];
         } elseif ($dataset === 'cases') {
+            if ($field === 'image') {
+                throw new RuntimeException('Изображение загружается файлом');
+            }
             $clean = site_admin_sanitize_case_row($row);
             if ($clean === null) {
                 throw new RuntimeException('Заголовок кейса не может быть пустым');
@@ -537,6 +543,95 @@ function site_visual_editor_handle_deal_card_image_upload(string $itemId, array 
     }
 
     $public = '/assets/deal-cards/' . $safe . '.' . $ext . '?v=' . (string) time();
+
+    return ['ok' => true, 'path' => $public];
+}
+
+/**
+ * Загрузка фото кейса в assets/cases/{id}.{ext}
+ *
+ * @param array{name?: string, type?: string, tmp_name?: string, error?: int, size?: int} $file
+ * @return array{ok: bool, path?: string, error?: string}
+ */
+function site_visual_editor_handle_case_image_upload(string $itemId, array $file): array
+{
+    $safe = preg_replace('/[^a-z0-9_-]/i', '', $itemId) ?? '';
+    if ($safe === '' || mb_strlen($safe) > 40) {
+        return ['ok' => false, 'error' => 'Некорректный id кейса'];
+    }
+
+    require_once __DIR__ . '/site-cases.php';
+    $exists = false;
+    foreach (site_cases_all() as $case) {
+        if (($case['id'] ?? '') === $itemId || ($case['id'] ?? '') === $safe) {
+            $exists = true;
+            break;
+        }
+    }
+    if (!$exists) {
+        return ['ok' => false, 'error' => 'Кейс не найден'];
+    }
+
+    $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
+    if ($error === UPLOAD_ERR_NO_FILE) {
+        return ['ok' => false, 'error' => 'Выберите изображение'];
+    }
+    if ($error !== UPLOAD_ERR_OK) {
+        return ['ok' => false, 'error' => 'Ошибка загрузки (код ' . $error . ')'];
+    }
+
+    $size = (int) ($file['size'] ?? 0);
+    if ($size <= 0 || $size > 8 * 1024 * 1024) {
+        return ['ok' => false, 'error' => 'Файл должен быть не больше 8 МБ'];
+    }
+
+    $tmp = (string) ($file['tmp_name'] ?? '');
+    if ($tmp === '' || !is_uploaded_file($tmp)) {
+        return ['ok' => false, 'error' => 'Некорректная загрузка'];
+    }
+
+    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($tmp);
+    $ext = match ($mime) {
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+        default => null,
+    };
+    if ($ext === null) {
+        return ['ok' => false, 'error' => 'Допустимы JPG, PNG или WebP'];
+    }
+    if (@getimagesize($tmp) === false) {
+        return ['ok' => false, 'error' => 'Файл не является изображением'];
+    }
+
+    $dir = dirname(__DIR__) . '/assets/cases';
+    if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
+        return ['ok' => false, 'error' => 'Не удалось создать каталог cases'];
+    }
+
+    $staged = $dir . '/.' . $safe . '-' . bin2hex(random_bytes(6)) . '.' . $ext;
+    if (!move_uploaded_file($tmp, $staged)) {
+        return ['ok' => false, 'error' => 'Не удалось сохранить файл'];
+    }
+
+    $destination = $dir . '/' . $safe . '.' . $ext;
+    if (!@rename($staged, $destination)) {
+        @unlink($staged);
+
+        return ['ok' => false, 'error' => 'Не удалось установить изображение'];
+    }
+
+    foreach (['jpg', 'jpeg', 'png', 'webp'] as $other) {
+        if ($other === $ext) {
+            continue;
+        }
+        $old = $dir . '/' . $safe . '.' . $other;
+        if (is_file($old)) {
+            @unlink($old);
+        }
+    }
+
+    $public = '/assets/cases/' . $safe . '.' . $ext . '?v=' . (string) time();
 
     return ['ok' => true, 'path' => $public];
 }

@@ -158,6 +158,8 @@ if ($action === 'upload_image') {
 
     if ($dataset === 'deal-cards') {
         $result = site_visual_editor_handle_deal_card_image_upload($itemId, $file);
+    } elseif ($dataset === 'cases') {
+        $result = site_visual_editor_handle_case_image_upload($itemId, $file);
     } else {
         http_response_code(400);
         echo json_encode(['ok' => false, 'error' => 'Загрузка для этого блока не поддерживается'], JSON_UNESCAPED_UNICODE);
