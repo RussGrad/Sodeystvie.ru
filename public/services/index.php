@@ -23,6 +23,11 @@ require __DIR__ . '/../includes/header.php';
                 Полный спектр сопровождения сделок с недвижимостью в Иркутске: от оценки и подбора объекта
                 до ипотеки, юридической проверки и координации цепочки заказов.
             </p>
+            <?php if (site_visual_editor_enabled()) { ?>
+                <p class="services-page__ve-actions">
+                    <button type="button" class="ve-add-btn" data-ve-add-service>Добавить услугу</button>
+                </p>
+            <?php } ?>
         </header>
 
         <ul class="services-page__list">
@@ -30,7 +35,16 @@ require __DIR__ . '/../includes/header.php';
                 $sid = (string) ($item['id'] ?? '');
                 ?>
                 <li class="services-page__item">
-                    <article class="services-page__card">
+                    <article class="services-page__card<?php echo site_visual_editor_enabled() ? ' services-page__card--ve' : ''; ?>">
+                        <?php if (site_visual_editor_enabled()) { ?>
+                            <button
+                                type="button"
+                                class="ve-card-delete"
+                                data-ve-delete-service="<?php echo htmlspecialchars($sid, ENT_QUOTES, 'UTF-8'); ?>"
+                                title="Удалить услугу"
+                                aria-label="Удалить услугу «<?php echo htmlspecialchars((string) ($item['title'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>»"
+                            >×</button>
+                        <?php } ?>
                         <div class="services-page__card-head">
                             <?php sodeystvie_services_render_icon_wrap($item); ?>
                             <div class="services-page__card-titles">

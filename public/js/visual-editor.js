@@ -426,6 +426,22 @@
         return;
       }
 
+      var addServiceBtn = target.closest('[data-ve-add-service]');
+      if (addServiceBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        createService();
+        return;
+      }
+
+      var deleteServiceBtn = target.closest('[data-ve-delete-service]');
+      if (deleteServiceBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        deleteService(deleteServiceBtn.getAttribute('data-ve-delete-service') || '');
+        return;
+      }
+
       var veEl = target.closest('[data-ve-field]');
       if (veEl && !bar.contains(veEl)) {
         event.preventDefault();
@@ -710,4 +726,76 @@
         saveBtn.disabled = false;
       });
   });
+
+  function createService() {
+    var title = window.prompt('Название новой услуги', 'Новая услуга');
+    if (title === null) {
+      return;
+    }
+    setStatus('Создание услуги…');
+    fetch(boot.saveUrl || '/admin/api/visual-save.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        csrf: boot.csrf || '',
+        action: 'create_item',
+        dataset: 'services',
+        title: title,
+      }),
+    })
+      .then(function (r) {
+        return r.json().then(function (data) {
+          return { ok: r.ok, data: data };
+        });
+      })
+      .then(function (res) {
+        if (!res.ok || !res.data || !res.data.ok) {
+          throw new Error((res.data && res.data.error) || 'Не удалось создать');
+        }
+        setStatus('Услуга добавлена');
+        window.location.reload();
+      })
+      .catch(function (err) {
+        setStatus('');
+        window.alert(err.message || 'Ошибка');
+      });
+  }
+
+  function deleteService(id) {
+    if (!id) {
+      return;
+    }
+    if (!window.confirm('Удалить эту услугу? Действие нельзя отменить.')) {
+      return;
+    }
+    setStatus('Удаление…');
+    fetch(boot.saveUrl || '/admin/api/visual-save.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        csrf: boot.csrf || '',
+        action: 'delete_item',
+        dataset: 'services',
+        id: id,
+      }),
+    })
+      .then(function (r) {
+        return r.json().then(function (data) {
+          return { ok: r.ok, data: data };
+        });
+      })
+      .then(function (res) {
+        if (!res.ok || !res.data || !res.data.ok) {
+          throw new Error((res.data && res.data.error) || 'Не удалось удалить');
+        }
+        setStatus('Услуга удалена');
+        window.location.reload();
+      })
+      .catch(function (err) {
+        setStatus('');
+        window.alert(err.message || 'Ошибка');
+      });
+  }
 })();

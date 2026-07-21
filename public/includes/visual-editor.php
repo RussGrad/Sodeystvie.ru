@@ -368,6 +368,106 @@ function site_ve_save_dataset_field(string $dataset, string $itemId, string $fie
     return ['value' => $savedValue, 'warning' => $warning];
 }
 
+/**
+ * Создать новую услугу в services.json.
+ *
+ * @return array{id: string, title: string}
+ */
+function site_ve_create_service(string $title = ''): array
+{
+    require_once __DIR__ . '/site-content.php';
+
+    $rows = site_admin_read_dataset('services');
+    if (!is_array($rows)) {
+        $rows = [];
+    }
+
+    $title = trim($title);
+
+    $existing = [];
+    foreach ($rows as $row) {
+        if (is_array($row) && isset($row['id'])) {
+            $existing[(string) $row['id']] = true;
+        }
+    }
+
+    $n = count($rows) + 1;
+    $id = 'service-' . $n;
+    while (isset($existing[$id])) {
+        $n++;
+        $id = 'service-' . $n;
+        if ($n > 500) {
+            $id = 'service-' . bin2hex(random_bytes(3));
+            break;
+        }
+    }
+
+    $label = $title !== '' ? mb_substr($title, 0, 120) : 'Новая услуга';
+    $row = site_admin_sanitize_service_row([
+        'id' => $id,
+        'title' => $label,
+        'short' => 'Краткое описание услуги — нажмите, чтобы изменить',
+        'text' => 'Полное описание услуги. Отредактируйте текст в визуальном редакторе или в админке.',
+        'icon' => 'realtor',
+        'href' => '/services/' . $id . '/',
+        'bullets' => [],
+    ]);
+    if ($row === null) {
+        throw new RuntimeException('Не удалось создать услугу');
+    }
+
+    $rows[] = $row;
+    if (!site_admin_write_dataset('services', $rows)) {
+        throw new RuntimeException('Не удалось сохранить services.json');
+    }
+
+    return ['id' => (string) $row['id'], 'title' => (string) $row['title']];
+}
+
+/**
+ * Удалить услугу из services.json и её кастомное изображение.
+ */
+function site_ve_delete_service(string $itemId): void
+{
+    require_once __DIR__ . '/site-content.php';
+
+    $itemId = trim($itemId);
+    if ($itemId === '') {
+        throw new RuntimeException('Не указан id услуги');
+    }
+
+    $rows = site_admin_read_dataset('services');
+    if (!is_array($rows)) {
+        throw new RuntimeException('Каталог услуг пуст');
+    }
+
+    $out = [];
+    $found = false;
+    foreach ($rows as $row) {
+        if (!is_array($row)) {
+            continue;
+        }
+        if ((string) ($row['id'] ?? '') === $itemId) {
+            $found = true;
+            continue;
+        }
+        $out[] = $row;
+    }
+
+    if (!$found) {
+        throw new RuntimeException('Услуга не найдена');
+    }
+    if (count($out) === 0) {
+        throw new RuntimeException('Нельзя удалить последнюю услугу');
+    }
+
+    if (!site_admin_write_dataset('services', $out)) {
+        throw new RuntimeException('Не удалось сохранить services.json');
+    }
+
+    site_visual_editor_delete_item_image('services', $itemId);
+}
+
 function site_visual_editor_render_assets(): void
 {
     if (!site_visual_editor_enabled()) {

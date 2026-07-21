@@ -303,3 +303,57 @@ body.ve-on .mortgage-quiz__mag-logo[data-ve-field] {
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.62);
 }
+
+.ve-add-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.35rem 0.75rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #0b1614;
+  cursor: pointer;
+  background: #9fd2c7;
+  border: none;
+  border-radius: 8px;
+}
+
+.ve-add-btn:hover {
+  filter: brightness(1.05);
+}
+
+.ve-card-delete {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  font: inherit;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: #fff;
+  cursor: pointer;
+  background: rgba(140, 40, 40, 0.92);
+  border: none;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.ve-card-delete:hover {
+  background: #a83232;
+}
+
+.services__card--ve,
+.services-page__card--ve {
+  position: relative;
+}
+
+.services-page__ve-actions {
+  margin: 0.75rem 0 0;
+}
