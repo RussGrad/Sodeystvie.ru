@@ -270,9 +270,10 @@ function site_admin_render_item_row(string $section, int $index, array $row): vo
             switch ($section) {
                 case 'team':
                     site_admin_field($p, 'id', 'ID (латиница)', (string) ($row['id'] ?? ''), 'text', 'member-1');
-                    site_admin_field($p, 'name', 'Имя / должность на карточке', (string) ($row['name'] ?? ''));
+                    site_admin_field($p, 'name', 'Имя на карточке', (string) ($row['name'] ?? ''));
                     site_admin_field($p, 'role', 'Роль', (string) ($row['role'] ?? ''));
-                    site_admin_field($p, 'experience', 'Стаж / опыт', (string) ($row['experience'] ?? ''));
+                    site_admin_field($p, 'experience', 'Стаж / опыт (например: 10 лет)', (string) ($row['experience'] ?? ''));
+                    site_admin_field($p, 'description', 'Описание на карточке', (string) ($row['description'] ?? ''), 'textarea');
                     site_admin_field($p, 'telegram', 'Telegram URL', (string) ($row['telegram'] ?? ''), 'url');
                     site_admin_field($p, 'whatsapp', 'WhatsApp URL', (string) ($row['whatsapp'] ?? ''), 'url');
                     $memberId = (string) ($row['id'] ?? '');

@@ -15,7 +15,7 @@ function site_team_data_path(): string
 }
 
 /**
- * @return list<array{id: string, name: string, role: string, experience: string, photo: string, telegram: string, whatsapp: string}>
+ * @return list<array{id: string, name: string, role: string, experience: string, description: string, photo: string, telegram: string, whatsapp: string}>
  */
 function site_team_all(): array
 {
@@ -43,7 +43,7 @@ function site_team_display_from_crm(): bool
 }
 
 /**
- * @return list<array{id: string, name: string, role: string, experience: string, photo: string, telegram: string, whatsapp: string}>
+ * @return list<array{id: string, name: string, role: string, experience: string, description: string, photo: string, telegram: string, whatsapp: string}>
  */
 function site_team_all_from_crm(): array
 {
@@ -82,6 +82,10 @@ function site_team_all_from_crm(): array
         }
 
         $experience = isset($row['experience']) ? trim((string) $row['experience']) : '';
+        $description = isset($row['description']) ? trim((string) $row['description']) : '';
+        if ($description === '' && isset($row['bio'])) {
+            $description = trim((string) $row['bio']);
+        }
 
         $photoRaw = isset($row['photo']) && is_string($row['photo']) ? trim($row['photo']) : '';
         $photo = site_team_resolve_photo_url($photoRaw);
@@ -91,6 +95,7 @@ function site_team_all_from_crm(): array
             'name' => $name,
             'role' => $role,
             'experience' => $experience,
+            'description' => $description,
             'photo' => $photo,
             'telegram' => '',
             'whatsapp' => '',
@@ -101,7 +106,7 @@ function site_team_all_from_crm(): array
 }
 
 /**
- * @return list<array{id: string, name: string, role: string, experience: string, photo: string, telegram: string, whatsapp: string}>
+ * @return list<array{id: string, name: string, role: string, experience: string, description: string, photo: string, telegram: string, whatsapp: string}>
  */
 function site_team_all_from_json(): array
 {
@@ -136,6 +141,7 @@ function site_team_all_from_json(): array
             'name' => $name,
             'role' => isset($row['role']) ? trim((string) $row['role']) : '',
             'experience' => isset($row['experience']) ? trim((string) $row['experience']) : '',
+            'description' => isset($row['description']) ? trim((string) $row['description']) : '',
             'photo' => $photo,
             'telegram' => isset($row['telegram']) ? trim((string) $row['telegram']) : '',
             'whatsapp' => isset($row['whatsapp']) ? trim((string) $row['whatsapp']) : '',
@@ -207,7 +213,7 @@ function site_team_initials(string $name): string
 }
 
 /**
- * @param array{id: string, name: string, role: string, experience: string, photo: string, telegram: string, whatsapp: string} $member
+ * @param array{id: string, name: string, role: string, experience: string, description?: string, photo: string, telegram: string, whatsapp: string} $member
  */
 function site_render_team_card(array $member): void
 {
@@ -219,6 +225,11 @@ function site_render_team_card(array $member): void
     $photo = trim((string) ($member['photo'] ?? ''));
     $hasLocalPhoto = $photo !== '' && site_team_member_photo_is_local($photo) && is_readable(dirname(__DIR__) . $photo);
     $hasRemotePhoto = $photo !== '' && !$hasLocalPhoto;
+    $experienceRaw = trim((string) ($member['experience'] ?? ''));
+    $experience = site_visual_editor_enabled()
+        ? $experienceRaw
+        : site_team_format_experience($experienceRaw);
+    $description = trim((string) ($member['description'] ?? ''));
     ?>
     <article class="team-card">
         <div class="team-card__photo-wrap">
@@ -229,7 +240,7 @@ function site_render_team_card(array $member): void
                     'team-card__photo'
                 );
             } elseif ($hasRemotePhoto) { ?>
-                <img class="team-card__photo" src="<?php echo htmlspecialchars($photo, ENT_QUOTES, 'UTF-8'); ?>" alt="" width="88" height="88" loading="lazy">
+                <img class="team-card__photo" src="<?php echo htmlspecialchars($photo, ENT_QUOTES, 'UTF-8'); ?>" alt="" width="160" height="160" loading="lazy">
             <?php } else { ?>
                 <span class="team-card__initials" aria-hidden="true"><?php echo htmlspecialchars(site_team_initials($member['name']), ENT_QUOTES, 'UTF-8'); ?></span>
             <?php } ?>
@@ -238,8 +249,11 @@ function site_render_team_card(array $member): void
         <?php if ($member['role'] !== '' || site_visual_editor_enabled()) { ?>
             <p class="team-card__role"<?php echo site_ve_attrs('role', 'text', 'Должность', 'team', $id); ?>><?php echo htmlspecialchars($member['role'], ENT_QUOTES, 'UTF-8'); ?></p>
         <?php } ?>
-        <?php if ($member['experience'] !== '' || site_visual_editor_enabled()) { ?>
-            <p class="team-card__exp"<?php echo site_ve_attrs('experience', 'text', 'Опыт', 'team', $id); ?>><?php echo htmlspecialchars($member['experience'], ENT_QUOTES, 'UTF-8'); ?></p>
+        <?php if ($experience !== '' || site_visual_editor_enabled()) { ?>
+            <p class="team-card__exp"<?php echo site_ve_attrs('experience', 'text', 'Опыт', 'team', $id); ?>><?php echo htmlspecialchars($experience, ENT_QUOTES, 'UTF-8'); ?></p>
+        <?php } ?>
+        <?php if ($description !== '' || site_visual_editor_enabled()) { ?>
+            <p class="team-card__desc"<?php echo site_ve_attrs('description', 'text', 'Описание', 'team', $id); ?>><?php echo htmlspecialchars($description, ENT_QUOTES, 'UTF-8'); ?></p>
         <?php } ?>
         <?php if ($member['telegram'] !== '' || $member['whatsapp'] !== '') { ?>
             <div class="team-card__contacts">
@@ -253,4 +267,37 @@ function site_render_team_card(array $member): void
         <?php } ?>
     </article>
     <?php
+}
+
+/** Если в стаже одно число — показываем «N лет опыта». */
+function site_team_format_experience(string $experience): string
+{
+    $experience = trim($experience);
+    if ($experience === '') {
+        return '';
+    }
+    if (preg_match('/^\d{1,2}$/', $experience) === 1) {
+        $n = (int) $experience;
+
+        return $n . ' ' . site_team_years_word($n) . ' опыта';
+    }
+
+    return $experience;
+}
+
+function site_team_years_word(int $n): string
+{
+    $n = abs($n) % 100;
+    $n1 = $n % 10;
+    if ($n > 10 && $n < 20) {
+        return 'лет';
+    }
+    if ($n1 === 1) {
+        return 'год';
+    }
+    if ($n1 >= 2 && $n1 <= 4) {
+        return 'года';
+    }
+
+    return 'лет';
 }

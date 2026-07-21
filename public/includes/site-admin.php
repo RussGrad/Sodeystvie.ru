@@ -226,6 +226,7 @@ function site_admin_sanitize_team_row(array $row): array
         'name' => mb_substr(trim((string) ($row['name'] ?? '')), 0, 120),
         'role' => mb_substr(trim((string) ($row['role'] ?? '')), 0, 120),
         'experience' => mb_substr(trim((string) ($row['experience'] ?? '')), 0, 160),
+        'description' => mb_substr(trim((string) ($row['description'] ?? '')), 0, 500),
         'photo' => mb_substr(trim((string) ($row['photo'] ?? '')), 0, 200),
         'telegram' => mb_substr(trim((string) ($row['telegram'] ?? '')), 0, 200),
         'whatsapp' => mb_substr(trim((string) ($row['whatsapp'] ?? '')), 0, 200),

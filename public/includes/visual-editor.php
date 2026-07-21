@@ -145,6 +145,7 @@ function site_visual_editor_dataset_fields(): array
             'name' => 120,
             'role' => 120,
             'experience' => 160,
+            'description' => 500,
         ],
         'services' => [
             'title' => 120,
