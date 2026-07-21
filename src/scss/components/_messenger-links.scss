@@ -80,9 +80,19 @@ $messenger-hit-size: 32px;
 }
 
 .messenger-links__item--tg,
-.contacts-page__messenger--tg {
+.messenger-links__item--telegram,
+.contacts-page__messenger--tg,
+.contacts-page__messenger--telegram {
   color: #fff;
   background: #2aabee;
+
+  // Брендовый SVG уже круг — растягиваем на весь hit-area, иначе «фон» меньше соседних
+  .messenger-links__svg,
+  .messenger-links__img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+  }
 }
 
 .messenger-links__item--vk,
