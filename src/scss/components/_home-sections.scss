@@ -710,6 +710,10 @@
     padding: 0;
     border: 0;
 
+    &[hidden] {
+      display: none !important;
+    }
+
     &.is-active {
       display: block;
     }
@@ -831,6 +835,10 @@
       transform var(--duration-fast) var(--ease-smooth),
       filter 0.2s ease,
       box-shadow var(--duration-fast) ease;
+
+    &[hidden] {
+      display: none !important;
+    }
 
     &--back {
       color: rgba(255, 255, 255, 0.82);

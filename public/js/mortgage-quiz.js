@@ -66,10 +66,22 @@
 
   function showStep(index) {
     current = Math.max(0, Math.min(index, steps.length - 1));
+    var isLast = current === steps.length - 1;
+
     for (var i = 0; i < steps.length; i++) {
-      steps[i].hidden = i !== current;
-      steps[i].classList.toggle('is-active', i === current);
+      var on = i === current;
+      steps[i].hidden = !on;
+      steps[i].classList.toggle('is-active', on);
+      // невалидируем скрытые шаги браузером
+      steps[i].querySelectorAll('input, select, textarea').forEach(function (input) {
+        if (on) {
+          input.removeAttribute('disabled');
+        } else {
+          input.setAttribute('disabled', 'disabled');
+        }
+      });
     }
+
     if (progress) {
       progress.style.width = String(((current + 1) / steps.length) * 100) + '%';
     }
@@ -77,10 +89,18 @@
       btnBack.hidden = current === 0;
     }
     if (btnNext) {
-      btnNext.hidden = current === steps.length - 1;
+      btnNext.hidden = isLast;
     }
     if (btnSubmit) {
-      btnSubmit.hidden = current !== steps.length - 1;
+      // «Получить расчёт» только на последнем шаге после вопросов квиза
+      btnSubmit.hidden = !isLast;
+      btnSubmit.disabled = !isLast;
+      btnSubmit.setAttribute('aria-hidden', isLast ? 'false' : 'true');
+      if (isLast) {
+        btnSubmit.removeAttribute('tabindex');
+      } else {
+        btnSubmit.setAttribute('tabindex', '-1');
+      }
     }
   }
 
@@ -162,6 +182,11 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
+    // до последнего шага отправка запрещена
+    if (current !== steps.length - 1) {
+      return;
+    }
+
     if (honeypotInput instanceof HTMLInputElement && honeypotInput.value.trim() !== '') {
       return;
     }
@@ -231,6 +256,24 @@
           btnSubmit.disabled = false;
         }
       });
+  });
+
+  // Enter на ранних шагах не должен отправлять форму
+  form.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') {
+      return;
+    }
+    if (current === steps.length - 1) {
+      return;
+    }
+    var tag = (e.target && e.target.tagName) || '';
+    if (tag === 'TEXTAREA') {
+      return;
+    }
+    e.preventDefault();
+    if (btnNext && !btnNext.hidden) {
+      btnNext.click();
+    }
   });
 
   showStep(0);

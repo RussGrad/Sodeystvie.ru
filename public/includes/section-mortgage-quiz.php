@@ -98,7 +98,7 @@ $magCalcStyle = sprintf('--mag-calc-offset: %dpx;', $magCalcOffset);
                         <fieldset class="mortgage-quiz__step is-active" data-quiz-step="1">
                             <legend class="mortgage-quiz__question">Какая недвижимость вас интересует?</legend>
                             <div class="mortgage-quiz__options">
-                                <label class="mortgage-quiz__option"><input type="radio" name="property" value="new" required> Новостройка</label>
+                                <label class="mortgage-quiz__option"><input type="radio" name="property" value="new"> Новостройка</label>
                                 <label class="mortgage-quiz__option"><input type="radio" name="property" value="resale"> Вторичка</label>
                                 <label class="mortgage-quiz__option"><input type="radio" name="property" value="house"> Дом / участок</label>
                             </div>
@@ -107,7 +107,7 @@ $magCalcStyle = sprintf('--mag-calc-offset: %dpx;', $magCalcOffset);
                         <fieldset class="mortgage-quiz__step" data-quiz-step="2" hidden>
                             <legend class="mortgage-quiz__question">Какой первоначальный взнос планируете?</legend>
                             <div class="mortgage-quiz__options">
-                                <label class="mortgage-quiz__option"><input type="radio" name="down" value="0-20" required> До 20%</label>
+                                <label class="mortgage-quiz__option"><input type="radio" name="down" value="0-20"> До 20%</label>
                                 <label class="mortgage-quiz__option"><input type="radio" name="down" value="20-30"> 20–30%</label>
                                 <label class="mortgage-quiz__option"><input type="radio" name="down" value="30+"> Более 30%</label>
                             </div>
@@ -116,7 +116,7 @@ $magCalcStyle = sprintf('--mag-calc-offset: %dpx;', $magCalcOffset);
                         <fieldset class="mortgage-quiz__step" data-quiz-step="3" hidden>
                             <legend class="mortgage-quiz__question">Планируете использовать материнский капитал?</legend>
                             <div class="mortgage-quiz__options">
-                                <label class="mortgage-quiz__option"><input type="radio" name="matcap" value="yes" required> Да</label>
+                                <label class="mortgage-quiz__option"><input type="radio" name="matcap" value="yes"> Да</label>
                                 <label class="mortgage-quiz__option"><input type="radio" name="matcap" value="no"> Нет</label>
                                 <label class="mortgage-quiz__option"><input type="radio" name="matcap" value="maybe"> Пока не знаю</label>
                             </div>
@@ -127,11 +127,11 @@ $magCalcStyle = sprintf('--mag-calc-offset: %dpx;', $magCalcOffset);
                             <div class="mortgage-quiz__fields">
                                 <label class="mortgage-quiz__field">
                                     <span class="mortgage-quiz__label">Имя</span>
-                                    <input class="mortgage-quiz__input" type="text" name="name" id="mortgage-quiz-name" autocomplete="name" maxlength="120" required>
+                                    <input class="mortgage-quiz__input" type="text" name="name" id="mortgage-quiz-name" autocomplete="name" maxlength="120">
                                 </label>
                                 <label class="mortgage-quiz__field">
                                     <span class="mortgage-quiz__label">Телефон</span>
-                                    <input class="mortgage-quiz__input" type="tel" name="phone" id="mortgage-quiz-phone" autocomplete="tel" inputmode="tel" required>
+                                    <input class="mortgage-quiz__input" type="tel" name="phone" id="mortgage-quiz-phone" autocomplete="tel" inputmode="tel">
                                 </label>
                             </div>
                             <p class="mortgage-quiz__note">
@@ -143,7 +143,7 @@ $magCalcStyle = sprintf('--mag-calc-offset: %dpx;', $magCalcOffset);
                         <div class="mortgage-quiz__actions">
                             <button type="button" class="mortgage-quiz__btn mortgage-quiz__btn--back" id="mortgage-quiz-back" hidden>Назад</button>
                             <button type="button" class="mortgage-quiz__btn mortgage-quiz__btn--next" id="mortgage-quiz-next">Далее</button>
-                            <button type="submit" class="mortgage-quiz__btn mortgage-quiz__btn--submit" id="mortgage-quiz-submit" hidden<?php echo site_ve_attrs('home_lead_cta', 'text', 'Текст кнопки заявки'); ?>><?php echo htmlspecialchars(site_home_lead_cta(), ENT_QUOTES, 'UTF-8'); ?></button>
+                            <button type="submit" class="mortgage-quiz__btn mortgage-quiz__btn--submit" id="mortgage-quiz-submit" hidden disabled aria-hidden="true"<?php echo site_ve_attrs('home_lead_cta', 'text', 'Текст кнопки заявки'); ?>><?php echo htmlspecialchars(site_home_lead_cta(), ENT_QUOTES, 'UTF-8'); ?></button>
                         </div>
 
                         <p class="mortgage-quiz__error" id="mortgage-quiz-error" hidden role="alert"></p>
