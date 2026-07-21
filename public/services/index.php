@@ -9,6 +9,7 @@ $currentNav = 'services';
 
 require_once __DIR__ . '/../includes/services-catalog.php';
 require_once __DIR__ . '/../includes/services-icon.php';
+require_once __DIR__ . '/../includes/visual-editor.php';
 
 $servicesItems = sodeystvie_services_catalog();
 
@@ -25,19 +26,21 @@ require __DIR__ . '/../includes/header.php';
         </header>
 
         <ul class="services-page__list">
-            <?php foreach ($servicesItems as $item) { ?>
+            <?php foreach ($servicesItems as $item) {
+                $sid = (string) ($item['id'] ?? '');
+                ?>
                 <li class="services-page__item">
                     <article class="services-page__card">
                         <div class="services-page__card-head">
-                            <div class="services__icon-wrap" aria-hidden="true">
+                            <div class="services__icon-wrap" aria-hidden="true"<?php echo site_ve_attrs('icon', 'icon', 'Иконка услуги', 'services', $sid, (string) ($item['icon'] ?? 'realtor')); ?>>
                                 <?php sodeystvie_services_render_icon($item['icon']); ?>
                             </div>
                             <div class="services-page__card-titles">
-                                <h2 class="services-page__card-title"><?php echo htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8'); ?></h2>
-                                <p class="services-page__card-lead"><?php echo htmlspecialchars($item['short'], ENT_QUOTES, 'UTF-8'); ?></p>
+                                <h2 class="services-page__card-title"<?php echo site_ve_attrs('title', 'text', 'Название услуги', 'services', $sid); ?>><?php echo htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8'); ?></h2>
+                                <p class="services-page__card-lead"<?php echo site_ve_attrs('short', 'textarea', 'Краткое описание', 'services', $sid); ?>><?php echo htmlspecialchars($item['short'], ENT_QUOTES, 'UTF-8'); ?></p>
                             </div>
                         </div>
-                        <p class="services-page__card-text"><?php echo htmlspecialchars($item['text'], ENT_QUOTES, 'UTF-8'); ?></p>
+                        <p class="services-page__card-text"<?php echo site_ve_attrs('text', 'textarea', 'Полное описание', 'services', $sid); ?>><?php echo htmlspecialchars($item['text'], ENT_QUOTES, 'UTF-8'); ?></p>
                         <?php if (!empty($item['bullets'])) { ?>
                             <ul class="services-page__bullets">
                                 <?php foreach ($item['bullets'] as $bullet) { ?>

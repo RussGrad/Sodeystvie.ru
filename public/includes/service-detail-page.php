@@ -49,21 +49,26 @@ function sodeystvie_render_service_detail_page(string $serviceId): void
                 <span class="service-detail__crumb service-detail__crumb--current"><?php echo htmlspecialchars($service['title'], ENT_QUOTES, 'UTF-8'); ?></span>
             </nav>
             <div class="service-detail__head">
-                <div class="services__icon-wrap service-detail__icon" aria-hidden="true">
+                <div class="services__icon-wrap service-detail__icon" aria-hidden="true"<?php
+                if (!function_exists('site_ve_attrs')) {
+                    require_once __DIR__ . '/visual-editor.php';
+                }
+                echo site_ve_attrs('icon', 'icon', 'Иконка услуги', 'services', (string) $service['id'], (string) ($service['icon'] ?? 'realtor'));
+                ?>>
                     <?php sodeystvie_services_render_icon($service['icon']); ?>
                 </div>
                 <div>
-                    <h1 class="page-main__heading"><?php echo htmlspecialchars($service['title'], ENT_QUOTES, 'UTF-8'); ?></h1>
-                    <?php if ($service['short'] !== '') { ?>
-                        <p class="page-main__lead"><?php echo htmlspecialchars($service['short'], ENT_QUOTES, 'UTF-8'); ?></p>
+                    <h1 class="page-main__heading"<?php echo site_ve_attrs('title', 'text', 'Название услуги', 'services', (string) $service['id']); ?>><?php echo htmlspecialchars($service['title'], ENT_QUOTES, 'UTF-8'); ?></h1>
+                    <?php if ($service['short'] !== '' || site_visual_editor_enabled()) { ?>
+                        <p class="page-main__lead"<?php echo site_ve_attrs('short', 'textarea', 'Краткое описание', 'services', (string) $service['id']); ?>><?php echo htmlspecialchars($service['short'], ENT_QUOTES, 'UTF-8'); ?></p>
                     <?php } ?>
                 </div>
             </div>
         </header>
 
         <article class="service-detail__card">
-            <?php if ($service['text'] !== '') { ?>
-                <p class="service-detail__text"><?php echo htmlspecialchars($service['text'], ENT_QUOTES, 'UTF-8'); ?></p>
+            <?php if ($service['text'] !== '' || site_visual_editor_enabled()) { ?>
+                <p class="service-detail__text"<?php echo site_ve_attrs('text', 'textarea', 'Полное описание', 'services', (string) $service['id']); ?>><?php echo htmlspecialchars($service['text'], ENT_QUOTES, 'UTF-8'); ?></p>
             <?php } ?>
             <?php if (!empty($service['bullets'])) { ?>
                 <ul class="service-detail__bullets">

@@ -6,6 +6,7 @@ require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/site-about.php';
 require_once __DIR__ . '/../includes/site-image.php';
 require_once __DIR__ . '/../includes/site-team.php';
+require_once __DIR__ . '/../includes/visual-editor.php';
 
 $pageTitle = site_format_page_title('О компании');
 $currentNav = 'about';
@@ -27,7 +28,7 @@ require __DIR__ . '/../includes/header.php';
             <div class="about-page__hero-text">
                 <h1 class="page-main__heading">О компании</h1>
                 <p class="page-main__lead"><?php echo htmlspecialchars(site_about_intro_text(), ENT_QUOTES, 'UTF-8'); ?></p>
-                <p class="about-page__tagline"><?php echo htmlspecialchars(site_slogan_hero(), ENT_QUOTES, 'UTF-8'); ?></p>
+                <p class="about-page__tagline"<?php echo site_ve_attrs('slogan_hero', 'textarea', 'Слоган'); ?>><?php echo htmlspecialchars(site_slogan_hero(), ENT_QUOTES, 'UTF-8'); ?></p>
             </div>
             <?php if (site_about_team_image_exists()) { ?>
                 <figure class="about-page__figure">

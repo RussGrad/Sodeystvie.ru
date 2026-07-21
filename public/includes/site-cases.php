@@ -65,17 +65,22 @@ function site_cases_all(): array
  */
 function site_render_case_card(array $case): void
 {
+    if (!function_exists('site_ve_attrs')) {
+        require_once __DIR__ . '/visual-editor.php';
+    }
+
+    $id = (string) ($case['id'] ?? '');
     ?>
     <article class="case-card">
-        <?php if ($case['tag'] !== '') { ?>
-            <span class="case-card__tag"><?php echo htmlspecialchars($case['tag'], ENT_QUOTES, 'UTF-8'); ?></span>
+        <?php if ($case['tag'] !== '' || site_visual_editor_enabled()) { ?>
+            <span class="case-card__tag"<?php echo site_ve_attrs('tag', 'text', 'Тег кейса', 'cases', $id); ?>><?php echo htmlspecialchars($case['tag'], ENT_QUOTES, 'UTF-8'); ?></span>
         <?php } ?>
-        <h3 class="case-card__title"><?php echo htmlspecialchars($case['title'], ENT_QUOTES, 'UTF-8'); ?></h3>
-        <?php if ($case['result'] !== '') { ?>
-            <p class="case-card__result"><?php echo htmlspecialchars($case['result'], ENT_QUOTES, 'UTF-8'); ?></p>
+        <h3 class="case-card__title"<?php echo site_ve_attrs('title', 'text', 'Заголовок кейса', 'cases', $id); ?>><?php echo htmlspecialchars($case['title'], ENT_QUOTES, 'UTF-8'); ?></h3>
+        <?php if ($case['result'] !== '' || site_visual_editor_enabled()) { ?>
+            <p class="case-card__result"<?php echo site_ve_attrs('result', 'text', 'Результат', 'cases', $id); ?>><?php echo htmlspecialchars($case['result'], ENT_QUOTES, 'UTF-8'); ?></p>
         <?php } ?>
-        <?php if ($case['text'] !== '') { ?>
-            <p class="case-card__text"><?php echo htmlspecialchars($case['text'], ENT_QUOTES, 'UTF-8'); ?></p>
+        <?php if ($case['text'] !== '' || site_visual_editor_enabled()) { ?>
+            <p class="case-card__text"<?php echo site_ve_attrs('text', 'textarea', 'Текст кейса', 'cases', $id); ?>><?php echo htmlspecialchars($case['text'], ENT_QUOTES, 'UTF-8'); ?></p>
         <?php } ?>
     </article>
     <?php

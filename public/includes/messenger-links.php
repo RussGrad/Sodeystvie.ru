@@ -22,6 +22,17 @@ function site_render_messenger_links(
     echo '<ul class="' . htmlspecialchars($listClass, ENT_QUOTES, 'UTF-8') . $listMod . '">';
 
     foreach ($links as $link) {
+        $urlField = match ($link['type']) {
+            'telegram' => 'telegram_url',
+            'vk' => 'vk_url',
+            'max' => 'max_url',
+            'whatsapp' => 'whatsapp_url',
+            default => '',
+        };
+        $veAttrs = '';
+        if ($urlField !== '' && function_exists('site_ve_attrs')) {
+            $veAttrs = site_ve_attrs($urlField, 'url', 'Ссылка: ' . $link['label'], '', '', $link['href']);
+        }
         site_render_messenger_link_item(
             $linkClass,
             '--' . $link['type'],
@@ -31,6 +42,7 @@ function site_render_messenger_links(
             $link['type'],
             null,
             $flat,
+            $veAttrs,
         );
     }
 
@@ -49,11 +61,12 @@ function site_render_messenger_link_item(
     string $type,
     ?string $imgSrc = null,
     bool $flat = false,
+    string $veAttrs = '',
 ): void {
     echo '<li class="messenger-links__cell">';
     echo '<a class="' . htmlspecialchars($linkClass, ENT_QUOTES, 'UTF-8') . ' ' . htmlspecialchars($linkClass . $modifier, ENT_QUOTES, 'UTF-8') . '"';
     echo ' href="' . htmlspecialchars($href, ENT_QUOTES, 'UTF-8') . '" target="_blank" rel="noopener noreferrer"';
-    echo ' aria-label="Написать в ' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '">';
+    echo ' aria-label="Написать в ' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '"' . $veAttrs . '>';
 
     site_render_messenger_icon($type, $flat, $imgSrc);
 

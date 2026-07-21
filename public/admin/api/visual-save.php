@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * API визуального редактора: точечное сохранение settings и логотипа.
+ * API визуального редактора: точечное сохранение settings, датасетов и логотипа.
  * Только для залогиненного администратора + CSRF.
  */
 
@@ -28,6 +28,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     exit;
 }
 
+$json = null;
 $csrf = '';
 if (isset($_POST['csrf']) && is_string($_POST['csrf'])) {
     $csrf = $_POST['csrf'];
@@ -48,7 +49,7 @@ if (!site_admin_verify_csrf($csrf)) {
 $action = '';
 if (isset($_POST['action']) && is_string($_POST['action'])) {
     $action = $_POST['action'];
-} elseif (isset($json) && is_array($json) && isset($json['action']) && is_string($json['action'])) {
+} elseif (is_array($json) && isset($json['action']) && is_string($json['action'])) {
     $action = $json['action'];
 }
 
@@ -58,7 +59,7 @@ if ($action === 'save_field') {
     if (isset($_POST['field'], $_POST['value']) && is_string($_POST['field'])) {
         $field = $_POST['field'];
         $value = (string) $_POST['value'];
-    } elseif (isset($json) && is_array($json)) {
+    } elseif (is_array($json)) {
         $field = isset($json['field']) && is_string($json['field']) ? $json['field'] : '';
         $value = isset($json['value']) ? (string) $json['value'] : '';
     }
@@ -81,6 +82,47 @@ if ($action === 'save_field') {
         'ok' => true,
         'field' => $field,
         'value' => mb_substr(trim($value), 0, $allowed[$field]),
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+if ($action === 'save_item') {
+    $dataset = '';
+    $itemId = '';
+    $field = '';
+    $value = '';
+    if (
+        isset($_POST['dataset'], $_POST['id'], $_POST['field'])
+        && is_string($_POST['dataset'])
+        && is_string($_POST['id'])
+        && is_string($_POST['field'])
+    ) {
+        $dataset = $_POST['dataset'];
+        $itemId = $_POST['id'];
+        $field = $_POST['field'];
+        $value = (string) ($_POST['value'] ?? '');
+    } elseif (is_array($json)) {
+        $dataset = isset($json['dataset']) && is_string($json['dataset']) ? $json['dataset'] : '';
+        $itemId = isset($json['id']) && is_string($json['id']) ? $json['id'] : '';
+        $field = isset($json['field']) && is_string($json['field']) ? $json['field'] : '';
+        $value = isset($json['value']) ? (string) $json['value'] : '';
+    }
+
+    try {
+        $result = site_ve_save_dataset_field($dataset, $itemId, $field, $value);
+    } catch (Throwable $e) {
+        http_response_code(400);
+        echo json_encode(['ok' => false, 'error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    echo json_encode([
+        'ok' => true,
+        'dataset' => $dataset,
+        'id' => $itemId,
+        'field' => $field,
+        'value' => $result['value'],
+        'warning' => $result['warning'],
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }

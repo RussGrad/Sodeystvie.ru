@@ -205,6 +205,11 @@ function site_team_initials(string $name): string
  */
 function site_render_team_card(array $member): void
 {
+    if (!function_exists('site_ve_attrs')) {
+        require_once __DIR__ . '/visual-editor.php';
+    }
+
+    $id = (string) ($member['id'] ?? '');
     $photo = trim((string) ($member['photo'] ?? ''));
     $hasLocalPhoto = $photo !== '' && site_team_member_photo_is_local($photo) && is_readable(dirname(__DIR__) . $photo);
     $hasRemotePhoto = $photo !== '' && !$hasLocalPhoto;
@@ -223,12 +228,12 @@ function site_render_team_card(array $member): void
                 <span class="team-card__initials" aria-hidden="true"><?php echo htmlspecialchars(site_team_initials($member['name']), ENT_QUOTES, 'UTF-8'); ?></span>
             <?php } ?>
         </div>
-        <h3 class="team-card__name"><?php echo htmlspecialchars($member['name'], ENT_QUOTES, 'UTF-8'); ?></h3>
-        <?php if ($member['role'] !== '') { ?>
-            <p class="team-card__role"><?php echo htmlspecialchars($member['role'], ENT_QUOTES, 'UTF-8'); ?></p>
+        <h3 class="team-card__name"<?php echo site_ve_attrs('name', 'text', 'Имя', 'team', $id); ?>><?php echo htmlspecialchars($member['name'], ENT_QUOTES, 'UTF-8'); ?></h3>
+        <?php if ($member['role'] !== '' || site_visual_editor_enabled()) { ?>
+            <p class="team-card__role"<?php echo site_ve_attrs('role', 'text', 'Должность', 'team', $id); ?>><?php echo htmlspecialchars($member['role'], ENT_QUOTES, 'UTF-8'); ?></p>
         <?php } ?>
-        <?php if ($member['experience'] !== '') { ?>
-            <p class="team-card__exp"><?php echo htmlspecialchars($member['experience'], ENT_QUOTES, 'UTF-8'); ?></p>
+        <?php if ($member['experience'] !== '' || site_visual_editor_enabled()) { ?>
+            <p class="team-card__exp"<?php echo site_ve_attrs('experience', 'text', 'Опыт', 'team', $id); ?>><?php echo htmlspecialchars($member['experience'], ENT_QUOTES, 'UTF-8'); ?></p>
         <?php } ?>
         <?php if ($member['telegram'] !== '' || $member['whatsapp'] !== '') { ?>
             <div class="team-card__contacts">

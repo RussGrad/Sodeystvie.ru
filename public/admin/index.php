@@ -23,7 +23,7 @@ site_admin_render_nav('');
         <div class="admin-cards">
             <a class="admin-card admin-card--accent" href="/admin/visual.php">
                 <h2 class="admin-card__title">Визуальный редактор</h2>
-                <p class="admin-card__text">Копия сайта: кликайте по логотипу, меню, телефону, заголовкам и сохраняйте на месте. Только для администратора.</p>
+                <p class="admin-card__text">Сайт с кликом по тексту: логотип, меню, контакты, hero, карточки услуг/команды/кейсов. Работает на внутренних страницах (?ve=1).</p>
             </a>
             <?php foreach (site_admin_editable_datasets() as $section) { ?>
                 <a class="admin-card" href="/admin/edit.php?section=<?php echo htmlspecialchars($section, ENT_QUOTES, 'UTF-8'); ?>">
