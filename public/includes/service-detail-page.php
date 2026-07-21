@@ -49,14 +49,7 @@ function sodeystvie_render_service_detail_page(string $serviceId): void
                 <span class="service-detail__crumb service-detail__crumb--current"><?php echo htmlspecialchars($service['title'], ENT_QUOTES, 'UTF-8'); ?></span>
             </nav>
             <div class="service-detail__head">
-                <div class="services__icon-wrap service-detail__icon" aria-hidden="true"<?php
-                if (!function_exists('site_ve_attrs')) {
-                    require_once __DIR__ . '/visual-editor.php';
-                }
-                echo site_ve_attrs('icon', 'icon', 'Иконка услуги', 'services', (string) $service['id'], (string) ($service['icon'] ?? 'realtor'));
-                ?>>
-                    <?php sodeystvie_services_render_icon($service['icon']); ?>
-                </div>
+                <?php sodeystvie_services_render_icon_wrap($service, 'service-detail__icon'); ?>
                 <div>
                     <h1 class="page-main__heading"<?php echo site_ve_attrs('title', 'text', 'Название услуги', 'services', (string) $service['id']); ?>><?php echo htmlspecialchars($service['title'], ENT_QUOTES, 'UTF-8'); ?></h1>
                     <?php if ($service['short'] !== '' || site_visual_editor_enabled()) { ?>

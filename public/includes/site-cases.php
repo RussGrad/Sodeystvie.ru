@@ -109,7 +109,12 @@ function site_render_case_card(array $case): void
         <?php if ($showMedia) { ?>
             <div
                 class="case-card__media<?php echo $image === '' ? ' case-card__media--empty' : ''; ?>"
-                <?php echo site_ve_attrs('image', 'image', 'Фото кейса', 'cases', $id); ?>
+                <?php
+                echo site_ve_attrs('image', 'image', 'Фото кейса', 'cases', $id);
+                if ($image !== '') {
+                    echo ' data-ve-has-image="1"';
+                }
+                ?>
             >
                 <?php if ($image !== '') {
                     if (preg_match('#^https?://#i', $image)) { ?>

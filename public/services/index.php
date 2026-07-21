@@ -32,9 +32,7 @@ require __DIR__ . '/../includes/header.php';
                 <li class="services-page__item">
                     <article class="services-page__card">
                         <div class="services-page__card-head">
-                            <div class="services__icon-wrap" aria-hidden="true"<?php echo site_ve_attrs('icon', 'icon', 'Иконка услуги', 'services', $sid, (string) ($item['icon'] ?? 'realtor')); ?>>
-                                <?php sodeystvie_services_render_icon($item['icon']); ?>
-                            </div>
+                            <?php sodeystvie_services_render_icon_wrap($item); ?>
                             <div class="services-page__card-titles">
                                 <h2 class="services-page__card-title"<?php echo site_ve_attrs('title', 'text', 'Название услуги', 'services', $sid); ?>><?php echo htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8'); ?></h2>
                                 <p class="services-page__card-lead"<?php echo site_ve_attrs('short', 'textarea', 'Краткое описание', 'services', $sid); ?>><?php echo htmlspecialchars($item['short'], ENT_QUOTES, 'UTF-8'); ?></p>

@@ -25,9 +25,7 @@ $servicesItems = sodeystvie_services_catalog();
                 ?>
                 <li class="services__cell">
                     <article class="services__card">
-                        <div class="services__icon-wrap" aria-hidden="true"<?php echo site_ve_attrs('icon', 'icon', 'Иконка услуги', 'services', $sid, (string) ($item['icon'] ?? 'realtor')); ?>>
-                            <?php sodeystvie_services_render_icon($item['icon']); ?>
-                        </div>
+                        <?php sodeystvie_services_render_icon_wrap($item); ?>
                         <h3 class="services__card-title">
                             <a class="services__card-link" href="<?php echo htmlspecialchars(sodeystvie_service_page_href($item), ENT_QUOTES, 'UTF-8'); ?>"<?php echo site_ve_attrs('title', 'text', 'Название услуги', 'services', $sid); ?>>
                                 <?php echo htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8'); ?>

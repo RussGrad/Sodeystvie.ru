@@ -109,9 +109,11 @@
     '<input class="ve-panel__input" id="ve-panel-input" type="text">' +
     '<textarea class="ve-panel__textarea" id="ve-panel-textarea" hidden></textarea>' +
     '<select class="ve-panel__select" id="ve-panel-select" hidden></select>' +
+    '<p class="ve-panel__hint" id="ve-panel-hint" hidden></p>' +
     '<input class="ve-panel__input" id="ve-panel-file" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden>' +
     '<div class="ve-panel__actions">' +
     '<button type="button" class="ve-bar__btn ve-bar__btn--primary" id="ve-panel-save">Сохранить</button>' +
+    '<button type="button" class="ve-bar__btn" id="ve-panel-delete-image" hidden>Удалить изображение</button>' +
     '<button type="button" class="ve-bar__btn" id="ve-panel-cancel">Отмена</button>' +
     '</div>';
   document.body.appendChild(panel);
@@ -122,9 +124,11 @@
   var inputEl = document.getElementById('ve-panel-input');
   var textareaEl = document.getElementById('ve-panel-textarea');
   var selectEl = document.getElementById('ve-panel-select');
+  var hintEl = document.getElementById('ve-panel-hint');
   var fileEl = document.getElementById('ve-panel-file');
   var errorEl = document.getElementById('ve-panel-error');
   var saveBtn = document.getElementById('ve-panel-save');
+  var deleteImageBtn = document.getElementById('ve-panel-delete-image');
   var cancelBtn = document.getElementById('ve-panel-cancel');
   var reloadBtn = document.getElementById('ve-reload');
 
@@ -216,14 +220,34 @@
     textareaEl.hidden = true;
     selectEl.hidden = true;
     fileEl.hidden = true;
+    if (hintEl) {
+      hintEl.hidden = true;
+      hintEl.textContent = '';
+    }
+    if (deleteImageBtn) {
+      deleteImageBtn.hidden = true;
+    }
+    fileEl.value = '';
 
     if (type === 'image') {
       fileEl.hidden = false;
       labelEl.setAttribute('for', 've-panel-file');
+      if (deleteImageBtn && el.getAttribute('data-ve-has-image') === '1') {
+        deleteImageBtn.hidden = false;
+      }
     } else if (type === 'icon') {
       selectEl.hidden = false;
+      fileEl.hidden = false;
       fillIconSelect(readCurrentValue(el, type) || 'realtor');
+      labelEl.textContent = 'Встроенная иконка';
       labelEl.setAttribute('for', 've-panel-select');
+      if (hintEl) {
+        hintEl.hidden = false;
+        hintEl.textContent = 'Или загрузите своё изображение ниже — оно заменит иконку.';
+      }
+      if (deleteImageBtn && el.getAttribute('data-ve-has-image') === '1') {
+        deleteImageBtn.hidden = false;
+      }
       selectEl.focus();
     } else if (type === 'textarea') {
       textareaEl.hidden = false;
@@ -321,6 +345,49 @@
 
   cancelBtn.addEventListener('click', closePanel);
 
+  if (deleteImageBtn) {
+    deleteImageBtn.addEventListener('click', function () {
+      if (!activeDataset || !activeItemId) {
+        return;
+      }
+      setError('');
+      setStatus('Удаление…');
+      deleteImageBtn.disabled = true;
+      saveBtn.disabled = true;
+      fetch(boot.saveUrl || '/admin/api/visual-save.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+          csrf: boot.csrf || '',
+          action: 'delete_image',
+          dataset: activeDataset,
+          id: activeItemId,
+        }),
+      })
+        .then(function (r) {
+          return r.json().then(function (data) {
+            return { ok: r.ok, data: data };
+          });
+        })
+        .then(function (res) {
+          if (!res.ok || !res.data || !res.data.ok) {
+            throw new Error((res.data && res.data.error) || 'Ошибка удаления');
+          }
+          setStatus('Изображение удалено');
+          window.location.reload();
+        })
+        .catch(function (err) {
+          setError(err.message || 'Ошибка');
+          setStatus('');
+        })
+        .finally(function () {
+          deleteImageBtn.disabled = false;
+          saveBtn.disabled = false;
+        });
+    });
+  }
+
   saveBtn.addEventListener('click', function () {
     if (!activeField) {
       return;
@@ -330,27 +397,20 @@
     setStatus('Сохранение…');
     saveBtn.disabled = true;
 
-    if (activeType === 'image') {
-      var file = fileEl.files && fileEl.files[0];
-      if (!file) {
-        setError('Выберите файл');
-        setStatus('');
-        saveBtn.disabled = false;
-        return;
-      }
+    function uploadImageFile(file) {
       var fd = new FormData();
       fd.append('csrf', boot.csrf || '');
-      if (activeDataset && activeItemId && activeField === 'image') {
+      if (activeDataset && activeItemId && (activeField === 'image' || activeType === 'icon')) {
         fd.append('action', 'upload_image');
         fd.append('dataset', activeDataset);
         fd.append('id', activeItemId);
-        fd.append('field', activeField);
+        fd.append('field', 'image');
         fd.append('file', file);
       } else {
         fd.append('action', 'upload_logo');
         fd.append('logo', file);
       }
-      fetch(boot.saveUrl || '/admin/api/visual-save.php', {
+      return fetch(boot.saveUrl || '/admin/api/visual-save.php', {
         method: 'POST',
         body: fd,
         credentials: 'same-origin',
@@ -366,7 +426,18 @@
           }
           setStatus('Изображение сохранено');
           window.location.reload();
-        })
+        });
+    }
+
+    if (activeType === 'image') {
+      var imageFile = fileEl.files && fileEl.files[0];
+      if (!imageFile) {
+        setError('Выберите файл');
+        setStatus('');
+        saveBtn.disabled = false;
+        return;
+      }
+      uploadImageFile(imageFile)
         .catch(function (err) {
           setError(err.message || 'Ошибка');
           setStatus('');
@@ -375,6 +446,21 @@
           saveBtn.disabled = false;
         });
       return;
+    }
+
+    if (activeType === 'icon') {
+      var iconFile = fileEl.files && fileEl.files[0];
+      if (iconFile) {
+        uploadImageFile(iconFile)
+          .catch(function (err) {
+            setError(err.message || 'Ошибка');
+            setStatus('');
+          })
+          .finally(function () {
+            saveBtn.disabled = false;
+          });
+        return;
+      }
     }
 
     var value =

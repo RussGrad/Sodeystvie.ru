@@ -160,6 +160,8 @@ if ($action === 'upload_image') {
         $result = site_visual_editor_handle_deal_card_image_upload($itemId, $file);
     } elseif ($dataset === 'cases') {
         $result = site_visual_editor_handle_case_image_upload($itemId, $file);
+    } elseif ($dataset === 'services') {
+        $result = site_visual_editor_handle_service_image_upload($itemId, $file);
     } else {
         http_response_code(400);
         echo json_encode(['ok' => false, 'error' => 'Загрузка для этого блока не поддерживается'], JSON_UNESCAPED_UNICODE);
@@ -173,6 +175,28 @@ if ($action === 'upload_image') {
     }
 
     echo json_encode($result, JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+if ($action === 'delete_image') {
+    $dataset = '';
+    $itemId = '';
+    if (isset($_POST['dataset'], $_POST['id']) && is_string($_POST['dataset']) && is_string($_POST['id'])) {
+        $dataset = $_POST['dataset'];
+        $itemId = $_POST['id'];
+    } elseif (is_array($json)) {
+        $dataset = isset($json['dataset']) && is_string($json['dataset']) ? $json['dataset'] : '';
+        $itemId = isset($json['id']) && is_string($json['id']) ? $json['id'] : '';
+    }
+
+    $result = site_visual_editor_delete_item_image($dataset, $itemId);
+    if (!$result['ok']) {
+        http_response_code(400);
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);
     exit;
 }
 

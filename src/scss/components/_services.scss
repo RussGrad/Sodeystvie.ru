@@ -65,6 +65,7 @@
 }
 
 .services__icon-wrap {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -85,6 +86,33 @@
 .services__icon {
   display: block;
   flex-shrink: 0;
+}
+
+.services__icon--custom {
+  width: 1.35rem;
+  height: 1.35rem;
+  object-fit: contain;
+
+  @media (min-width: 768px) {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+}
+
+.services__icon-wrap:has(.services__icon--custom) {
+  overflow: hidden;
+}
+
+.services__icon-wrap .services__icon--custom,
+.services__icon-wrap picture {
+  width: 60%;
+  height: 60%;
+}
+
+.services__icon-wrap picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .services__card-title {

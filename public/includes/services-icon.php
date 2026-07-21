@@ -3,8 +3,86 @@
 declare(strict_types=1);
 
 /**
- * SVG-иконки услуг (stroke, currentColor).
+ * SVG-иконки услуг (stroke, currentColor) и кастомные изображения.
  */
+
+function site_service_custom_image_path(string $id): ?string
+{
+    $safe = preg_replace('/[^a-z0-9_-]/i', '', $id) ?? '';
+    if ($safe === '') {
+        return null;
+    }
+
+    $dir = dirname(__DIR__) . '/assets/services';
+    $webBase = '/assets/services/' . $safe;
+
+    foreach (['.png', '.webp', '.jpg', '.jpeg', '.svg'] as $ext) {
+        if (is_file($dir . '/' . $safe . $ext)) {
+            return $webBase . $ext;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Рендер иконки или загруженного изображения услуги.
+ *
+ * @param array{id?: string, icon?: string} $item
+ */
+function sodeystvie_services_render_visual(array $item): void
+{
+    $id = (string) ($item['id'] ?? '');
+    $icon = (string) ($item['icon'] ?? 'realtor');
+    $custom = $id !== '' ? site_service_custom_image_path($id) : null;
+
+    if ($custom !== null) {
+        $ext = strtolower(pathinfo($custom, PATHINFO_EXTENSION));
+        if ($ext === 'svg') {
+            echo '<img class="services__icon services__icon--custom" src="'
+                . htmlspecialchars($custom, ENT_QUOTES, 'UTF-8')
+                . '" alt="" width="28" height="28" decoding="async">';
+        } else {
+            require_once __DIR__ . '/site-image.php';
+            echo site_render_static_picture(
+                $custom,
+                '',
+                'services__icon services__icon--custom',
+                'width="28" height="28"'
+            );
+        }
+
+        return;
+    }
+
+    sodeystvie_services_render_icon($icon);
+}
+
+/**
+ * @param array{id?: string, icon?: string} $item
+ * @param string $extraClass дополнительные классы на wrap
+ */
+function sodeystvie_services_render_icon_wrap(array $item, string $extraClass = ''): void
+{
+    if (!function_exists('site_ve_attrs')) {
+        require_once __DIR__ . '/visual-editor.php';
+    }
+
+    $id = (string) ($item['id'] ?? '');
+    $icon = (string) ($item['icon'] ?? 'realtor');
+    $hasImage = $id !== '' && site_service_custom_image_path($id) !== null;
+    $class = trim('services__icon-wrap ' . $extraClass);
+    $ve = site_ve_attrs('icon', 'icon', 'Иконка / изображение услуги', 'services', $id, $icon);
+    if ($ve !== '' && $hasImage) {
+        $ve .= ' data-ve-has-image="1"';
+    }
+    ?>
+    <div class="<?php echo htmlspecialchars($class, ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="true"<?php echo $ve; ?>>
+        <?php sodeystvie_services_render_visual($item); ?>
+    </div>
+    <?php
+}
+
 function sodeystvie_services_render_icon(string $icon): void
 {
     switch ($icon) {

@@ -122,6 +122,7 @@ function site_visual_editor_dataset_fields(): array
             'short' => 240,
             'text' => 2000,
             'icon' => 40,
+            'image' => 0,
         ],
         'cases' => [
             'tag' => 40,
@@ -634,4 +635,135 @@ function site_visual_editor_handle_case_image_upload(string $itemId, array $file
     $public = '/assets/cases/' . $safe . '.' . $ext . '?v=' . (string) time();
 
     return ['ok' => true, 'path' => $public];
+}
+
+/**
+ * Загрузка изображения услуги в assets/services/{id}.{ext}
+ *
+ * @param array{name?: string, type?: string, tmp_name?: string, error?: int, size?: int} $file
+ * @return array{ok: bool, path?: string, error?: string}
+ */
+function site_visual_editor_handle_service_image_upload(string $itemId, array $file): array
+{
+    $safe = preg_replace('/[^a-z0-9_-]/i', '', $itemId) ?? '';
+    if ($safe === '' || mb_strlen($safe) > 40) {
+        return ['ok' => false, 'error' => 'Некорректный id услуги'];
+    }
+
+    require_once __DIR__ . '/services-catalog.php';
+    if (sodeystvie_service_by_id($safe) === null && sodeystvie_service_by_id($itemId) === null) {
+        return ['ok' => false, 'error' => 'Услуга не найдена'];
+    }
+
+    $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
+    if ($error === UPLOAD_ERR_NO_FILE) {
+        return ['ok' => false, 'error' => 'Выберите изображение'];
+    }
+    if ($error !== UPLOAD_ERR_OK) {
+        return ['ok' => false, 'error' => 'Ошибка загрузки (код ' . $error . ')'];
+    }
+
+    $size = (int) ($file['size'] ?? 0);
+    if ($size <= 0 || $size > 4 * 1024 * 1024) {
+        return ['ok' => false, 'error' => 'Файл должен быть не больше 4 МБ'];
+    }
+
+    $tmp = (string) ($file['tmp_name'] ?? '');
+    if ($tmp === '' || !is_uploaded_file($tmp)) {
+        return ['ok' => false, 'error' => 'Некорректная загрузка'];
+    }
+
+    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($tmp);
+    $ext = match ($mime) {
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+        'image/svg+xml' => 'svg',
+        default => null,
+    };
+    if ($ext === null) {
+        return ['ok' => false, 'error' => 'Допустимы JPG, PNG, WebP или SVG'];
+    }
+    if ($ext !== 'svg' && @getimagesize($tmp) === false) {
+        return ['ok' => false, 'error' => 'Файл не является изображением'];
+    }
+
+    $dir = dirname(__DIR__) . '/assets/services';
+    if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
+        return ['ok' => false, 'error' => 'Не удалось создать каталог services'];
+    }
+
+    $staged = $dir . '/.' . $safe . '-' . bin2hex(random_bytes(6)) . '.' . $ext;
+    if (!move_uploaded_file($tmp, $staged)) {
+        return ['ok' => false, 'error' => 'Не удалось сохранить файл'];
+    }
+
+    $destination = $dir . '/' . $safe . '.' . $ext;
+    if (!@rename($staged, $destination)) {
+        @unlink($staged);
+
+        return ['ok' => false, 'error' => 'Не удалось установить изображение'];
+    }
+
+    foreach (['jpg', 'jpeg', 'png', 'webp', 'svg'] as $other) {
+        if ($other === $ext) {
+            continue;
+        }
+        $old = $dir . '/' . $safe . '.' . $other;
+        if (is_file($old)) {
+            @unlink($old);
+        }
+    }
+
+    $public = '/assets/services/' . $safe . '.' . $ext . '?v=' . (string) time();
+
+    return ['ok' => true, 'path' => $public];
+}
+
+/**
+ * Удаление кастомного изображения услуги / кейса.
+ *
+ * @return array{ok: bool, error?: string}
+ */
+function site_visual_editor_delete_item_image(string $dataset, string $itemId): array
+{
+    if ($dataset === 'services') {
+        $safe = preg_replace('/[^a-z0-9_-]/i', '', $itemId) ?? '';
+        if ($safe === '') {
+            return ['ok' => false, 'error' => 'Некорректный id'];
+        }
+        $dir = dirname(__DIR__) . '/assets/services';
+        $removed = false;
+        foreach (['jpg', 'jpeg', 'png', 'webp', 'svg'] as $ext) {
+            $path = $dir . '/' . $safe . '.' . $ext;
+            if (is_file($path) && @unlink($path)) {
+                $removed = true;
+            }
+        }
+
+        return $removed
+            ? ['ok' => true]
+            : ['ok' => false, 'error' => 'Изображение не найдено'];
+    }
+
+    if ($dataset === 'cases') {
+        $safe = preg_replace('/[^a-z0-9_-]/i', '', $itemId) ?? '';
+        if ($safe === '') {
+            return ['ok' => false, 'error' => 'Некорректный id'];
+        }
+        $dir = dirname(__DIR__) . '/assets/cases';
+        $removed = false;
+        foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
+            $path = $dir . '/' . $safe . '.' . $ext;
+            if (is_file($path) && @unlink($path)) {
+                $removed = true;
+            }
+        }
+
+        return $removed
+            ? ['ok' => true]
+            : ['ok' => false, 'error' => 'Изображение не найдено'];
+    }
+
+    return ['ok' => false, 'error' => 'Удаление для этого блока не поддерживается'];
 }

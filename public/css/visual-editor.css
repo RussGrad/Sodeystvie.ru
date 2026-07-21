@@ -172,6 +172,29 @@ body.ve-on .case-card__media--empty[data-ve-field]::after {
   content: 'Добавить фото';
 }
 
+body.ve-on .services__icon-wrap[data-ve-field]::after {
+  content: 'Иконка';
+  position: absolute;
+  left: 50%;
+  bottom: -0.15rem;
+  z-index: 3;
+  transform: translateX(-50%);
+  padding: 0.1rem 0.35rem;
+  font: 600 0.55rem/1 system-ui, sans-serif;
+  white-space: nowrap;
+  color: #0b1614;
+  background: rgba(159, 210, 199, 0.95);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.ve-panel__hint {
+  margin: 0 0 0.65rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.62);
+}
+
 .ve-panel {
   position: fixed;
   z-index: 100001;
