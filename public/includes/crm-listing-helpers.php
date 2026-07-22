@@ -2891,11 +2891,22 @@ function site_crm_fetch_listing_by_id(string $id): ?array
     }
 
     $detail = site_http_get_json_cached(site_crm_listings_url($id), 8, 60);
-    if (!is_array($detail) || isset($detail['_error']) || !isset($detail['id'])) {
-        return null;
+    if (is_array($detail) && !isset($detail['_error']) && isset($detail['id'])) {
+        return site_crm_listing_enrich_row($detail);
     }
 
-    return site_crm_listing_enrich_row($detail);
+    // Fallback: объект мог пропасть из detail API, но ещё есть в ленте каталога
+    $catalog = site_crm_fetch_listings_catalog([], 100);
+    foreach ($catalog['items'] as $row) {
+        if (!is_array($row)) {
+            continue;
+        }
+        if (trim((string) ($row['id'] ?? '')) === $id) {
+            return $row;
+        }
+    }
+
+    return null;
 }
 
 /**

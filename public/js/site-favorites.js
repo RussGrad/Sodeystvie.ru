@@ -7,54 +7,62 @@
     var STORAGE_KEY = 'sodeystvie-favorites';
     var LEGACY_KEY = 'sodeystvie:catalog-favs';
 
-    function readIds() {
+    function normalizeId(id) {
+        return String(id == null ? '' : id).trim();
+    }
+
+    function normalizeIds(list) {
+        if (!Array.isArray(list)) {
+            return [];
+        }
+        var out = [];
+        list.forEach(function (id) {
+            id = normalizeId(id);
+            if (id && out.indexOf(id) === -1) {
+                out.push(id);
+            }
+        });
+        return out;
+    }
+
+    function readRaw(key) {
         try {
-            var raw = localStorage.getItem(STORAGE_KEY);
+            var raw = localStorage.getItem(key);
             if (!raw) {
                 return [];
             }
             var parsed = JSON.parse(raw);
-            if (!Array.isArray(parsed)) {
-                return [];
-            }
-            return parsed.filter(function (id) {
-                return typeof id === 'string' && id.trim() !== '';
-            });
+            return normalizeIds(parsed);
         } catch (e) {
             return [];
         }
     }
 
-    function writeIds(ids) {
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
-        } catch (e) {
-            /* ignore quota */
+    function readIds() {
+        var ids = readRaw(STORAGE_KEY);
+        var legacy = readRaw(LEGACY_KEY);
+        if (legacy.length === 0) {
+            return ids;
         }
-    }
-
-    function migrateLegacy() {
+        legacy.forEach(function (id) {
+            if (ids.indexOf(id) === -1) {
+                ids.push(id);
+            }
+        });
+        writeIds(ids);
         try {
-            var legacyRaw = localStorage.getItem(LEGACY_KEY);
-            if (!legacyRaw) {
-                return;
-            }
-            var legacy = JSON.parse(legacyRaw);
-            if (!Array.isArray(legacy)) {
-                localStorage.removeItem(LEGACY_KEY);
-                return;
-            }
-            var ids = readIds();
-            legacy.forEach(function (id) {
-                id = String(id || '').trim();
-                if (id && ids.indexOf(id) === -1) {
-                    ids.push(id);
-                }
-            });
-            writeIds(ids);
             localStorage.removeItem(LEGACY_KEY);
         } catch (e) {
             /* ignore */
+        }
+        return ids;
+    }
+
+    function writeIds(ids) {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeIds(ids)));
+        } catch (e) {
+            /* ignore quota */
         }
     }
 
@@ -72,15 +80,27 @@
         }
     }
 
-    migrateLegacy();
-
     window.SodeystvieFavorites = {
         getIds: readIds,
+        setIds: function (ids) {
+            writeIds(ids);
+            updateBadge();
+        },
+        removeIds: function (ids) {
+            var remove = normalizeIds(ids);
+            if (remove.length === 0) {
+                return;
+            }
+            writeIds(readIds().filter(function (id) {
+                return remove.indexOf(id) === -1;
+            }));
+            updateBadge();
+        },
         has: function (id) {
-            return readIds().indexOf(String(id)) !== -1;
+            return readIds().indexOf(normalizeId(id)) !== -1;
         },
         toggle: function (id) {
-            id = String(id || '').trim();
+            id = normalizeId(id);
             if (!id) {
                 return false;
             }

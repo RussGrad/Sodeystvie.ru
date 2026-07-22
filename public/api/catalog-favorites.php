@@ -18,6 +18,7 @@ if (!function_exists('site_crm_fetch_listing_by_id')) {
             'html' => '',
             'count' => 0,
             'requested' => 0,
+            'missing' => [],
             'error' => 'Сервис избранного временно недоступен',
         ],
         JSON_UNESCAPED_UNICODE
@@ -27,7 +28,7 @@ if (!function_exists('site_crm_fetch_listing_by_id')) {
 
 $rawIds = isset($_GET['ids']) && is_string($_GET['ids']) ? trim($_GET['ids']) : '';
 if ($rawIds === '') {
-    echo json_encode(['html' => '', 'count' => 0, 'requested' => 0], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['html' => '', 'count' => 0, 'requested' => 0, 'missing' => []], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -46,26 +47,31 @@ foreach (explode(',', $rawIds) as $part) {
 }
 
 if (count($ids) === 0) {
-    echo json_encode(['html' => '', 'count' => 0, 'requested' => 0], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['html' => '', 'count' => 0, 'requested' => 0, 'missing' => []], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 ob_start();
-$rendered = 0;
+$found = [];
+$missing = [];
 foreach ($ids as $id) {
     $row = site_crm_fetch_listing_by_id($id);
-    if ($row !== null) {
-        site_render_catalog_listing_card($row);
-        $rendered++;
+    if ($row === null) {
+        $missing[] = $id;
+        continue;
     }
+    site_render_catalog_listing_card($row);
+    $found[] = $id;
 }
 $html = ob_get_clean() ?: '';
 
 echo json_encode(
     [
         'html' => $html,
-        'count' => $rendered,
+        'count' => count($found),
         'requested' => count($ids),
+        'found' => $found,
+        'missing' => $missing,
     ],
     JSON_UNESCAPED_UNICODE
 );

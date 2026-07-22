@@ -134,24 +134,25 @@
     var api = favApi();
     if (!api) return;
 
-    function sync() {
+    function syncUi() {
       var on = api.has(id);
       btn.setAttribute('aria-pressed', on ? 'true' : 'false');
       btn.classList.toggle('is-active', on);
       btn.setAttribute('aria-label', on ? 'Убрать из избранного' : 'Добавить в избранное');
+    }
+
+    syncUi();
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var on = api.toggle(id);
+      syncUi();
+      // Удаляем карточку только после явного клика пользователя
       if (isFavoritesView() && !on) {
         card.remove();
         updateFavoritesCount();
         showFavoritesEmptyIfNeeded();
       }
-    }
-
-    sync();
-    btn.addEventListener('click', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      api.toggle(id);
-      sync();
     });
   }
 
@@ -165,14 +166,16 @@
     });
   }
 
-  function updateFavoritesCount() {
+  function updateFavoritesCount(explicitCount) {
     var countEl = document.querySelector('.catalog__count');
     if (!countEl) return;
-    var cards = document.querySelectorAll('.catalog-list [data-listing-card]');
-    countEl.textContent = 'В избранном: ' + String(cards.length);
+    var n = typeof explicitCount === 'number'
+      ? explicitCount
+      : document.querySelectorAll('.catalog-list [data-listing-card]').length;
+    countEl.textContent = 'В избранном: ' + String(n);
   }
 
-  function showFavoritesEmptyIfNeeded() {
+  function showFavoritesEmptyIfNeeded(message) {
     var list = document.getElementById('catalog-list-root');
     var emptyEl = document.querySelector('.catalog-favorites-empty');
     if (!(list instanceof HTMLElement) || !(emptyEl instanceof HTMLElement)) return;
@@ -182,8 +185,11 @@
       return;
     }
     list.hidden = true;
+    if (typeof message === 'string' && message !== '') {
+      emptyEl.innerHTML = message;
+    }
     emptyEl.hidden = false;
-    updateFavoritesCount();
+    updateFavoritesCount(0);
   }
 
   function setFavoritesLoading(isLoading) {
@@ -191,6 +197,22 @@
     if (loadingEl instanceof HTMLElement) {
       loadingEl.hidden = !isLoading;
     }
+  }
+
+  function waitForFavoritesApi(attempt) {
+    var api = favApi();
+    if (api) {
+      loadFavoritesView();
+      return;
+    }
+    if ((attempt || 0) >= 40) {
+      setFavoritesLoading(false);
+      showFavoritesEmptyIfNeeded('Не удалось инициализировать избранное. Обновите страницу.');
+      return;
+    }
+    window.setTimeout(function () {
+      waitForFavoritesApi((attempt || 0) + 1);
+    }, 50);
   }
 
   function loadFavoritesView() {
@@ -205,8 +227,12 @@
       setFavoritesLoading(false);
       list.innerHTML = '';
       list.hidden = true;
-      if (emptyEl instanceof HTMLElement) emptyEl.hidden = false;
-      updateFavoritesCount();
+      if (emptyEl instanceof HTMLElement) {
+        emptyEl.innerHTML = 'В избранном пока ничего нет. <a href="/catalog/">Перейти в каталог</a>.';
+        emptyEl.hidden = false;
+      }
+      updateFavoritesCount(0);
+      api.refresh();
       return;
     }
 
@@ -240,13 +266,30 @@
               : 'Не удалось загрузить избранное. Обновите страницу.';
             emptyEl.hidden = false;
           }
-          updateFavoritesCount();
+          updateFavoritesCount(0);
           return;
         }
+
+        var missing = Array.isArray(data.missing) ? data.missing : [];
+        if (missing.length > 0 && typeof api.removeIds === 'function') {
+          api.removeIds(missing);
+        } else if (typeof api.refresh === 'function') {
+          api.refresh();
+        }
+
         list.innerHTML = data.html;
         list.hidden = data.html === '';
         initCardInteractions(list);
-        updateFavoritesCount();
+        updateFavoritesCount(typeof data.count === 'number' ? data.count : undefined);
+
+        if (data.html === '') {
+          var msg = missing.length > 0
+            ? 'Сохранённые объекты больше недоступны в каталоге. <a href="/catalog/">Перейти в каталог</a>.'
+            : 'В избранном пока ничего нет. <a href="/catalog/">Перейти в каталог</a>.';
+          showFavoritesEmptyIfNeeded(msg);
+          return;
+        }
+
         showFavoritesEmptyIfNeeded();
       })
       .catch(function () {
@@ -257,13 +300,15 @@
           emptyEl.textContent = 'Не удалось загрузить избранное. Обновите страницу.';
           emptyEl.hidden = false;
         }
-        updateFavoritesCount();
+        updateFavoritesCount(0);
       });
   }
 
   function boot() {
     initCardInteractions(document);
-    loadFavoritesView();
+    if (isFavoritesView()) {
+      waitForFavoritesApi(0);
+    }
   }
 
   if (document.readyState === 'loading') {
