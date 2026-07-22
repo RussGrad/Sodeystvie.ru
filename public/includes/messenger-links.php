@@ -97,6 +97,13 @@ function site_render_messenger_icon(string $type, bool $flat = false, ?string $i
         return;
     }
 
+    // MAX — всегда официальный знак (inline), без PNG/кастомного файла
+    if ($type === 'max') {
+        echo site_messenger_icon_svg_flat('max');
+
+        return;
+    }
+
     $custom = site_messenger_custom_icon_src($type);
     if ($custom !== null) {
         echo '<img class="messenger-links__img" src="' . htmlspecialchars($custom, ENT_QUOTES, 'UTF-8') . '" width="24" height="24" alt="" decoding="async">';
@@ -106,8 +113,6 @@ function site_render_messenger_icon(string $type, bool $flat = false, ?string $i
 
     if ($type === 'telegram' || $type === 'vk') {
         echo site_messenger_icon_svg_branded($type);
-    } elseif ($type === 'max') {
-        echo site_messenger_icon_svg_flat('max');
     } elseif ($type === 'whatsapp') {
         echo site_messenger_icon_svg_flat('whatsapp');
     } elseif ($imgSrc !== null) {
@@ -159,10 +164,10 @@ function site_messenger_icon_svg_flat(string $type): string
             . $close;
     }
 
-    // MAX — кольцо с хвостом внутрь
+    // MAX — официальный знак (кольцо с «хвостиком»), монохром currentColor
     return $open
-        . '<path fill="currentColor" fill-rule="evenodd" d="'
-        . 'M12 2.25c5.385 0 9.75 4.365 9.75 9.75s-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25Zm0 3.9a5.85 5.85 0 1 0 0 11.7 5.85 5.85 0 0 0 0-11.7ZM8.1 16.2c.35-.55.2-1.25-.35-1.55-.5-.28-1.15-.15-1.5.35-.65.85-1.7 1.4-2.9 1.55 1.2.75 2.75.9 4.1.25.3-.15.55-.3.7-.5.05-.05.1-.07.15-.1Z'
+        . '<path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" transform="translate(1 1) scale(0.511627907)" d="'
+        . 'M22.39 41.89c-3.93 0-5.75-.58-8.9-2.9-2.02 2.61-8.34 4.63-8.62 1.17 0-2.6-.58-4.8-1.22-7.2C2.87 30 2 26.72 2 21.94 2 10.56 11.28 2 22.28 2c11 0 19.63 8.98 19.63 20.06 0 11.07-8.9 19.83-19.52 19.83Zm.2-30.02c-5.22-.27-9.3 3.37-10.2 9.08-.74 4.72.58 10.48 1.7 10.77.54.13 1.9-.98 2.74-1.82 1.39.9 2.97 1.6 4.73 1.7a9.96 9.96 0 0 0 10.4-9.34 10 10 0 0 0-9.37-10.39Z'
         . '"/>'
         . $close;
 }
